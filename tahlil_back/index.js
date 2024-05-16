@@ -34,7 +34,7 @@ app.use(cookieParser());
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
 
-app.listen(port, hostname, () => {
+app.listen(port, () => {
     console.log(`Example app listening at ${hostname}:${port}`);
 });
 

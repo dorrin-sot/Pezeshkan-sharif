@@ -2,13 +2,15 @@
 FROM node:18
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /usr/src/app
 
 # Copy the application files into the working directory
-COPY . /app
+COPY package*.json ./
 
 # Install the application dependencies
 RUN npm install
+
+COPY . .
 
 # Set Environment Variables
 ENV server_port 80
@@ -19,4 +21,4 @@ ENV cookie_max_age 86400000
 EXPOSE 80
 
 # Define the entry point for the container
-CMD ["npm", "run"]
+CMD ["node", "index.js"]
