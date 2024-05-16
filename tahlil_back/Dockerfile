@@ -11,6 +11,11 @@ COPY . /app
 RUN npm install
 
 # Set Environment Variables
+ENV server_port 80
+ENV jwt_secret_key H3d1dHUV4cm0PckrePij/NEZ40gQMd5iXP971V4vu9Y=
+ENV cookie_max_age 86400000
+
+# Expose the Port
 EXPOSE 80
 
 # Define the entry point for the container
