@@ -10,5 +10,8 @@ COPY . /app
 # Install the application dependencies
 RUN npm install
 
+# Set Environment Variables
+EXPOSE 80
+
 # Define the entry point for the container
 CMD ["npm", "run"]
