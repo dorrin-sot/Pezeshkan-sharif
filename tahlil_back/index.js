@@ -25,6 +25,7 @@ db_client
 
 const app = express();
 const port = process.env.server_port;
+const hostname = process.env.server_host;
 const jsonParser = bodyParser.json()
 
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -33,7 +34,7 @@ app.use(cookieParser());
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
 
-app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+app.listen(port, hostname, () => {
+    console.log(`Example app listening at ${hostname}:${port}`);
 });
 
