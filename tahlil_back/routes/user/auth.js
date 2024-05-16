@@ -1,12 +1,14 @@
+const {generateJwtToken} = require('../../utils/jwt');
+const {values} = require("pg/lib/native/query");
+
+
 function auth_requests(app, db, jsonParser) {
     /**
      * @swagger
      * /auth/register:
      *   post:
      *     summary: Register
-     *     description: Register.
      *     requestBody:
-     *       description: Optional description in *Markdown*
      *       required: true
      *       content:
      *         application/json:
@@ -16,7 +18,6 @@ function auth_requests(app, db, jsonParser) {
      *               ssid: string
      *               first_name: string
      *               last_name: string
-     *               username: string
      *               password: string
      *               repeat_password: string
      *               medical_id: string
@@ -25,7 +26,6 @@ function auth_requests(app, db, jsonParser) {
      *               ssid: 1234567890
      *               first_name: fname
      *               last_name: lname
-     *               username: usern
      *               password: passpass123
      *               repeat_password: passpass123
      *               medical_id: 12345
@@ -39,7 +39,7 @@ function auth_requests(app, db, jsonParser) {
      */
     console.log(process.env.pg_password, process.env.pg_user)
     app.post('/auth/register', jsonParser, async function (req, res) {
-        const {ssid, first_name, last_name, username, password, repeat_password, medical_id, user_type} = req.body;
+        const {ssid, first_name, last_name, password, repeat_password, medical_id, user_type} = req.body;
         const {rowCount} = await db.query(`select * from public."user" where ssid='${ssid}'`);
         if (rowCount > 0) {
             res.status(401).send('SSID should be Unique.')
@@ -66,12 +66,56 @@ function auth_requests(app, db, jsonParser) {
 
             res.status(201).json(await db.query({
                 text: `insert into public.${user_type} ` +
-                    `(ssid, first_name, last_name, username, password${user_type == 'doctor' ? ", medical_id" : ""}${user_type == 'referrer' ? ", is_verified" : ""}) ` +
-                    `values ($1, $2, $3, $4, $5${user_type != 'patient' ? ", $6" : ""})`,
+                    `(ssid, first_name, last_name, password${user_type == 'doctor' ? ", medical_id" : ""}${user_type == 'referrer' ? ", is_verified" : ""}) ` +
+                    `values ($1, $2, $3, $4${user_type != 'patient' ? ", $5" : ""})`,
                 values: values,
             }));
         }
-    })
+    });
+
+    /**
+     * @swagger
+     * /auth/login:
+     *   post:
+     *     summary: Login
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               ssid: string
+     *               password: string
+     *             example:
+     *               ssid: 1234567899
+     *               password: passpass123
+     *     responses:
+     *       200:
+     *         description: Successful login with token cookie.
+     *       401:
+     *         description: An error occurred during login. Messages in body.
+     *
+     */
+    app.post('/auth/login', jsonParser, async function (req, res) {
+        const {ssid, password} = req.body;
+        console.log(await db.query(`select * from public."user" where ssid='${ssid}' and password='${password}'`))
+        const {rowCount, rows} = await db.query(`select * from public."user" where ssid='${ssid}' and password='${password}'`);
+        if (rowCount === 0) {
+            res.status(401).send('SSID or Password is incorrect.');
+        } else if (!rows[0]['is_verified']) {
+            res.status(401).send('Unverified users can\'t login.');
+        } else {
+            const token = generateJwtToken(ssid);
+            db.query({
+                text: `insert into public.login_token values ($1, $2)`,
+                values: [ssid, token]
+            }).then((_) => {
+                res.cookie('token', token, {httpOnly: true});
+                res.status(200).send('Login Successful!');
+            })
+        }
+    });
 }
 
 module.exports = auth_requests;
