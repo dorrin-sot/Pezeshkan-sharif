@@ -1,4 +1,4 @@
-const {generateJwtToken} = require('../../utils/jwt');
+const {generateJwtToken, validateJwtToken} = require('../../utils/jwt');
 const {values} = require("pg/lib/native/query");
 
 
@@ -114,6 +114,36 @@ function auth_requests(app, db, jsonParser) {
                 res.cookie('token', token, {httpOnly: true});
                 res.status(200).send('Login Successful!');
             })
+        }
+    });
+
+    /**
+     * @swagger
+     * /auth/refresh:
+     *   post:
+     *     summary: Refresh Token
+     *     responses:
+     *       200:
+     *         description: Successful refresh token with new token cookie.
+     *       401:
+     *         description: An error occurred during refresh.
+     *
+     */
+    app.post('/auth/refresh', jsonParser, async function (req, res) {
+        let {token} = req.cookies;
+        if (validateJwtToken(token)) {
+            const {rows} = await db.query(`select ssid from public."login_token" where token='${token}'`);
+            const ssid = rows[0]['ssid']
+            token = generateJwtToken(ssid);
+            db.query({
+                text: `insert into public.login_token values ($1, $2)`,
+                values: [ssid, token]
+            }).then((_) => {
+                res.cookie('token', token, {httpOnly: true});
+                res.status(200).send('Login Successful!');
+            })
+        } else {
+            res.status(401).send('Invalid token.');
         }
     });
 }

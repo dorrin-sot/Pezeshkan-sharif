@@ -2,6 +2,7 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser');
 
 const {Client} = require('pg')
 
@@ -27,6 +28,7 @@ const port = process.env.server_port;
 const jsonParser = bodyParser.json()
 
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(cookieParser());
 
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
