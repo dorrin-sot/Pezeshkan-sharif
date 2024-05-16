@@ -11,11 +11,7 @@ const healthcheck_request = require('./routes/health-check');
 
 
 const db_client = new Client({
-    user: process.env.pg_user,
-    password: process.env.pg_password,
-    host: process.env.pg_host,
-    port: process.env.pg_port,
-    database: process.env.pg_database,
+    connectionString: process.env.pg_url,
 });
 
 db_client
@@ -25,8 +21,7 @@ db_client
 
 const app = express();
 const port = process.env.server_port;
-const hostname = process.env.server_host;
-const jsonParser = bodyParser.json()
+const jsonParser = bodyParser.json();
 
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cookieParser());
@@ -35,6 +30,6 @@ healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
 
 app.listen(port, () => {
-    console.log(`Example app listening at ${hostname}:${port}`);
+    console.log(`Example app listening at http://localhost:${port}`);
 });
 
