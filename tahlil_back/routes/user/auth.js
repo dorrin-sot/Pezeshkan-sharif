@@ -1,5 +1,4 @@
 const {generateJwtToken, validateJwtToken} = require('../../utils/jwt');
-const {values} = require("pg/lib/native/query");
 
 
 function auth_requests(app, db, jsonParser) {
@@ -37,7 +36,6 @@ function auth_requests(app, db, jsonParser) {
      *         description: An error occurred during register. Messages in body.
      *
      */
-    console.log(process.env.pg_password, process.env.pg_user)
     app.post('/auth/register', jsonParser, async function (req, res) {
         const {ssid, first_name, last_name, password, repeat_password, medical_id, user_type} = req.body;
         const {rowCount} = await db.query(`select * from public."user" where ssid='${ssid}'`);
@@ -99,7 +97,6 @@ function auth_requests(app, db, jsonParser) {
      */
     app.post('/auth/login', jsonParser, async function (req, res) {
         const {ssid, password} = req.body;
-        console.log(await db.query(`select * from public."user" where ssid='${ssid}' and password='${password}'`))
         const {rowCount, rows} = await db.query(`select * from public."user" where ssid='${ssid}' and password='${password}'`);
         if (rowCount === 0) {
             res.status(401).send('SSID or Password is incorrect.');
@@ -108,8 +105,8 @@ function auth_requests(app, db, jsonParser) {
         } else {
             const token = generateJwtToken(ssid);
             db.query({
-                text: `insert into public.login_token values ($1, $2)`,
-                values: [ssid, token]
+                text: `insert into public.login_token (ssid, token, created_at) values ($1, $2, $3)`,
+                values: [ssid, token, (new Date()).toISOString()]
             }).then((_) => {
                 res.cookie('token', token, {httpOnly: true});
                 res.status(200).send('Login Successful!');
@@ -132,15 +129,47 @@ function auth_requests(app, db, jsonParser) {
     app.post('/auth/refresh', jsonParser, async function (req, res) {
         let {token} = req.cookies;
         if (validateJwtToken(token)) {
-            const {rows} = await db.query(`select ssid from public."login_token" where token='${token}'`);
-            const ssid = rows[0]['ssid']
+            const {rows} = await db.query(`select ssid from public."login_token" where token='${token}' order by created_at desc limit 1`);
+            const {ssid} = rows[0]
             token = generateJwtToken(ssid);
             db.query({
-                text: `insert into public.login_token values ($1, $2)`,
-                values: [ssid, token]
+                text: `insert into public.login_token (ssid, token, created_at) values ($1, $2, $3)`,
+                values: [ssid, token, (new Date()).toISOString()]
             }).then((_) => {
                 res.cookie('token', token, {httpOnly: true});
-                res.status(200).send('Login Successful!');
+                res.status(200).send('Refresh Token Successful!');
+            })
+        } else {
+            res.status(401).send('Invalid token.');
+        }
+    });
+
+    /**
+     * @swagger
+     * /auth/logout:
+     *   delete:
+     *     summary: Logout
+     *     responses:
+     *       204:
+     *         description: Successful logout.
+     *       401:
+     *         description: An error occurred during logout.
+     *
+     */
+    app.delete('/auth/logout', jsonParser, async function (req, res) {
+        let {token} = req.cookies;
+        if (validateJwtToken(token)) {
+            const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+            const {ssid, created_at} = rows[0]
+            if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+                res.status(401).send('Invalid token.')
+            }
+            token = generateJwtToken(ssid);
+            db.query({
+                text: `delete from public.login_token where ssid=$1`,
+                values: [ssid]
+            }).then((_) => {
+                res.status(204).send('Logout Successful!');
             })
         } else {
             res.status(401).send('Invalid token.');
