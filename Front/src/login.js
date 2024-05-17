@@ -40,17 +40,21 @@ const Login = (props) => {
       setPasswordError('The password must be 8 characters or longer')
       return
     }
-    setUsername(username)
-    setPassword(password)
-    setLoggedIn(true)
     
     // navigate('/page',{ props: {
     //   username: username,
     //   user: data
     //   }
     // })
-    setNewState({data: data, username: username, password: password})
-    console.log("passed")
+
+    // Hard coded username, untill we connect it to back
+    if(username == 'user@mail.com' && password == '12345678'){
+      setUsername(username)
+      setPassword(password)
+      setLoggedIn(true)
+      setNewState({data: data, username: username, password: password})
+      console.log("passed")
+    }
     // Authentication calls will be made here...
   }
   if(!loggedIn){
