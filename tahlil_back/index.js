@@ -3,6 +3,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan')
 
 const {Client} = require('pg')
 
@@ -24,6 +25,7 @@ const app = express();
 const port = process.env.server_port;
 const jsonParser = bodyParser.json();
 
+app.use(morgan('> :date[iso] :method :url :status :res[content-length]B - :response-time[3]ms'))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cookieParser());
 
