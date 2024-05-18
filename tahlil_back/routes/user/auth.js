@@ -50,7 +50,7 @@ function auth_requests(app, db, jsonParser) {
         } else if (user_type === 'doctor' && (medical_id || '').length == 0) {
             res.status(401).send("Medical ID is required for doctors.")
         } else {
-            const values = [ssid, first_name, last_name, username, password];
+            const values = [ssid, first_name, last_name, password];
             if (user_type === 'doctor') {
                 values.push(medical_id);
                 const {rowCount} = await db.query(`select * from public."doctor" where medical_id='${medical_id}'`);
@@ -86,7 +86,7 @@ function auth_requests(app, db, jsonParser) {
      *               ssid: string
      *               password: string
      *             example:
-     *               ssid: 1234567899
+     *               ssid: 1234567890
      *               password: passpass123
      *     responses:
      *       200:
@@ -162,7 +162,7 @@ function auth_requests(app, db, jsonParser) {
             const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
             const {ssid, created_at} = rows[0]
             if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
-                res.status(401).send('Invalid token.')
+                res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
             }
             token = generateJwtToken(ssid);
             db.query({

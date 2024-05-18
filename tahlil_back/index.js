@@ -8,6 +8,7 @@ const {Client} = require('pg')
 
 const auth_requests = require('./routes/user/auth');
 const healthcheck_request = require('./routes/health-check');
+const user_requests = require("./routes/user/user");
 
 
 const db_client = new Client({
@@ -28,8 +29,10 @@ app.use(cookieParser());
 
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
+user_requests(app, db_client, jsonParser);
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`Pezeshkan-sharif listening at http://localhost:${port}`);
+    console.log(`Swagger app listening at http://localhost:${port}/swagger`);
 });
 
