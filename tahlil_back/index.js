@@ -25,7 +25,7 @@ const app = express();
 const port = process.env.server_port;
 const jsonParser = bodyParser.json();
 
-app.use(morgan('> :date[iso] :method :url :status :res[content-length]B - :response-time[3]ms'))
+app.use(morgan('> :date[iso] :method :url :status :res[content-length]B - :response-time[0]ms'))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cookieParser());
 
