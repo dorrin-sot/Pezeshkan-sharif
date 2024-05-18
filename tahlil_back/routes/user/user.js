@@ -90,10 +90,13 @@ function user_requests(app, db, jsonParser) {
             if (i > 1) {
                 query = query.substring(0, query.length - 1) + ` where ssid=\$${i++}`
                 values.push(ssid)
-                console.log(query)
-                console.log(values)
+                let error = false
                 await db.query({text: query, values})
-                    .catch((e) => res.status(400).send(e.message))
+                    .catch((e) => {
+                        res.status(400).send(e.message);
+                        error = true;
+                    })
+                if (error) return
             }
 
             const {rows: new_user} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`)
