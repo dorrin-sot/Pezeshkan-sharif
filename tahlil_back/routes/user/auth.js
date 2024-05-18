@@ -97,7 +97,18 @@ function auth_requests(app, db, jsonParser) {
      */
     app.post('/auth/login', jsonParser, async function (req, res) {
         const {ssid, password} = req.body;
-        const {rowCount, rows} = await db.query(`select * from public."user" where ssid='${ssid}' and password='${password}'`);
+        let user_type = 'doctor';
+        let {rowCount, rows} = await db.query(`select * from public."doctor" where ssid='${ssid}' and password='${password}'`);
+        if (rowCount === 0) {
+            user_type = 'patient';
+            rows = (await db.query(`select * from public."patient" where ssid='${ssid}' and password='${password}'`))['rows'];
+            rowCount = rows.length;
+        }
+        user_type = 'referrer';
+        if (rowCount === 0) {
+            rows = (await db.query(`select * from public."referrer" where ssid='${ssid}' and password='${password}'`))['rows'];
+            rowCount = rows.length;
+        }
         if (rowCount === 0) {
             res.status(401).send('SSID or Password is incorrect.');
         } else if (!rows[0]['is_verified']) {
@@ -105,8 +116,8 @@ function auth_requests(app, db, jsonParser) {
         } else {
             const token = generateJwtToken(ssid);
             db.query({
-                text: `insert into public.login_token (ssid, token, created_at) values ($1, $2, $3)`,
-                values: [ssid, token, (new Date()).toISOString()]
+                text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
+                values: [ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
                 res.cookie('token', token, {httpOnly: true});
                 res.status(200).send('Login Successful!');
@@ -130,11 +141,11 @@ function auth_requests(app, db, jsonParser) {
         let {token} = req.cookies;
         if (validateJwtToken(token)) {
             const {rows} = await db.query(`select ssid from public."login_token" where token='${token}' order by created_at desc limit 1`);
-            const {ssid} = rows[0]
+            const {ssid, user_type} = rows[0]
             token = generateJwtToken(ssid);
             db.query({
-                text: `insert into public.login_token (ssid, token, created_at) values ($1, $2, $3)`,
-                values: [ssid, token, (new Date()).toISOString()]
+                text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
+                values: [ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
                 res.cookie('token', token, {httpOnly: true});
                 res.status(200).send('Refresh Token Successful!');
