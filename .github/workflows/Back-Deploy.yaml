@@ -18,5 +18,6 @@ jobs:
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
         run: |
+          cd tahlil/back
           npm i -g @liara/cli@4
           liara deploy --api-token="$LIARA_TOKEN" --port=80 --detach
