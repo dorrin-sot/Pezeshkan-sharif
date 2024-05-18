@@ -23,4 +23,4 @@ jobs:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
         run: |
           npm i -g @liara/cli@4
-          liara deploy --api-token="$LIARA_TOKEN" --port=80 --detach
+          liara deploy --api-token="$LIARA_TOKEN" --app="pezeshkan-sharif" --port=80 --detach
