@@ -19,7 +19,16 @@ const Home = (props) => {
       navigate('/login')
     }
   }
-
+  const onRegisterClick = () => {
+    console.log("got it ")
+    if (loggedIn) {
+      localStorage.removeItem('user')
+      props.setLoggedIn(false)
+    } else {
+      console.log("found here")
+      navigate('/register')
+    }
+  }
   return (
     <div className="mainContainer">
       <div className={'titleContainer'}>
@@ -31,6 +40,12 @@ const Home = (props) => {
           type="button"
           onClick={onButtonClick}
           value={loggedIn ? 'Log out' : 'Log in'}
+        />
+        <input
+          className={'inputButton'}
+          type="button"
+          onClick={onRegisterClick}
+          value={loggedIn ? 'Log out' : 'Register'}
         />
         {loggedIn ? <div>Your username address is {username}</div> : <div />}
       </div>

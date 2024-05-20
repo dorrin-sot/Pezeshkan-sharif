@@ -83,8 +83,9 @@ export function Page ({ props }) {
     }
     else if(state.data == 'Others'){
         if(!appointmentsClicked && !profileClicked && !makeReservationClicked){
+            // TODO Elahe ...
             return(
-                <div>Welcome Other!</div>
+                <div>Welcome Othersssssss!</div>
             )
         }
     }
