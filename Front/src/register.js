@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './register.css'
 const Register = (props) => {
 // function RegisterPage() {
   const [userType, setUserType] = useState('patient'); // Default to patient
