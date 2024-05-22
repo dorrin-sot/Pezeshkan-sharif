@@ -1,6 +1,4 @@
 const {validateJwtToken} = require('../../utils/jwt');
-const results = require("gh-pages/lib/git");
-
 
 function verify_requests(app, db, jsonParser) {
     /**
