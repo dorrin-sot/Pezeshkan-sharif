@@ -105,8 +105,8 @@ function auth_requests(app, db, jsonParser) {
             rows = (await db.query(`select * from public."patient" where ssid='${ssid}' and password='${password}'`))['rows'];
             rowCount = rows.length;
         }
-        user_type = 'referrer';
         if (rowCount === 0) {
+            user_type = 'referrer';
             rows = (await db.query(`select * from public."referrer" where ssid='${ssid}' and password='${password}'`))['rows'];
             rowCount = rows.length;
         }
