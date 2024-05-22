@@ -75,10 +75,55 @@ function verify_requests(app, db, jsonParser) {
         } else if (user_type != 'referrer') {
             res.status(401).send('You have to be a referrer to access this part!')
         } else {
-            await db.query({text: `update public."user" set is_verified=true where ssid=$1 and referrer=$2 and not is_verified`, values: [user_ssid, ssid]})
+            await db.query({text: `update public."user" set is_declined=false, is_verified=true where ssid=$1 and referrer=$2 and not is_verified`, values: [user_ssid, ssid]})
                 .then(({rowCount}) => {
                     if (rowCount == 0) return res.status(404).send('Unverified user with ssid not found!')
                     res.status(200).send('User Accepted Successfully!')
+                })
+                .catch(console.log);
+        }
+    });
+
+    /**
+     * @swagger
+     * /referees/{ssid}/decline:
+     *   post:
+     *     summary: Decline the user with the given ssid
+     *     parameters:
+     *       - in: path
+     *         name: ssid
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: The SSID of the user that the referrer wants to decline
+     *     responses:
+     *       200:
+     *         description: Declined user successfully.
+     *       404:
+     *         description: User not found.
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.post('/referees/:ssid/decline', async function (req, res) {
+        let {ssid: user_ssid} = req.params;
+        let {token} = req.cookies;
+
+        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length == 0) return res.status(401).send('Invalid Token!');
+        const {ssid, created_at, user_type} = rows[0]
+
+        if (!validateJwtToken(token)) {
+            res.status(401).send('Invalid Token!')
+        } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+            res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+        } else if (user_type != 'referrer') {
+            res.status(401).send('You have to be a referrer to access this part!')
+        } else {
+            await db.query({text: `update public."user" set is_declined=true, is_verified=false where ssid=$1 and referrer=$2`, values: [user_ssid, ssid]})
+                .then(({rowCount}) => {
+                    if (rowCount == 0) return res.status(404).send('User with ssid not found!')
+                    res.status(200).send('User Declined Successfully!')
                 })
                 .catch(console.log);
         }
