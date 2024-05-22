@@ -13,6 +13,7 @@ const healthcheck_request = require('./routes/health-check');
 const user_requests = require("./routes/user/user");
 const verify_requests = require("./routes/user/verify");
 const appointment_requests = require("./routes/appointment");
+const {validateJwtToken} = require("./utils/jwt");
 
 
 const db_client = new Client({

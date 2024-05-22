@@ -159,6 +159,33 @@ function auth_requests(app, db, jsonParser) {
 
     /**
      * @swagger
+     * /auth/is_logged_in:
+     *   get:
+     *     summary: Check if user is logged in
+     *     responses:
+     *       200:
+     *         description: Is Logged in.
+     *       401:
+     *         description: Is not logged in.
+     *
+     */
+    app.get('/auth/is_logged_in', async (req, res) => {
+        let {token} = req.cookies;
+        if (!validateJwtToken(token)) {
+            res.status(401).send('Invalid Token!')
+        } else {
+            const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+            if (rows.length == 0) return res.status(401).send('Invalid Token!')
+            const {created_at} = rows[0]
+            if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+                res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+            }
+        }
+        res.status(200).send('User is logged in!')
+    })
+
+    /**
+     * @swagger
      * /auth/logout:
      *   delete:
      *     summary: Logout
