@@ -4,6 +4,7 @@ const swaggerSpec = require('./swagger');
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan')
+const cors = require('cors')
 
 const {Client} = require('pg')
 
@@ -30,6 +31,7 @@ const jsonParser = bodyParser.json();
 app.use(morgan('> :date[iso] :method :url :status :res[content-length]B - :response-time[0]ms'))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cookieParser());
+app.use(cors())
 
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
