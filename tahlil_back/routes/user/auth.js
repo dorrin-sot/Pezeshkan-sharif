@@ -62,12 +62,13 @@ function auth_requests(app, db, jsonParser) {
                 values.push(true) // referrer is verified by default
             }
 
-            res.status(201).json(await db.query({
+            await db.query({
                 text: `insert into public.${user_type} ` +
                     `(ssid, first_name, last_name, password${user_type == 'doctor' ? ", medical_id" : ""}${user_type == 'referrer' ? ", is_verified" : ""}) ` +
                     `values ($1, $2, $3, $4${user_type != 'patient' ? ", $5" : ""})`,
                 values: values,
-            }));
+            }).catch(console.log);
+            res.status(201).send('Register Successful!');
         }
     });
 
