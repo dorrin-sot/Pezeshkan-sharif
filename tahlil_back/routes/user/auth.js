@@ -141,6 +141,7 @@ function auth_requests(app, db, jsonParser) {
         let {token} = req.cookies;
         if (validateJwtToken(token)) {
             const {rows} = await db.query(`select ssid from public."login_token" where token='${token}' order by created_at desc limit 1`);
+            if (rows.length == 0) return res.status(401).send('Invalid Token!')
             const {ssid, user_type} = rows[0]
             token = generateJwtToken(ssid);
             db.query({

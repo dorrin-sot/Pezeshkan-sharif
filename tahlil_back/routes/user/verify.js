@@ -1,4 +1,5 @@
 const {validateJwtToken} = require('../../utils/jwt');
+const results = require("gh-pages/lib/git");
 
 
 function verify_requests(app, db, jsonParser) {
@@ -28,13 +29,58 @@ function verify_requests(app, db, jsonParser) {
         } else if (user_type != 'referrer') {
             res.status(401).send('You have to be a referrer to access this part!')
         } else {
-            const {rows: results} = await db.query({text: `select ssid, first_name, last_name, 'doctor' as user_type from public."doctor" where referrer=$1 and not is_verified`, values: [ssid]})
+            const {rows: results} = await db.query({text: `select *, 'doctor' as user_type from public."doctor" where referrer=$1 and not is_verified`, values: [ssid]})
                 .catch(console.log);
-            await db.query({text: `select ssid, first_name, last_name, 'patient' as user_type from public."patient" where referrer=$1 and not is_verified`, values: [ssid]})
+            await db.query({text: `select *, 'patient' as user_type from public."patient" where referrer=$1 and not is_verified`, values: [ssid]})
                 .then(({rows}) => rows.forEach((e) => results.push(e)))
                 .catch(console.log);
 
             res.status(200).send(results)
+        }
+    });
+
+    /**
+     * @swagger
+     * /referees/{ssid}/accept:
+     *   post:
+     *     summary: Accept the user with the given ssid
+     *     parameters:
+     *       - in: path
+     *         name: ssid
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: The SSID of the user that the referrer wants to verify
+     *     responses:
+     *       200:
+     *         description: Accepted user successfully.
+     *       404:
+     *         description: User not found.
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.post('/referees/:ssid/accept', async function (req, res) {
+        let {ssid: user_ssid} = req.params;
+        let {token} = req.cookies;
+
+        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length == 0) return res.status(401).send('Invalid Token!');
+        const {ssid, created_at, user_type} = rows[0]
+
+        if (!validateJwtToken(token)) {
+            res.status(401).send('Invalid Token!')
+        } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+            res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+        } else if (user_type != 'referrer') {
+            res.status(401).send('You have to be a referrer to access this part!')
+        } else {
+            await db.query({text: `update public."user" set is_verified=true where ssid=$1 and referrer=$2 and not is_verified`, values: [user_ssid, ssid]})
+                .then(({rowCount}) => {
+                    if (rowCount == 0) return res.status(404).send('Unverified user with ssid not found!')
+                    res.status(200).send('User Accepted Successfully!')
+                })
+                .catch(console.log);
         }
     });
 }
