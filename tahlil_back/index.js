@@ -10,6 +10,7 @@ const {Client} = require('pg')
 const auth_requests = require('./routes/user/auth');
 const healthcheck_request = require('./routes/health-check');
 const user_requests = require("./routes/user/user");
+const verify_requests = require("./routes/user/verify");
 
 
 const db_client = new Client({
@@ -32,6 +33,7 @@ app.use(cookieParser());
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
 user_requests(app, db_client, jsonParser);
+verify_requests(app, db_client, jsonParser);
 
 app.listen(port, () => {
     console.log(`Pezeshkan-sharif listening at http://localhost:${port}`);
