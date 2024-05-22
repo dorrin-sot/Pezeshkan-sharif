@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import './register.css'
+import { register_req } from './back-requests/auth';
+import { useNavigate } from 'react-router-dom';
+
 const Register = (props) => {
-// function RegisterPage() {
   const [userType, setUserType] = useState('patient'); // Default to patient
   const [formData, setFormData] = useState({
     ssid: '',
-    fullName: '',
+    firstName: '',
+    lastName: '',
     medicalId: '',
     username: '',
     password: '',
     repeatPassword: ''
   });
   const [errors, setErrors] = useState([]);
+
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,12 +27,17 @@ const Register = (props) => {
   };
 
   const handleSubmit = (e) => {
+    console.log('Form submitted:', formData);
     e.preventDefault();
     const validationErrors = validateForm();
     if (validationErrors.length === 0) {
-      // Send request to server (not implemented)
-      console.log('Form submitted:', formData);
-      // Navigate to login (not implemented)
+      register_req(formData.ssid, formData.firstName, formData.lastName, formData.password, formData.repeatPassword, userType, formData.medicalId)
+        .then(async (response) => {
+          if (response.ok) {
+            navigate('/login')
+            setErrors([])
+          } else setErrors(await response.text());
+        });
     } else {
       setErrors(validationErrors);
     }
@@ -35,9 +45,9 @@ const Register = (props) => {
 
   const validateForm = () => {
     const errors = [];
-    const { ssid, fullName, username, password, repeatPassword } = formData;
+    const { ssid, fullName, password, repeatPassword, medicalId } = formData;
 
-    if (!ssid || !fullName || !username || !password || !repeatPassword) {
+    if (!ssid || !fullName || !password || !repeatPassword, (userType == 'doctor' && !medicalId)) {
       errors.push('All fields are required.');
     }
 
@@ -101,11 +111,22 @@ const Register = (props) => {
         </div>
         <div>
           <label>
-            Full Name:
+            First Name:
             <input
               type="text"
-              name="fullName"
-              value={formData.fullName}
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
+        <div>
+          <label>
+            Last Name:
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
               onChange={handleChange}
             />
           </label>
@@ -123,17 +144,6 @@ const Register = (props) => {
             </label>
           </div>
         )}
-        <div>
-          <label>
-            Username:
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-            />
-          </label>
-        </div>
         <div>
           <label>
             Password:
