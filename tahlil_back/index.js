@@ -32,7 +32,10 @@ const jsonParser = bodyParser.json();
 app.use(morgan('> :date[iso] :method :url :status :res[content-length]B - :response-time[0]ms'))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cookieParser());
-app.use(cors())
+app.use(cors({
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    credentials: true,
+}));
 
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
