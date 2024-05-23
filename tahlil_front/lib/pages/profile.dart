@@ -1,26 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/auth.dart';
+import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/pair.dart';
 import 'package:tahlil_front/widgets/toast.dart';
 
 class ProfilePage extends StatelessWidget {
   final _authService = AuthService.instance;
+  final _profileService = ProfileService.instance;
 
   ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextButton.icon(
-          onPressed: _logout,
-          label: const Text('Logout'),
-        ),
-      ],
+    return FutureBuilder<User?>(
+      future: _profileService.profile,
+      builder: (context, snapshot) {
+        return Column(
+          children: [
+            TextButton.icon(
+              onPressed: _logout,
+              label: const Text('Logout'),
+            ),
+          ],
+        );
+      }
     );
   }
 
