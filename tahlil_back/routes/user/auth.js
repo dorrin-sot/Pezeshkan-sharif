@@ -120,7 +120,7 @@ function auth_requests(app, db, jsonParser) {
                 text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
                 values: [ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
-                res.cookie('token', token, {httpOnly: false});
+                res.cookie('token', token, {httpOnly: false, sameSite: 'none'});
                 res.status(200).send('Login Successful!');
             })
         }
@@ -149,7 +149,7 @@ function auth_requests(app, db, jsonParser) {
                 text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
                 values: [ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
-                res.cookie('token', token, {httpOnly: false});
+                res.cookie('token', token, {httpOnly: false, sameSite: 'none'});
                 res.status(200).send('Refresh Token Successful!');
             })
         } else {
