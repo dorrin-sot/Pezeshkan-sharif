@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/pages/auth.dart';
@@ -76,6 +77,7 @@ class TahlilApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
+      builder: FToastBuilder(),
     );
   }
 }

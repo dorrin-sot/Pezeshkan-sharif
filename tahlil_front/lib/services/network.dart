@@ -1,10 +1,14 @@
-class NetworkService {
-  static NetworkService? _instance;
+import 'package:get/get.dart';
 
+class NetworkService extends GetConnect {
   static NetworkService get instance {
-    _instance ??= NetworkService();
-    return _instance!;
+    Get.put(NetworkService());
+    return Get.find<NetworkService>();
   }
 
-  get_request() {}
+  @override
+  void onInit() {
+    print('NetworkService:: onInit()');
+    httpClient.baseUrl = 'https://pezeshkan-sharif.liara.run';
+  }
 }

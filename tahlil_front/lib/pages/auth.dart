@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
+import 'package:tahlil_front/main.dart';
+import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/widgets/text_field.dart';
+import 'package:tahlil_front/widgets/toast.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -11,7 +17,9 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  bool isLogin = true, passwordShown = false;
+  final _authService = AuthService.instance;
+
+  bool _isLogin = true, _passwordShown = false;
   UserType _userType = UserType.referrer;
   final _ssidController = TextEditingController();
   final _firstNameController = TextEditingController();
@@ -45,7 +53,7 @@ class _AuthPageState extends State<AuthPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
-                        isLogin ? 'Login' : 'Register',
+                        _isLogin ? 'Login' : 'Register',
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ),
@@ -53,18 +61,19 @@ class _AuthPageState extends State<AuthPage> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                SegmentedButton<UserType>(
-                  segments: UserType.values
-                      .map((ut) => ButtonSegment(
-                            value: ut,
-                            label: Text('$ut'),
-                          ))
-                      .toList(),
-                  selected: <UserType>{_userType},
-                  onSelectionChanged: (newUserType) => setState(() {
-                    _userType = newUserType.last;
-                  }),
-                ),
+                if (!_isLogin)
+                  SegmentedButton<UserType>(
+                    segments: UserType.values
+                        .map((ut) => ButtonSegment(
+                              value: ut,
+                              label: Text('$ut'),
+                            ))
+                        .toList(),
+                    selected: <UserType>{_userType},
+                    onSelectionChanged: (newUserType) => setState(() {
+                      _userType = newUserType.last;
+                    }),
+                  ),
                 const SizedBox(height: 10),
                 CustomTextField(
                   icon: const FaIcon(FontAwesomeIcons.idCard),
@@ -73,7 +82,7 @@ class _AuthPageState extends State<AuthPage> {
                   controller: _ssidController,
                   hint: 'e.g. 1234567890',
                 ),
-                if (!isLogin) ...[
+                if (!_isLogin) ...[
                   CustomTextField(
                     icon: const FaIcon(Icons.abc),
                     label: 'First Name',
@@ -92,20 +101,20 @@ class _AuthPageState extends State<AuthPage> {
                   label: 'Password',
                   required: true,
                   controller: _passwordController,
-                  obscureText: !passwordShown,
+                  obscureText: !_passwordShown,
                   toggleObscureText: () =>
-                      setState(() => passwordShown = !passwordShown),
+                      setState(() => _passwordShown = !_passwordShown),
                   helperText: 'At least 8 characters',
                 ),
-                if (!isLogin) ...[
+                if (!_isLogin) ...[
                   CustomTextField(
                     icon: const Icon(Icons.password),
                     label: 'Repeat Password',
                     required: true,
                     controller: _repeatPasswordController,
-                    obscureText: !passwordShown,
+                    obscureText: !_passwordShown,
                     toggleObscureText: () =>
-                        setState(() => passwordShown = !passwordShown),
+                        setState(() => _passwordShown = !_passwordShown),
                   ),
                   if (_userType == UserType.doctor)
                     CustomTextField(
@@ -128,21 +137,21 @@ class _AuthPageState extends State<AuthPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      isLogin
+                      _isLogin
                           ? 'Don\'t have an account?'
                           : 'Already have an account?',
                     ),
                     const SizedBox(width: 5),
                     TextButton(
-                      onPressed: () => setState(() => isLogin = !isLogin),
-                      child: Text(isLogin ? 'Register Here!' : 'Login Here!'),
+                      onPressed: () => setState(() => _isLogin = !_isLogin),
+                      child: Text(_isLogin ? 'Register Here!' : 'Login Here!'),
                     )
                   ],
                 ),
                 const SizedBox(height: 25),
                 FilledButton(
-                  onPressed: isLogin ? _login : _register,
-                  child: Text(isLogin ? 'Login' : 'Register'),
+                  onPressed: _isLogin ? _login : _register,
+                  child: Text(_isLogin ? 'Login' : 'Register'),
                 )
               ],
             ),
@@ -152,8 +161,21 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  _login() {
-    // todo
+  void _login() async {
+    final response = await _authService.login(
+      ssid: _ssidController.text,
+      password: _passwordController.text,
+    );
+    final toast = FToast();
+    toast.init(rootNavigatorKey.currentContext!);
+    toast.showToast(
+      child: CustomToast(
+        text: response.second,
+        toastType: response.first ? ToastType.success : ToastType.error,
+      ),
+      gravity: ToastGravity.BOTTOM_LEFT,
+    );
+    if (response.first) GoRouter.of(context).go('/');
   }
 
   _register() {
