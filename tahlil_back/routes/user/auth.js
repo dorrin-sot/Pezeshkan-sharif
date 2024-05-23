@@ -200,11 +200,11 @@ function auth_requests(app, db, jsonParser) {
         let {token} = req.cookies;
         if (validateJwtToken(token)) {
             const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+            if (rows.length === 0) return res.status(401).send('Invalid Token!')
             const {ssid, created_at} = rows[0]
             if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
-                res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+                return res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
             }
-            token = generateJwtToken(ssid);
             db.query({
                 text: `delete from public.login_token where ssid=$1`,
                 values: [ssid]
