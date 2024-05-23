@@ -6,6 +6,7 @@ import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/auth.dart';
+import 'package:tahlil_front/utils/pair.dart';
 import 'package:tahlil_front/widgets/text_field.dart';
 import 'package:tahlil_front/widgets/toast.dart';
 
@@ -161,11 +162,27 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  void _login() async {
-    final response = await _authService.login(
-      ssid: _ssidController.text,
-      password: _passwordController.text,
-    );
+  void _login() async => _postSubmit(
+        await _authService.login(
+          ssid: _ssidController.text,
+          password: _passwordController.text,
+        ),
+      );
+
+  Future<void> _register() async => _postSubmit(
+        await _authService.register(
+          ssid: _ssidController.text,
+          firstName: _firstNameController.text,
+          lastName: _lastNameController.text,
+          password: _passwordController.text,
+          repeatPassword: _repeatPasswordController.text,
+          userType: _userType,
+          medicalId: _medicalIdController.text,
+          birthDate: _birthdateController.text,
+        ),
+      );
+
+  void _postSubmit(Pair<bool, String> response) {
     final toast = FToast();
     toast.init(rootNavigatorKey.currentContext!);
     toast.showToast(
@@ -176,9 +193,5 @@ class _AuthPageState extends State<AuthPage> {
       gravity: ToastGravity.BOTTOM_LEFT,
     );
     if (response.first) GoRouter.of(shellNavigatorKey.currentContext!).go('/');
-  }
-
-  _register() {
-    // todo
   }
 }

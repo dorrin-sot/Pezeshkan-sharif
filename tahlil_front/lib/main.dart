@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/pages/auth.dart';
 import 'package:tahlil_front/pages/home.dart';
+import 'package:tahlil_front/pages/profile.dart';
 import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/utils/theme.dart';
 
@@ -32,11 +35,23 @@ class TahlilApp extends StatelessWidget {
             centerTitle: false,
             title: const Text('Pezeshkan-sharif'),
             actions: [
-              TextButton.icon(
-                onPressed: () => GoRouter.of(context).go('/auth'),
-                label: const Text('Register / Login'),
-                icon: const FaIcon(FontAwesomeIcons.rightToBracket),
-              ),
+              FutureBuilder<bool>(
+                  future: AuthService.instance.isLoggedIn(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Container();
+                    if (snapshot.hasError || !snapshot.data!) {
+                      return TextButton.icon(
+                        onPressed: () => GoRouter.of(context).go('/auth'),
+                        label: const Text('Register / Login'),
+                        icon: const FaIcon(FontAwesomeIcons.rightToBracket),
+                      );
+                    }
+                    return TextButton.icon(
+                      onPressed: () => GoRouter.of(context).go('/profile'),
+                      label: const Text('Profile'),
+                      icon: const FaIcon(FontAwesomeIcons.user),
+                    );
+                  }),
             ],
           ),
           drawer: Drawer(
@@ -58,11 +73,13 @@ class TahlilApp extends StatelessWidget {
             routes: [
               GoRoute(
                 path: 'auth',
-                redirect: (context, state) async {
-                  if (await AuthService.instance.isLoggedIn()) return '/';
-                  return null;
-                },
+                redirect: needsNoAuthRedirect,
                 builder: (context, state) => const AuthPage(),
+              ),
+              GoRoute(
+                path: 'profile',
+                redirect: needsAuthRedirect,
+                builder: (context, state) => ProfilePage(),
               )
             ],
           ),
@@ -83,5 +100,21 @@ class TahlilApp extends StatelessWidget {
       routerConfig: _router,
       builder: FToastBuilder(),
     );
+  }
+
+  static FutureOr<String?> needsAuthRedirect(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    if (await AuthService.instance.isLoggedIn()) return null;
+    return 'auth';
+  }
+
+  static FutureOr<String?> needsNoAuthRedirect(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    if (!(await AuthService.instance.isLoggedIn())) return null;
+    return '/';
   }
 }

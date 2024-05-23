@@ -28,6 +28,7 @@ class CustomTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: TextField(
@@ -46,8 +47,8 @@ class CustomTextField extends StatelessWidget {
             ),
           ),
           if (toggleObscureText != null)
-            SizedBox(
-              width: 50,
+            SizedBox.square(
+              dimension: 50,
               child: Center(
                 child: IconButton(
                   icon: FaIcon(
