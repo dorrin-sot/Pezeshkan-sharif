@@ -26,7 +26,7 @@ function user_requests(app, db, jsonParser) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
         } else {
             const {rows} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`);
-            res.status(200).json(rows[0])
+            res.status(200).json({...rows[0], user_type})
         }
     });
 
