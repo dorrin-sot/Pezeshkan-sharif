@@ -9,10 +9,11 @@ class AuthService {
     return _instance!;
   }
 
-  NetworkService _networkService = NetworkService.instance;
+  final NetworkService _networkService = NetworkService.instance;
 
-  bool is_logged_in() {
-    return true; // todo
+  Future<bool> isLoggedIn() async {
+    final response = await _networkService.get('/auth/is_logged_in');
+    return response.statusCode == 200;
   }
 
   Future<Pair<bool, String>> login({
@@ -23,6 +24,6 @@ class AuthService {
       '/auth/login',
       {'ssid': ssid, 'password': password},
     );
-    return Pair(response.statusCode == 200, response.body);
+    return Pair(response.statusCode == 200, response.body ?? '');
   }
 }

@@ -175,7 +175,7 @@ class _AuthPageState extends State<AuthPage> {
       ),
       gravity: ToastGravity.BOTTOM_LEFT,
     );
-    if (response.first) GoRouter.of(context).go('/');
+    if (response.first) GoRouter.of(shellNavigatorKey.currentContext!).go('/');
   }
 
   _register() {

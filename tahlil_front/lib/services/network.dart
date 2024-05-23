@@ -8,7 +8,7 @@ class NetworkService extends GetConnect {
 
   @override
   void onInit() {
-    print('NetworkService:: onInit()');
+    withCredentials = true;
     httpClient.baseUrl = 'https://pezeshkan-sharif.liara.run';
   }
 }

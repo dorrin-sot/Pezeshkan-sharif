@@ -17,9 +17,9 @@ void main() {
 }
 
 class TahlilApp extends StatelessWidget {
-  AuthService authService = AuthService.instance;
-  ThemeData lightTheme = generateTheme(ThemeMode.light);
-  ThemeData darkTheme = generateTheme(ThemeMode.dark);
+  final AuthService _authService = AuthService.instance;
+  final ThemeData _lightTheme = generateTheme(ThemeMode.light);
+  final ThemeData _darkTheme = generateTheme(ThemeMode.dark);
 
   final _router = GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -58,6 +58,10 @@ class TahlilApp extends StatelessWidget {
             routes: [
               GoRoute(
                 path: 'auth',
+                redirect: (context, state) async {
+                  if (await AuthService.instance.isLoggedIn()) return '/';
+                  return null;
+                },
                 builder: (context, state) => const AuthPage(),
               )
             ],
