@@ -9,6 +9,7 @@ class Patient extends User {
     required super.lastName,
     required super.password,
     super.referrerSsid,
+    super.referrerName,
     super.phoneNumber,
     super.emailAddress,
     super.province,
@@ -26,6 +27,7 @@ class Patient extends User {
           lastName: json['last_name'],
           password: json['password'],
           referrerSsid: json['referrer'],
+          referrerName: json['referrer.full_name'],
           phoneNumber: json['phone_number'],
           emailAddress: json['email_address'],
           province: json['province'],
@@ -35,4 +37,7 @@ class Patient extends User {
           isDeclined: json['is_declined'],
           birthDate: json['birth_date'],
         );
+
+  @override
+  bool get isPatient => true;
 }

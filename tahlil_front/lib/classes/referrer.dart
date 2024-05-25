@@ -6,7 +6,6 @@ class Referrer extends User {
     required super.firstName,
     required super.lastName,
     required super.password,
-    super.referrerSsid,
     super.phoneNumber,
     super.emailAddress,
     super.province,
@@ -30,4 +29,7 @@ class Referrer extends User {
           isVerified: json['is_verified'],
           isDeclined: json['is_declined'],
         );
+
+  @override
+  bool get isReferrer => true;
 }

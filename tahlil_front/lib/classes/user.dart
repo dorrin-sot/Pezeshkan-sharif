@@ -4,6 +4,7 @@ class User {
   final String lastName;
   final String password;
   final String? referrerSsid;
+  final String? referrerName;
   final String? phoneNumber;
   final String? emailAddress;
   final String? province;
@@ -17,6 +18,7 @@ class User {
     required this.lastName,
     required this.password,
     this.referrerSsid,
+    this.referrerName,
     this.phoneNumber,
     this.emailAddress,
     this.province,
@@ -25,4 +27,10 @@ class User {
     required this.isVerified,
     required this.isDeclined,
   });
+
+  bool get isDoctor => false;
+
+  bool get isPatient => false;
+
+  bool get isReferrer => false;
 }

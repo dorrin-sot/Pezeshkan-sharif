@@ -11,6 +11,7 @@ class Doctor extends User {
     required super.lastName,
     required super.password,
     super.referrerSsid,
+    super.referrerName,
     super.phoneNumber,
     super.emailAddress,
     super.province,
@@ -29,6 +30,7 @@ class Doctor extends User {
       lastName: json['last_name'],
       password: json['password'],
       referrerSsid: json['referrer'],
+      referrerName: json['referrer.full_name'],
       phoneNumber: json['phone_number'],
       emailAddress: json['email_address'],
       province: json['province'],
@@ -40,4 +42,7 @@ class Doctor extends User {
       specialty: json['specialty'],
       canSurgery: json['can_surgery'],
   );
+
+  @override
+  bool get isDoctor => true;
 }
