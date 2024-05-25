@@ -8,6 +8,7 @@ import 'package:tahlil_front/pages/auth.dart';
 import 'package:tahlil_front/pages/home.dart';
 import 'package:tahlil_front/pages/profile.dart';
 import 'package:tahlil_front/services/auth.dart';
+import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/theme.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -41,13 +42,13 @@ class TahlilApp extends StatelessWidget {
                     if (!snapshot.hasData) return Container();
                     if (snapshot.hasError || !snapshot.data!) {
                       return TextButton.icon(
-                        onPressed: () => GoRouter.of(context).go('/auth'),
+                        onPressed: () => RouterService.go('/auth'),
                         label: const Text('Register / Login'),
                         icon: const FaIcon(FontAwesomeIcons.rightToBracket),
                       );
                     }
                     return TextButton.icon(
-                      onPressed: () => GoRouter.of(context).go('/profile'),
+                      onPressed: () => RouterService.go('/profile'),
                       label: const Text('Profile'),
                       icon: const FaIcon(FontAwesomeIcons.user),
                     );
@@ -59,7 +60,7 @@ class TahlilApp extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Image.asset('assets/Online Doctor-rafiki.png'),
+                  child: Image.asset('assets/doctor.png'),
                 )
               ],
             ),

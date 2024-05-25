@@ -6,6 +6,7 @@ import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/auth.dart';
+import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/pair.dart';
 import 'package:tahlil_front/widgets/text_field.dart';
 import 'package:tahlil_front/widgets/toast.dart';
@@ -85,13 +86,13 @@ class _AuthPageState extends State<AuthPage> {
                 ),
                 if (!_isLogin) ...[
                   CustomTextField(
-                    icon: const FaIcon(Icons.abc),
+                    icon: const Icon(Icons.abc),
                     label: 'First Name',
                     required: true,
                     controller: _firstNameController,
                   ),
                   CustomTextField(
-                    icon: const FaIcon(Icons.abc),
+                    icon: const Icon(Icons.abc),
                     label: 'Last Name',
                     required: true,
                     controller: _lastNameController,
@@ -192,6 +193,6 @@ class _AuthPageState extends State<AuthPage> {
       ),
       gravity: ToastGravity.BOTTOM_LEFT,
     );
-    if (response.first) GoRouter.of(shellNavigatorKey.currentContext!).go('/');
+    if (response.first) RouterService.go('/');
   }
 }

@@ -1,49 +1,107 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/classes/user.dart';
-import 'package:tahlil_front/enums/toast_type.dart';
-import 'package:tahlil_front/main.dart';
-import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/profile.dart';
-import 'package:tahlil_front/utils/pair.dart';
-import 'package:tahlil_front/widgets/toast.dart';
 
-class ProfilePage extends StatelessWidget {
-  final _authService = AuthService.instance;
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   final _profileService = ProfileService.instance;
 
-  ProfilePage({super.key});
+  bool isEditMode = false;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<User?>(
       future: _profileService.profile,
       builder: (context, snapshot) {
-        return Column(
-          children: [
-            TextButton.icon(
-              onPressed: _logout,
-              label: const Text('Logout'),
+        if (snapshot.hasError) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset('assets/error.png', width: 600),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Encountered an error loading your profile!',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 5),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () => Future(() => setState(() {})),
+                  )
+                ],
+              )
+            ],
+          );
+        }
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        final profile = snapshot.data!;
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 300, vertical: 100),
+            padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 50),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: const [
+                BoxShadow(color: Colors.black45, blurRadius: 2),
+              ],
             ),
-          ],
+            child: isEditMode ? _EditBody(profile) : _ViewBody(profile),
+          ),
         );
-      }
+      },
     );
   }
+}
 
-  Future<void> _logout() async => _postSubmit(await _authService.logout());
+class _ViewBody extends StatefulWidget {
+  final User user;
 
-  void _postSubmit(Pair<bool, String> response) {
-    final toast = FToast();
-    toast.init(rootNavigatorKey.currentContext!);
-    toast.showToast(
-      child: CustomToast(
-        text: response.second,
-        toastType: response.first ? ToastType.success : ToastType.error,
-      ),
-      gravity: ToastGravity.BOTTOM_LEFT,
-    );
-    if (response.first) GoRouter.of(shellNavigatorKey.currentContext!).go('/');
+  const _ViewBody(this.user);
+
+  @override
+  State<_ViewBody> createState() => _ViewBodyState();
+}
+
+class _ViewBodyState extends State<_ViewBody> {
+  User get user => widget.user;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class _EditBody extends StatefulWidget {
+  final User user;
+
+  const _EditBody(this.user);
+
+  @override
+  State<_EditBody> createState() => _EditBodyState();
+}
+
+class _EditBodyState extends State<_EditBody> {
+  User get user => widget.user;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
