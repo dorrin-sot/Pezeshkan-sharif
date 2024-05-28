@@ -3,7 +3,6 @@ import 'package:tahlil_front/classes/user.dart';
 class Doctor extends User {
   final String medicalId;
   final String? specialty;
-  final bool canSurgery;
 
   Doctor({
     required super.ssid,
@@ -21,7 +20,6 @@ class Doctor extends User {
     required super.isDeclined,
     required this.medicalId,
     required this.specialty,
-    required this.canSurgery,
   });
 
   Doctor.fromJson(dynamic json) : this(
@@ -40,7 +38,6 @@ class Doctor extends User {
       isDeclined: json['is_declined'],
       medicalId: json['medical_id'],
       specialty: json['specialty'],
-      canSurgery: json['can_surgery'],
   );
 
   @override
