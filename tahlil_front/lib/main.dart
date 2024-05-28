@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
-import 'package:tahlil_front/pages/home.dart';
 import 'package:tahlil_front/pages/profile.dart';
+import 'package:tahlil_front/pages/verification.dart';
 import 'package:tahlil_front/services/auth.dart';
+import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/theme.dart';
 
@@ -21,7 +23,9 @@ void main() {
 }
 
 class TahlilApp extends StatelessWidget {
-  final AuthService _authService = AuthService.instance;
+  static final AuthService _authService = AuthService.instance;
+  static final ProfileService _profileService = ProfileService.instance;
+
   final ThemeData _lightTheme = generateTheme(ThemeMode.light);
   final ThemeData _darkTheme = generateTheme(ThemeMode.dark);
 
@@ -70,7 +74,13 @@ class TahlilApp extends StatelessWidget {
         routes: [
           GoRoute(
             path: '/',
-            builder: (context, state) => const HomePage(),
+            redirect: (context, state) async {
+              if (!(await _authService.isLoggedIn())) return '/auth';
+              final profile = await _profileService.profile;
+              if (profile == null) return '/auth';
+              if (profile.isReferrer) return '/verification';
+              return '/appointments';
+            },
             routes: [
               GoRoute(
                 path: 'auth',
@@ -80,8 +90,18 @@ class TahlilApp extends StatelessWidget {
               GoRoute(
                 path: 'profile',
                 redirect: needsAuthRedirect,
-                builder: (context, state) => ProfilePage(),
-              )
+                builder: (context, state) => const ProfilePage(),
+              ),
+              GoRoute(
+                path: 'verification',
+                redirect: needsAuthRedirect,
+                builder: (context, state) => const VerificationPage(),
+              ),
+              GoRoute(
+                path: 'appointments',
+                redirect: needsAuthRedirect,
+                builder: (context, state) => const AppointmentsPage(),
+              ),
             ],
           ),
         ],
@@ -107,7 +127,7 @@ class TahlilApp extends StatelessWidget {
     BuildContext context,
     GoRouterState state,
   ) async {
-    if (await AuthService.instance.isLoggedIn()) return null;
+    if (await _authService.isLoggedIn()) return null;
     return 'auth';
   }
 
@@ -115,7 +135,7 @@ class TahlilApp extends StatelessWidget {
     BuildContext context,
     GoRouterState state,
   ) async {
-    if (!(await AuthService.instance.isLoggedIn())) return null;
+    if (!(await _authService.isLoggedIn())) return null;
     return '/';
   }
 }
