@@ -4,3 +4,7 @@ extension NullableStringExt on String? {
     return '$this$other';
   }
 }
+
+extension StringExt on String {
+  String? get nullIfEmpty => isEmpty ? null : this;
+}

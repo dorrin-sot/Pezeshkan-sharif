@@ -3,12 +3,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CustomTextField extends StatelessWidget {
   final Widget? icon;
-  final String? label, hint, helperText;
+  final String? label, hint, helperText, errorText;
   final bool required;
   final TextEditingController controller;
   final TextInputType? keyboardType;
   final bool obscureText, readOnly;
   final Function()? toggleObscureText;
+  final Function(String)? onChanged;
 
   const CustomTextField({
     super.key,
@@ -16,12 +17,14 @@ class CustomTextField extends StatelessWidget {
     this.label,
     this.hint,
     this.helperText,
+    this.errorText,
     this.keyboardType,
     this.required = false,
     this.obscureText = false,
     this.readOnly = false,
     this.toggleObscureText,
     required this.controller,
+    this.onChanged,
   });
 
   @override
@@ -37,6 +40,7 @@ class CustomTextField extends StatelessWidget {
               keyboardType: keyboardType,
               obscureText: obscureText,
               readOnly: readOnly,
+              onChanged: onChanged,
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 icon: icon,
@@ -45,6 +49,7 @@ class CustomTextField extends StatelessWidget {
                     : Text('${label!}${required ? " *" : ""}'),
                 hintText: hint,
                 helperText: helperText,
+                errorText: errorText,
               ),
             ),
           ),

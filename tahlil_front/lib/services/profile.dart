@@ -4,6 +4,7 @@ import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/referrer.dart';
 import 'package:tahlil_front/classes/user.dart';
+import 'package:tahlil_front/enums/weekday.dart';
 import 'package:tahlil_front/services/network.dart';
 
 class ProfileService {
@@ -42,5 +43,10 @@ class ProfileService {
   Future<User?> forceUpdateProfile() {
     _profile = null;
     return profile;
+  }
+
+  bool editWorkTimes(Map<Weekday, String> workTimes) {
+    // todo
+    return true;
   }
 }

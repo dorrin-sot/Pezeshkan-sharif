@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
+import 'package:tahlil_front/pages/create_appointment.dart';
 import 'package:tahlil_front/pages/explore.dart';
 import 'package:tahlil_front/pages/profile.dart';
 import 'package:tahlil_front/pages/verification.dart';
@@ -39,25 +41,33 @@ class TahlilApp extends StatelessWidget {
         builder: (context, state, child) => Scaffold(
           backgroundColor: Theme.of(context).canvasColor,
           appBar: AppBar(
+            elevation: 5,
             centerTitle: false,
-            title: Row(
-              children: [
-                const Text('Pezeshkan-sharif'),
-                Padding(
-                  padding: const EdgeInsets.only(left: 35),
-                  child: TextButton(
-                    onPressed: () => RouterService.go('/doctors'),
-                    child: const Text('Explore Doctors'),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: TextButton(
-                    onPressed: () => RouterService.go('/imaging-centers'),
-                    child: const Text('Explore Imaging Centers'),
-                  ),
-                ),
-              ],
+            title: FutureBuilder<UserType?>(
+              future: _profileService.profile.then((user) => user?.userType),
+              builder: (context, snapshot) {
+                return Row(
+                  children: [
+                    const Text('Pezeshkan-sharif'),
+                    if (snapshot.data == UserType.patient)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 35),
+                        child: TextButton(
+                          onPressed: () => RouterService.go('/doctors'),
+                          child: const Text('Explore Doctors'),
+                        ),
+                      ),
+                    if (snapshot.data == UserType.patient)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: TextButton(
+                          onPressed: () => RouterService.go('/imaging-centers'),
+                          child: const Text('Explore Imaging Centers'),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
             actions: [
               FutureBuilder<bool>(
@@ -105,47 +115,60 @@ class TahlilApp extends StatelessWidget {
               }
               return state.fullPath;
             },
-            routes: [
-              // GoRoute(
-              //   path: 'home',
-              //   redirect: (context, state) async {
-              //     if (!(await _authService.isLoggedIn())) return '/auth';
-              //     final profile = await _profileService.profile;
-              //     if (profile == null) return '/auth';
-              //     if (profile.isReferrer) return '/verification';
-              //     return '/appointments';
-              //   },
-              // ),
-              GoRoute(
-                path: 'auth',
-                redirect: needsNoAuthRedirect,
-                builder: (context, state) => const AuthPage(),
-              ),
-              GoRoute(
-                path: 'profile',
-                redirect: needsAuthRedirect,
-                builder: (context, state) => const ProfilePage(),
-              ),
-              GoRoute(
-                path: 'verification',
-                redirect: needsAuthRedirect,
-                builder: (context, state) => const VerificationPage(),
-              ),
-              GoRoute(
-                path: 'appointments',
-                redirect: needsAuthRedirect,
-                builder: (context, state) => const AppointmentsPage(),
-              ),
-              GoRoute(
-                path: 'doctors',
-                builder: (context, state) => const ExplorePage(doctors: true),
-              ),
-              GoRoute(
-                path: 'imaging-centers',
-                builder: (context, state) => const ExplorePage(doctors: false),
-              )
-            ],
           ),
+          GoRoute(
+            path: '/auth',
+            redirect: needsNoAuthRedirect,
+            builder: (context, state) => const AuthPage(),
+          ),
+          GoRoute(
+            path: '/profile',
+            redirect: needsAuthRedirect,
+            builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/verification',
+            redirect: (context, state) async {
+              if ((await needsAuthRedirect(context, state)) != null) return 'auth';
+              if ((await _profileService.profile)?.isReferrer ?? false) {
+                return null;
+              }
+              return 'not-found';
+            },
+            builder: (context, state) => const VerificationPage(),
+          ),
+          GoRoute(
+            path: '/appointments',
+            redirect: (context, state) async {
+              if ((await needsAuthRedirect(context, state)) != null) return 'auth';
+              if ((await _profileService.profile)?.isReferrer ?? false) {
+                return 'not-found';
+              }
+              return null;
+            },
+            builder: (context, state) => const AppointmentsPage(),
+          ),
+          GoRoute(
+            path: '/doctors',
+            builder: (context, state) => const ExplorePage(doctors: true),
+          ),
+          GoRoute(
+            path: '/imaging-centers',
+            builder: (context, state) => const ExplorePage(doctors: false),
+          ),
+          GoRoute(
+            path: '/create-appointment/:doctor',
+            redirect: (context, state) async {
+              if ((await needsAuthRedirect(context, state)) != null) return 'auth';
+              if ((await _profileService.profile)?.isPatient ?? false) {
+                return null;
+              }
+              return 'not-found';
+            },
+            builder: (context, state) => CreateAppointmentPage(
+              doctorSsid: state.pathParameters['doctor']!,
+            ),
+          )
         ],
       )
     ],

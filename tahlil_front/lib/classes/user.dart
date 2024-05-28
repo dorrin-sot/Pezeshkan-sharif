@@ -1,3 +1,5 @@
+import 'package:tahlil_front/enums/user_type.dart';
+
 class User {
   final String ssid;
   final String firstName;
@@ -33,4 +35,10 @@ class User {
   bool get isPatient => false;
 
   bool get isReferrer => false;
+
+  UserType get userType => isDoctor
+      ? UserType.doctor
+      : isPatient
+          ? UserType.patient
+          : UserType.referrer;
 }

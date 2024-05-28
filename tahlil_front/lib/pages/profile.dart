@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/user.dart';
+import 'package:tahlil_front/dialogs/work_hours.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/main.dart';
@@ -163,10 +164,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                       setState(() => isEditMode = true),
                                 ),
                               ),
+                              if (profile is Doctor)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  child: OutlinedButton.icon(
+                                    icon: const Icon(Icons.work),
+                                    label: const Text('Manage Work Hours'),
+                                    onPressed: () => showDialog(
+                                      context: context,
+                                      builder: (_) => WorkHoursDialog(profile),
+                                    ),
+                                  ),
+                                ),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 5),
-                                child: OutlinedButton.icon(
+                                child: TextButton.icon(
                                   icon: const FaIcon(
                                       FontAwesomeIcons.rightFromBracket),
                                   label: const Text('Logout'),
