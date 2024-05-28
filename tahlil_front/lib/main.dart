@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
+import 'package:tahlil_front/pages/explore.dart';
 import 'package:tahlil_front/pages/profile.dart';
 import 'package:tahlil_front/pages/verification.dart';
 import 'package:tahlil_front/services/auth.dart';
@@ -39,50 +40,82 @@ class TahlilApp extends StatelessWidget {
           backgroundColor: Theme.of(context).canvasColor,
           appBar: AppBar(
             centerTitle: false,
-            title: const Text('Pezeshkan-sharif'),
-            actions: [
-              FutureBuilder<bool>(
-                  future: AuthService.instance.isLoggedIn(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return Container();
-                    if (snapshot.hasError || !snapshot.data!) {
-                      return TextButton.icon(
-                        onPressed: () => RouterService.go('/auth'),
-                        label: const Text('Register / Login'),
-                        icon: const FaIcon(FontAwesomeIcons.rightToBracket),
-                      );
-                    }
-                    return TextButton.icon(
-                      onPressed: () => RouterService.go('/profile'),
-                      label: const Text('Profile'),
-                      icon: const FaIcon(FontAwesomeIcons.user),
-                    );
-                  }),
-            ],
-          ),
-          drawer: Drawer(
-            child: Column(
+            title: Row(
               children: [
+                const Text('Pezeshkan-sharif'),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Image.asset('assets/doctor.png'),
-                )
+                  padding: const EdgeInsets.only(left: 35),
+                  child: TextButton(
+                    onPressed: () => RouterService.go('/doctors'),
+                    child: const Text('Explore Doctors'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: TextButton(
+                    onPressed: () => RouterService.go('/imaging-centers'),
+                    child: const Text('Explore Imaging Centers'),
+                  ),
+                ),
               ],
             ),
+            actions: [
+              FutureBuilder<bool>(
+                future: _authService.isLoggedIn(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Container();
+                  if (snapshot.hasError || !snapshot.data!) {
+                    return TextButton.icon(
+                      onPressed: () => RouterService.go('/auth'),
+                      label: const Text('Register / Login'),
+                      icon: const FaIcon(FontAwesomeIcons.rightToBracket),
+                    );
+                  }
+                  return TextButton.icon(
+                    onPressed: () => RouterService.go('/profile'),
+                    label: const Text('Profile'),
+                    icon: const FaIcon(FontAwesomeIcons.user),
+                  );
+                },
+              ),
+            ],
           ),
+          // drawer: Drawer(
+          //   child: Column(
+          //     children: [
+          //       Padding(
+          //         padding: const EdgeInsets.symmetric(vertical: 15),
+          //         child: Image.asset('assets/doctor.png'),
+          //       )
+          //     ],
+          //   ),
+          // ),
           body: child,
         ),
         routes: [
           GoRoute(
             path: '/',
             redirect: (context, state) async {
-              if (!(await _authService.isLoggedIn())) return '/auth';
-              final profile = await _profileService.profile;
-              if (profile == null) return '/auth';
-              if (profile.isReferrer) return '/verification';
-              return '/appointments';
+              if (state.fullPath == '/') {
+                if (!(await _authService.isLoggedIn())) return '/auth';
+                final profile = await _profileService.profile;
+                if (profile == null) return '/auth';
+                if (profile.isReferrer) return '/verification';
+                return '/appointments';
+              }
+              return state.fullPath;
             },
             routes: [
+              // GoRoute(
+              //   path: 'home',
+              //   redirect: (context, state) async {
+              //     if (!(await _authService.isLoggedIn())) return '/auth';
+              //     final profile = await _profileService.profile;
+              //     if (profile == null) return '/auth';
+              //     if (profile.isReferrer) return '/verification';
+              //     return '/appointments';
+              //   },
+              // ),
               GoRoute(
                 path: 'auth',
                 redirect: needsNoAuthRedirect,
@@ -103,6 +136,14 @@ class TahlilApp extends StatelessWidget {
                 redirect: needsAuthRedirect,
                 builder: (context, state) => const AppointmentsPage(),
               ),
+              GoRoute(
+                path: 'doctors',
+                builder: (context, state) => const ExplorePage(doctors: true),
+              ),
+              GoRoute(
+                path: 'imaging-centers',
+                builder: (context, state) => const ExplorePage(doctors: false),
+              )
             ],
           ),
         ],

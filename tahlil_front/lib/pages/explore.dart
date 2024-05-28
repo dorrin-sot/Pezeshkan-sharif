@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ExplorePage extends StatefulWidget {
-  const ExplorePage({super.key});
+  final bool doctors;
+
+  const ExplorePage({super.key, required this.doctors});
 
   @override
   State<ExplorePage> createState() => _ExplorePageState();
@@ -10,6 +12,6 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Container();
   }
 }
