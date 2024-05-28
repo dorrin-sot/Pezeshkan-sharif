@@ -53,7 +53,6 @@ function user_requests(app, db, jsonParser) {
      *               city: string
      *               street: string
      *               specialty: string
-     *               can_surgery: string
      *             example:
      *               province: Tehran
      *               city: Tehran

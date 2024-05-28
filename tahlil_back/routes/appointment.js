@@ -4,12 +4,44 @@ const {jalaliToGregorian, gregorianToJalali} = require('shamsi-date-converter')
 function appointment_requests(app, db, jsonParser) {
     /**
      * @swagger
+     * /doctors:
+     *   get:
+     *     summary: Get List of doctors (Optional search)
+     *     parameters:
+     *       - in: query
+     *         name: search
+     *         schema:
+     *           type: string
+     *         description: The query string to search with. if not provided, will return all doctors
+     *     responses:
+     *       200:
+     *         description: Returns doctor list as a json.
+     *
+     */
+    app.get('/doctors', async function (req, res) {
+        const {search} = req.query;
+        if (search) {
+            const {rows} = await db.query({
+                text: `select * from public."doctor" where first_name || ' ' || last_name like $1`,
+                values: [`%${search}%`],
+            })
+                .catch(console.log);
+            res.status(200).json(rows)
+        } else {
+            const {rows} = await db.query(`select * from public."doctor"`)
+                .catch(console.log);
+            res.status(200).json(rows)
+        }
+    });
+
+    /**
+     * @swagger
      * /appointments:
      *   get:
      *     summary: Get List of doctor or patient's appointments
      *     responses:
      *       200:
-     *         description: Returns user profile as a json.
+     *         description: Returns appointment list.
      *       400:
      *         description: Referrer can not have appointments.
      *       401:
@@ -104,10 +136,10 @@ function appointment_requests(app, db, jsonParser) {
             })
                 .then((_) => res.status(200).send('Appointment created successfully!'))
                 .catch((e) => {
-                if (e.constraint == 'appointment_patient_doctor_time_key')
-                    res.status(400).send('Appointment already exists!')
-                else console.log(e);
-            });
+                    if (e.constraint == 'appointment_patient_doctor_time_key')
+                        res.status(400).send('Appointment already exists!')
+                    else console.log(e);
+                });
         }
     });
 }
