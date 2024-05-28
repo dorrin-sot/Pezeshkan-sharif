@@ -53,7 +53,7 @@ function auth_requests(app, db, jsonParser) {
             const values = [ssid, first_name, last_name, password];
             if (user_type === 'doctor') {
                 values.push(medical_id);
-                const {rowCount} = await db.query(`select * from public."doctor" where medical_id='${medical_id}'`);
+                const {rowCount} = await db.query(`select * from public."doctor_v1" where medical_id='${medical_id}'`);
                 if (rowCount > 0) {
                     res.status(401).send('Medical ID should be Unique.')
                     return
@@ -99,7 +99,7 @@ function auth_requests(app, db, jsonParser) {
     app.post('/auth/login', jsonParser, async function (req, res) {
         const {ssid, password} = req.body;
         let user_type = 'doctor';
-        let {rowCount, rows} = await db.query(`select * from public."doctor" where ssid='${ssid}' and password='${password}'`);
+        let {rowCount, rows} = await db.query(`select * from public."doctor_v1" where ssid='${ssid}' and password='${password}'`);
         if (rowCount === 0) {
             user_type = 'patient';
             rows = (await db.query(`select * from public."patient" where ssid='${ssid}' and password='${password}'`))['rows'];

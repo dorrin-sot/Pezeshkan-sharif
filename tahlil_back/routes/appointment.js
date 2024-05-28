@@ -28,7 +28,7 @@ function appointment_requests(app, db, jsonParser) {
                 .catch(console.log);
             res.status(200).json(rows)
         } else {
-            const {rows} = await db.query(`select * from public."doctor"`)
+            const {rows} = await db.query(`select * from public."doctor_v1"`)
                 .catch(console.log);
             res.status(200).json(rows)
         }
