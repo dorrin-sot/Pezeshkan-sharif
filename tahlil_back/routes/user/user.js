@@ -19,14 +19,16 @@ function user_requests(app, db, jsonParser) {
 
         const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
         if (rows.length === 0) return res.status(401).send('Invalid Token!')
-        const {ssid, created_at, user_type} = rows[0]
+        let {ssid, created_at, user_type} = rows[0]
 
         if (!validateJwtToken(token)) {
             res.status(401).send('Invalid Token!')
         } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
         } else {
+            if (user_type === 'doctor') user_type += '_v1';
             const {rows} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`);
+            user_type = user_type.replace('_v1', '');
             res.status(200).json({...rows[0], user_type})
         }
     });

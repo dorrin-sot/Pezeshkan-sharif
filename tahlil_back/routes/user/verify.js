@@ -27,7 +27,7 @@ function verify_requests(app, db, jsonParser) {
         } else if (user_type != 'referrer') {
             res.status(401).send('You have to be a referrer to access this part!')
         } else {
-            const {rows: results} = await db.query({text: `select *, 'doctor_v1' as user_type from public."doctor" where referrer=$1`, values: [ssid]})
+            const {rows: results} = await db.query({text: `select *, 'doctor' as user_type from public."doctor" where referrer=$1`, values: [ssid]})
                 .catch(console.log);
             await db.query({text: `select *, 'patient' as user_type from public."patient" where referrer=$1`, values: [ssid]})
                 .then(({rows}) => rows.forEach((e) => results.push(e)))

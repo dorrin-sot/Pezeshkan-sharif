@@ -22,7 +22,7 @@ function appointment_requests(app, db, jsonParser) {
         const {search} = req.query;
         if (search) {
             const {rows} = await db.query({
-                text: `select * from public."doctor" where first_name || ' ' || last_name like $1`,
+                text: `select * from public."doctor_v1" where first_name || ' ' || last_name like $1`,
                 values: [`%${search}%`],
             })
                 .catch(console.log);

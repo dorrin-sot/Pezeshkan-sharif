@@ -99,7 +99,7 @@ function auth_requests(app, db, jsonParser) {
     app.post('/auth/login', jsonParser, async function (req, res) {
         const {ssid, password} = req.body;
         let user_type = 'doctor';
-        let {rowCount, rows} = await db.query(`select * from public."doctor_v1" where ssid='${ssid}' and password='${password}'`);
+        let {rowCount, rows} = await db.query(`select * from public."doctor" where ssid='${ssid}' and password='${password}'`);
         if (rowCount === 0) {
             user_type = 'patient';
             rows = (await db.query(`select * from public."patient" where ssid='${ssid}' and password='${password}'`))['rows'];
