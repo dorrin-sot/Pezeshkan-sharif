@@ -82,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (profile is Doctor) {
           specialtyController.text = profile.specialty ?? '';
         } else if (profile is Patient) {
-          birthdateController.text = profile.birthDate;
+          birthdateController.text = profile.birthDate ?? '';
         }
 
         return Center(

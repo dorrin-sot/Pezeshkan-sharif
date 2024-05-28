@@ -1,7 +1,7 @@
 import 'package:tahlil_front/classes/user.dart';
 
 class Patient extends User {
-  final String birthDate;
+  final String? birthDate;
 
   Patient({
     required super.ssid,

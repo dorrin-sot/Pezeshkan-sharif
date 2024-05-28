@@ -36,6 +36,7 @@ class TahlilApp extends StatelessWidget {
       ShellRoute(
         navigatorKey: shellNavigatorKey,
         builder: (context, state, child) => Scaffold(
+          backgroundColor: Theme.of(context).canvasColor,
           appBar: AppBar(
             centerTitle: false,
             title: const Text('Pezeshkan-sharif'),
@@ -114,7 +115,7 @@ class TahlilApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      // theme: lightTheme,
+      // theme: _lightTheme,
       // darkTheme: darkTheme,
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
