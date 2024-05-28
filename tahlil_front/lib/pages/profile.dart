@@ -10,6 +10,7 @@ import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/triple.dart';
+import 'package:tahlil_front/widgets/text_field.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,6 +24,16 @@ class _ProfilePageState extends State<ProfilePage> {
   final _profileService = ProfileService.instance;
 
   bool isEditMode = false;
+
+  final TextEditingController firstNameController = TextEditingController(),
+      lastNameController = TextEditingController(),
+      phoneNumberController = TextEditingController(),
+      emailAddressController = TextEditingController(),
+      provinceController = TextEditingController(),
+      cityController = TextEditingController(),
+      streetController = TextEditingController(),
+      specialtyController = TextEditingController(),
+      birthdateController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -61,10 +72,21 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         }
         final profile = snapshot.data!;
+        firstNameController.text = profile.firstName;
+        lastNameController.text = profile.lastName;
+        phoneNumberController.text = profile.phoneNumber ?? '';
+        emailAddressController.text = profile.emailAddress ?? '';
+        provinceController.text = profile.province ?? '';
+        cityController.text = profile.city ?? '';
+        streetController.text = profile.street ?? '';
+        if (profile is Doctor) {
+          specialtyController.text = profile.specialty ?? '';
+        } else if (profile is Patient) {
+          birthdateController.text = profile.birthDate;
+        }
+
         return Center(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 300, vertical: 100),
-            padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 50),
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(10),
@@ -73,26 +95,40 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  flex: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: isEditMode ? _EditBody(profile) : _ViewBody(profile),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 20, bottom: 20, left: 40, right: 20),
+                  child: isEditMode
+                      ? SizedBox(
+                          width: 400,
+                          child: _EditBody(
+                            profile,
+                            firstNameController: firstNameController,
+                            lastNameController: lastNameController,
+                            phoneNumberController: phoneNumberController,
+                            emailAddressController: emailAddressController,
+                            provinceController: provinceController,
+                            cityController: cityController,
+                            streetController: streetController,
+                            specialtyController: specialtyController,
+                            birthdateController: birthdateController,
+                          ),
+                        )
+                      : SizedBox(width: 200, child: _ViewBody(profile)),
                 ),
-                const VerticalDivider(),
-                Expanded(child: Container()),
-                Expanded(
-                  flex: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 20, bottom: 20, right: 40, left: 20),
+                  child: SizedBox(
+                    width: 250,
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
                       children: isEditMode
                           ? [
                               Padding(
@@ -102,6 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   icon: const Icon(Icons.check),
                                   label: const Text('Save Changes'),
                                   onPressed: _editProfile,
+                                  // onPressed: _editProfile,
                                 ),
                               ),
                               Padding(
@@ -174,18 +211,12 @@ class _ViewBodyState extends State<_ViewBody> {
     final user = widget.user;
     final theme = Theme.of(context);
 
-    // Add Identifying information (SSID, First Name, Last Name, Medical ID, Referrer ID)
-    // Add Contact Information (Phone number, Email Address)
-    // Add Login Information (Username, password)
-    // Add Location Information (Province, City, Street)
-    // Add Work Information (Specialty, work days and hours, "can the doctor do surgery?")
-    // Add Row Access (Security: Only Doctor has read and write access)
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Triple('Hello, ', null, '${user.firstName} ${user.lastName}'),
+        Triple('Hello ', null, '${user.firstName} ${user.lastName}'),
         Triple(
           'You are a ',
           const Icon(Icons.person),
@@ -247,18 +278,122 @@ class _ViewBodyState extends State<_ViewBody> {
 
 class _EditBody extends StatefulWidget {
   final User user;
+  final TextEditingController firstNameController,
+      lastNameController,
+      phoneNumberController,
+      emailAddressController,
+      provinceController,
+      cityController,
+      streetController;
+  final TextEditingController? specialtyController, birthdateController;
 
-  const _EditBody(this.user);
+  const _EditBody(
+    this.user, {
+    required this.firstNameController,
+    required this.lastNameController,
+    required this.phoneNumberController,
+    required this.emailAddressController,
+    required this.provinceController,
+    required this.cityController,
+    required this.streetController,
+    this.specialtyController,
+    this.birthdateController,
+  });
 
   @override
   State<_EditBody> createState() => _EditBodyState();
 }
 
 class _EditBodyState extends State<_EditBody> {
-  User get user => widget.user;
+  late final TextEditingController _firstNameController,
+      _lastNameController,
+      _phoneNumberController,
+      _emailAddressController,
+      _provinceController,
+      _cityController,
+      _streetController;
+  late final TextEditingController? _specialtyController, _birthdateController;
+
+  @override
+  void initState() {
+    super.initState();
+    _firstNameController = widget.firstNameController;
+    _lastNameController = widget.lastNameController;
+    _phoneNumberController = widget.phoneNumberController;
+    _emailAddressController = widget.emailAddressController;
+    _provinceController = widget.provinceController;
+    _cityController = widget.cityController;
+    _streetController = widget.streetController;
+    _specialtyController = widget.specialtyController;
+    _birthdateController = widget.birthdateController;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    final user = widget.user;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CustomTextField(
+          icon: const Icon(Icons.abc),
+          label: 'First Name',
+          required: true,
+          controller: _firstNameController,
+        ),
+        CustomTextField(
+          icon: const Icon(Icons.abc),
+          label: 'Last Name',
+          required: true,
+          controller: _lastNameController,
+        ),
+        CustomTextField(
+          icon: const Icon(Icons.phone),
+          label: 'Phone Number',
+          required: true,
+          controller: _phoneNumberController,
+        ),
+        CustomTextField(
+          icon: const Icon(Icons.email),
+          label: 'Email Address',
+          required: true,
+          hint: 'e.g. abc@email.com',
+          controller: _emailAddressController,
+        ),
+        if (user.isDoctor)
+          CustomTextField(
+            icon: const FaIcon(FontAwesomeIcons.userDoctor),
+            label: 'Specialty',
+            required: true,
+            controller: _specialtyController!,
+          )
+        else if (user.isPatient)
+          CustomTextField(
+            icon: const Icon(Icons.calendar_month),
+            label: 'BirthDate',
+            required: true,
+            controller: _birthdateController!,
+            hint: 'YYYY-mm-dd',
+          ),
+        CustomTextField(
+          icon: const Icon(Icons.location_city),
+          label: 'Province',
+          required: true,
+          controller: _provinceController,
+        ),
+        CustomTextField(
+          icon: const Icon(Icons.location_city),
+          label: 'City',
+          required: true,
+          controller: _cityController,
+        ),
+        CustomTextField(
+          icon: const Icon(Icons.location_city),
+          label: 'Street',
+          required: true,
+          controller: _streetController,
+        ),
+      ],
+    );
   }
 }
