@@ -36,6 +36,37 @@ function appointment_requests(app, db, jsonParser) {
 
     /**
      * @swagger
+     * /imaging-centers:
+     *   get:
+     *     summary: Get List of Imaging Centers (Optional search)
+     *     parameters:
+     *       - in: query
+     *         name: search
+     *         schema:
+     *           type: string
+     *         description: The query string to search with. if not provided, will return all imaging centers
+     *     responses:
+     *       200:
+     *         description: Returns imaging center list as a json.
+     *
+     */
+    app.get('/imaging-centers', async function (req, res) {
+        const {search} = req.query;
+        if (search) {
+            const {rows} = await db.query({
+                text: `select * from public."imaging_center_v1" where name like $1`,
+                values: [`%${search}%`],
+            }).catch(console.log);
+            res.status(200).json(rows)
+        } else {
+            const {rows} = await db.query(`select * from public."imaging_center_v1"`)
+                .catch(console.log);
+            res.status(200).json(rows)
+        }
+    });
+
+    /**
+     * @swagger
      * /appointments:
      *   get:
      *     summary: Get List of doctor or patient's appointments
