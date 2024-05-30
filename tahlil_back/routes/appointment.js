@@ -1,5 +1,5 @@
 const {validateJwtToken} = require('../utils/jwt');
-const {jalaliToGregorian, gregorianToJalali} = require('shamsi-date-converter')
+const {gregorianToJalali} = require('shamsi-date-converter')
 
 function appointment_requests(app, db, jsonParser) {
     /**
@@ -140,13 +140,13 @@ function appointment_requests(app, db, jsonParser) {
             res.status(401).send('Invalid Token!')
         } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
-        } else if (user_type != 'patient') {
+        } else if (user_type !== 'patient') {
             res.status(400).send('Non-Patient users cannot create appointment!')
         } else {
-            const {year, month, day, hour, doctor} = req.body;
+            const {year, month, day, hour, doctor, imaging_center} = req.body;
             const greg = new Date(year, month, day)
             const weekday = greg.toLocaleDateString('en-US', {weekday: 'long'}).toLowerCase()
-            const jalali = (gregorianToJalali(greg));
+            const jalali = gregorianToJalali(greg);
 
             await db.query({
                 text: 'insert into public."time" ' +
@@ -158,19 +158,31 @@ function appointment_requests(app, db, jsonParser) {
 
             const {rows: times} = await db.query(`select id from public."time" where year=${jalali[0]} and month=${jalali[1]} and day=${jalali[2]} and hour=${hour}`)
                 .catch(console.log);
-            console.log(times);
             const time_id = times[0]['id']
 
-            await db.query({
-                text: `insert into public."appointment" values ($1, $2, $3)`,
-                values: [ssid, doctor, time_id]
-            })
-                .then((_) => res.status(200).send('Appointment created successfully!'))
-                .catch((e) => {
-                    if (e.constraint == 'appointment_patient_doctor_time_key')
-                        res.status(400).send('Appointment already exists!')
-                    else console.log(e);
-                });
+            if (doctor) {
+                await db.query({
+                    text: `insert into public."appointment_doctor" (patient, doctor, time) values ($1, $2, $3)`,
+                    values: [ssid, doctor, time_id]
+                })
+                    .then((_) => res.status(200).send('Appointment created successfully!'))
+                    .catch((e) => {
+                        if (e.constraint === 'appointment_doctor_unique_key')
+                            res.status(400).send('Appointment already exists!')
+                        else console.log(e);
+                    });
+            } else if (imaging_center) {
+                await db.query({
+                    text: `insert into public."appointment_imaging_center" (patient, imaging_center, time) values ($1, $2, $3)`,
+                    values: [ssid, imaging_center, time_id]
+                })
+                    .then((_) => res.status(200).send('Appointment created successfully!'))
+                    .catch((e) => {
+                        if (e.constraint === 'appointment_imaging_center_unique_key')
+                            res.status(400).send('Appointment already exists!')
+                        else console.log(e);
+                    });
+            }
         }
     });
 }
