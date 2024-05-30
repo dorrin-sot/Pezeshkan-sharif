@@ -58,10 +58,10 @@ function appointment_requests(app, db, jsonParser) {
             res.status(401).send('Invalid Token!')
         } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
-        } else if (user_type == 'referrer') {
+        } else if (user_type === 'referrer') {
             res.status(400).send('Referrer can not have appointments!')
         } else {
-            const {rows} = await db.query(`select * from public."appointment" where patient='${ssid}' or doctor='${ssid}'`)
+            const {rows} = await db.query(`select * from public."appointment_v1" where patient='${ssid}' or doctor='${ssid}'`)
                 .catch(console.log);
             res.status(200).json(rows)
         }
