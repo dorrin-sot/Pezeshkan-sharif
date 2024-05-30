@@ -120,7 +120,8 @@ function auth_requests(app, db, jsonParser) {
                 text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
                 values: [ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
-                res.cookie('token', token, {httpOnly: false, sameSite: 'none', secure: true});
+                res.cookie('token', token,
+                    process.env['NODE_ENV'] === 'production' ? {httpOnly: false, sameSite: 'none', secure: true} : {});
                 res.status(200).send('Login Successful!');
             })
         }
@@ -149,7 +150,8 @@ function auth_requests(app, db, jsonParser) {
                 text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
                 values: [ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
-                res.cookie('token', token, {httpOnly: false, sameSite: 'none', secure: true});
+                res.cookie('token', token,
+                    process.env['NODE_ENV'] === 'production' ? {httpOnly: false, sameSite: 'none', secure: true} : {});
                 res.status(200).send('Refresh Token Successful!');
             })
         } else {
@@ -208,9 +210,7 @@ function auth_requests(app, db, jsonParser) {
             db.query({
                 text: `delete from public.login_token where ssid=$1`,
                 values: [ssid]
-            }).then((_) => {
-                res.status(204).send('Logout Successful!');
-            })
+            }).then((_) => res.status(204).send('Logout Successful!'))
         } else {
             res.status(401).send('Invalid token.');
         }
