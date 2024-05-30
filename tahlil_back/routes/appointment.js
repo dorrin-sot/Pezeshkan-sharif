@@ -92,9 +92,11 @@ function appointment_requests(app, db, jsonParser) {
         } else if (user_type === 'referrer') {
             res.status(400).send('Referrer can not have appointments!')
         } else {
-            const {rows} = await db.query(`select * from public."appointment_v1" where patient='${ssid}' or doctor='${ssid}'`)
+            const {rows: list1} = await db.query(`select * from public."doctor_appointment_v1" where patient='${ssid}' or doctor='${ssid}'`)
                 .catch(console.log);
-            res.status(200).json(rows)
+            const {rows: list2} = await db.query(`select * from public."imaging_center_appointment_v1" where patient='${ssid}'`)
+                .catch(console.log);
+            res.status(200).json([...list1, ...list2])
         }
     });
 
