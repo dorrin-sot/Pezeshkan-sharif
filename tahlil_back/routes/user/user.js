@@ -36,7 +36,7 @@ function user_requests(app, db, jsonParser) {
     /**
      * @swagger
      * /profile:
-     *   patch:
+     *   put:
      *     summary: Edit one or more of the user's information
      *     requestBody:
      *       required: true
@@ -68,7 +68,7 @@ function user_requests(app, db, jsonParser) {
      *         description: Unauthorized access. Try logging in or refreshing token.
      *
      */
-    app.patch('/profile', jsonParser, async function (req, res) {
+    app.put('/profile', jsonParser, async function (req, res) {
         let {token} = req.cookies;
 
         const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
