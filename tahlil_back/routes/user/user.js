@@ -106,6 +106,32 @@ function user_requests(app, db, jsonParser) {
             res.status(200).json({...new_user[0], user_type})
         }
     });
+
+    /**
+     * @swagger
+     * /doctor/{ssid}:
+     *   get:
+     *     summary: Get Doctor info
+     *     parameters:
+     *       - in: path
+     *         name: ssid
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: The SSID of the doctor
+     *     responses:
+     *       200:
+     *         description: Doctor info returned successfully.
+     *       404:
+     *         description: Doctor not found.
+     */
+    app.get('/doctor/:ssid', async function (req, res) {
+        const {ssid} = req.params;
+        const {rows} = await db.query({text: 'select * from public."doctor_v1" where ssid=$1', values: [ssid]})
+            .catch(console.log);
+        if (rows.length === 0) return res.status(404).send('Doctor not found!')
+        res.status(200).json(rows[0]);
+    });
 }
 
 module.exports = user_requests;
