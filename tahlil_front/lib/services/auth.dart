@@ -1,5 +1,6 @@
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/services/network.dart';
+import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/pair.dart';
 
 class AuthService {
@@ -11,6 +12,7 @@ class AuthService {
   }
 
   final NetworkService _networkService = NetworkService.instance;
+  final ProfileService _profileService = ProfileService.instance;
 
   Future<bool> isLoggedIn() async {
     final response = await _networkService.get('/auth/is_logged_in');
@@ -29,6 +31,10 @@ class AuthService {
       '/auth/login',
       {'ssid': ssid, 'password': password},
     );
+    if (response.statusCode == 200) {
+      _profileService.profileCached = null;
+      await _profileService.profile;
+    }
     return Pair(response.statusCode == 200, response.body ?? '');
   }
 
@@ -66,6 +72,10 @@ class AuthService {
 
   Future<Pair<bool, String>> logout() async {
     final response = await _networkService.delete('/auth/logout');
+
+    if (response.statusCode == 204) {
+      _profileService.profileCached = null;
+    }
     return Pair(response.statusCode == 204, response.body ?? '');
   }
 }

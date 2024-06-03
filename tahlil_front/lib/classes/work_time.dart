@@ -10,6 +10,12 @@ class WorkTime {
     required this.endHour,
   });
 
+  WorkTime.fromJson(json) : this (
+    weekday: Weekday.find(json['weekday']),
+    startHour: int.parse(json['start_hour']),
+    endHour: int.parse(json['end_hour']),
+  );
+
   @override
   String toString() {
     return '${weekday.toString().substring(0, 3)} $startHour-$endHour';

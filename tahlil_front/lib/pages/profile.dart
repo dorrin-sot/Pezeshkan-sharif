@@ -109,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: isEditMode
                       ? SizedBox(
                           width: 400,
-                          child: _EditBody(
+                          child: ProfileEditBody(
                             profile,
                             firstNameController: firstNameController,
                             lastNameController: lastNameController,
@@ -122,7 +122,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             birthdateController: birthdateController,
                           ),
                         )
-                      : FittedBox(fit: BoxFit.fill, child: _ViewBody(profile)),
+                      : FittedBox(
+                          fit: BoxFit.fill,
+                          child: ProfileViewBody(profile),
+                        ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
@@ -234,16 +237,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class _ViewBody extends StatefulWidget {
+class ProfileViewBody extends StatefulWidget {
   final User user;
 
-  const _ViewBody(this.user);
+  const ProfileViewBody(this.user, {super.key});
 
   @override
-  State<_ViewBody> createState() => _ViewBodyState();
+  State<ProfileViewBody> createState() => _ProfileViewBodyState();
 }
 
-class _ViewBodyState extends State<_ViewBody> {
+class _ProfileViewBodyState extends State<ProfileViewBody> {
   @override
   Widget build(BuildContext context) {
     final user = widget.user;
@@ -314,7 +317,7 @@ class _ViewBodyState extends State<_ViewBody> {
   }
 }
 
-class _EditBody extends StatefulWidget {
+class ProfileEditBody extends StatefulWidget {
   final User user;
   final TextEditingController firstNameController,
       lastNameController,
@@ -325,8 +328,9 @@ class _EditBody extends StatefulWidget {
       streetController;
   final TextEditingController? specialtyController, birthdateController;
 
-  const _EditBody(
+  const ProfileEditBody(
     this.user, {
+    super.key,
     required this.firstNameController,
     required this.lastNameController,
     required this.phoneNumberController,
@@ -339,10 +343,10 @@ class _EditBody extends StatefulWidget {
   });
 
   @override
-  State<_EditBody> createState() => _EditBodyState();
+  State<ProfileEditBody> createState() => _ProfileEditBodyState();
 }
 
-class _EditBodyState extends State<_EditBody> {
+class _ProfileEditBodyState extends State<ProfileEditBody> {
   late final TextEditingController _firstNameController,
       _lastNameController,
       _phoneNumberController,

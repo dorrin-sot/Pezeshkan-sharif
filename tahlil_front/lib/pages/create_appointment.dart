@@ -1,4 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:tahlil_front/classes/appointment.dart' as ap;
+import 'package:tahlil_front/classes/doctor.dart';
+import 'package:tahlil_front/classes/time.dart';
+import 'package:tahlil_front/classes/work_time.dart';
+import 'package:tahlil_front/enums/toast_type.dart';
+import 'package:tahlil_front/extensions/string_ext.dart';
+import 'package:tahlil_front/main.dart';
+import 'package:tahlil_front/services/doctor.dart';
+import 'package:tahlil_front/services/imaging_center.dart';
+import 'package:tahlil_front/utils/appointment_data_source.dart';
+import 'package:tahlil_front/utils/pair.dart';
+import 'package:tahlil_front/utils/triple.dart';
+import 'package:tahlil_front/widgets/toast.dart';
 
 class CreateAppointmentPage extends StatefulWidget {
   final String? doctorSsid, imagingCenterId;
@@ -14,8 +32,307 @@ class CreateAppointmentPage extends StatefulWidget {
 }
 
 class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
+  final DoctorService _doctorService = DoctorService.instance;
+  final ImagingCenterService _imagingCenterService =
+      ImagingCenterService.instance;
+
+  CalendarController calendarController = CalendarController();
+  DateTime? selectedDateTime;
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    final theme = Theme.of(context);
+    final doctor = widget.doctorSsid;
+    final imagingCenter = widget.imagingCenterId;
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        elevation: 10,
+        onPressed: _createAppointment,
+        label: Text(
+          'Create Appointment for ${selectedDateTime == null ? '-' : DateFormat('yyyy/MMMM/dd HH:mm').format(selectedDateTime!)}',
+        ),
+        icon: const Icon(Icons.check),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(25),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black45, blurRadius: 2),
+                  ],
+                ),
+                child: doctor != null
+                    ? FutureBuilder<Doctor?>(
+                        future: _doctorService.getDoctorInfo(doctor),
+                        builder: (context, snapshot) {
+                          final doctor = snapshot.data;
+                          if (doctor != null) {
+                            return Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Triple<String, Widget?, dynamic>>[
+                                  Triple('', null,
+                                      '${doctor.firstName} ${doctor.lastName}'),
+                                  Triple(
+                                      'Medical ID: ',
+                                      const Icon(Icons.numbers),
+                                      doctor.medicalId),
+                                  Triple(
+                                      'Phone number: ',
+                                      const Icon(Icons.phone),
+                                      doctor.phoneNumber ?? '-'),
+                                  Triple(
+                                      'Email Address: ',
+                                      const Icon(Icons.email),
+                                      doctor.emailAddress ?? '-'),
+                                  Triple(
+                                      'Specialty: ',
+                                      const FaIcon(FontAwesomeIcons.userDoctor),
+                                      doctor.specialty ?? '-'),
+                                  Triple(
+                                      'Address: ',
+                                      const Icon(Icons.pin_drop),
+                                      // ignore: prefer_interpolation_to_compose_strings
+                                      (doctor.province +
+                                              ', ' +
+                                              doctor.city +
+                                              ', ' +
+                                              doctor.street) ??
+                                          '-'),
+                                  Triple(
+                                    'Working Hours: ',
+                                    const Icon(Icons.work),
+                                    doctor.workTimes
+                                        .map((wt) => '$wt')
+                                        .join(', ')
+                                        .capitalize,
+                                  ),
+                                ].map((tup) {
+                                  final label = tup.first;
+                                  final icon = tup.second;
+                                  final value = tup.third;
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 5),
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 5),
+                                          child: icon ?? Container(),
+                                        ),
+                                        RichText(
+                                          text: TextSpan(children: [
+                                            TextSpan(
+                                                text: label,
+                                                style:
+                                                    theme.textTheme.bodyMedium),
+                                            TextSpan(
+                                              text: '$value',
+                                              style: theme.textTheme.bodyLarge
+                                                  ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w900),
+                                            ),
+                                          ]),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            );
+                          }
+                          return Container();
+                        },
+                      )
+                    : Container() // todo
+                ),
+            const SizedBox(height: 20),
+            Expanded(
+              flex: 2,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black45, blurRadius: 2),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: FutureBuilder<Pair<List<WorkTime>, List<Time>>>(
+                    future: doctor != null
+                        ? Future.wait([
+                            _doctorService.getWorkTimes(doctor),
+                            _doctorService.filledTimesSinceToday(doctor),
+                          ]).then((list) => Pair(
+                            list[0] as List<WorkTime>, list[1] as List<Time>))
+                        : Future.wait([
+                            _imagingCenterService.getWorkTimes(imagingCenter!),
+                            _imagingCenterService
+                                .filledTimesSinceToday(imagingCenter),
+                          ]).then((list) => Pair(
+                            list[0] as List<WorkTime>, list[1] as List<Time>)),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/error.png', width: 600),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Encountered an error loading your profile!',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 5),
+                                IconButton(
+                                  icon: const Icon(Icons.refresh),
+                                  onPressed: () =>
+                                      Future(() => setState(() {})),
+                                )
+                              ],
+                            )
+                          ],
+                        );
+                      }
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      final workTimes = snapshot.data!.first;
+                      final unavailableTimes = snapshot.data!.second;
+                      final dataSource = unavailableTimes
+                          .asMap()
+                          .map(
+                            (i, time) => MapEntry(
+                              i,
+                              ap.Appointment(
+                                  id: i,
+                                  patientSsid: '',
+                                  patientName: '',
+                                  time: time),
+                            ),
+                          )
+                          .values
+                          .cast<ap.Appointment>()
+                          .toList();
+
+                      if (workTimes.isEmpty) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/empty.png', width: 600),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'No User has you as their referrer!',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 5),
+                                IconButton(
+                                  icon: const Icon(Icons.refresh),
+                                  onPressed: () =>
+                                      Future(() => setState(() {})),
+                                )
+                              ],
+                            )
+                          ],
+                        );
+                      }
+
+                      return SfCalendar(
+                        controller: calendarController,
+                        view: CalendarView.week,
+                        firstDayOfWeek: 6,
+                        showTodayButton: true,
+                        showWeekNumber: true,
+                        showNavigationArrow: true,
+                        allowViewNavigation: true,
+                        minDate: DateTime.now(),
+                        maxDate: DateTime.now().add(const Duration(days: 100)),
+                        dataSource: AppointmentDataSource(dataSource),
+                        onTap: (details) {
+                          final date = details.date!;
+                          final week =
+                              'monday tuesday wednesday thursday friday '
+                                      'saturday sunday'
+                                  .split(' ');
+                          print(date);
+                          print(workTimes);
+                          print(workTimes
+                              .map((wt) => Triple(
+                                  wt.startHour <= date.hour,
+                                  date.hour < wt.endHour,
+                                  '${wt.weekday}' == week[date.weekday]))
+                              .toList());
+                          if (workTimes.any((wt) =>
+                                  wt.startHour <= date.hour &&
+                                  date.hour < wt.endHour &&
+                                  '${wt.weekday}' == week[date.weekday]) &&
+                              !unavailableTimes
+                                  .any((t) => t.dateTime == date)) {
+                            selectedDateTime = details.date;
+                          } else {
+                            calendarController.selectedDate = null;
+                            calendarController.displayDate = null;
+                            selectedDateTime = null;
+                          }
+                          setState(() {});
+                        },
+                        timeSlotViewSettings: const TimeSlotViewSettings(
+                            nonWorkingDays: [],
+                            minimumAppointmentDuration: Duration(hours: 1),
+                            dateFormat: 'dd',
+                            dayFormat: 'EEE',
+                            timeFormat: 'HH'),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _createAppointment() {
+    if (selectedDateTime == null) {
+      final toast = FToast();
+      toast.init(rootNavigatorKey.currentContext!);
+      toast.showToast(
+        child: const CustomToast(
+          text: 'Please Select a valid date and time for the appointment!',
+          toastType: ToastType.error,
+        ),
+        gravity: ToastGravity.BOTTOM_LEFT,
+      );
+    } else {
+      // todo
+    }
   }
 }

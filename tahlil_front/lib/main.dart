@@ -43,7 +43,7 @@ class TahlilApp extends StatelessWidget {
         builder: (context, state, child) => Scaffold(
           backgroundColor: Theme.of(context).canvasColor,
           appBar: AppBar(
-            elevation: 5,
+            elevation: 10,
             centerTitle: false,
             title: FutureBuilder<UserType?>(
               future: _profileService.profile.then((user) => user?.userType),

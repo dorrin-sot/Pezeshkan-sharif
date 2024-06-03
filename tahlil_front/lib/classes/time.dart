@@ -1,24 +1,29 @@
+import 'package:intl/intl.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 import 'package:tahlil_front/enums/weekday.dart';
 
 class Time {
-  final int year, month, day, hour;
+  final DateTime dateTime;
   final Weekday weekday;
 
+  int get year => dateTime.year;
+
+  int get month => dateTime.month;
+
+  int get day => dateTime.day;
+
+  int get hour => dateTime.hour;
+
   Time({
-    required this.year,
-    required this.month,
-    required this.day,
-    required this.hour,
+    required this.dateTime,
     required this.weekday,
   });
 
   Time.fromJson(dynamic json)
       : this(
-          year: int.parse(json['year']),
-          month: int.parse(json['month']),
-          day: int.parse(json['day']),
-          hour: int.parse(json['hour']),
+          dateTime: DateFormat('yyyy-MM-ddThh:mm:ss')
+              .parse(json['date_time'], true)
+              .toLocal(),
           weekday: Weekday.find(json['weekday']),
         );
 
