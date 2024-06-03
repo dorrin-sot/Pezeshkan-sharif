@@ -1,4 +1,4 @@
-const {validateJwtToken} = require('../../utils/jwt');
+const {validateJwtToken} = require('../utils/jwt');
 
 
 function imaging_center_requests(app, db, jsonParser) {
@@ -32,7 +32,7 @@ function imaging_center_requests(app, db, jsonParser) {
      * @swagger
      * /imaging-center/{id}/working-hours:
      *   get:
-     *     summary: Get Imaging Center info
+     *     summary: Get Imaging Center Working Hours
      *     parameters:
      *       - in: path
      *         name: id
@@ -42,7 +42,7 @@ function imaging_center_requests(app, db, jsonParser) {
      *         description: The ID of the Imaging Center
      *     responses:
      *       200:
-     *         description: Imaging Center info returned successfully.
+     *         description: Imaging Center Working Hours returned successfully.
      *       404:
      *         description: Imaging Center not found.
      */

@@ -13,7 +13,8 @@ const healthcheck_request = require('./routes/health-check');
 const user_requests = require("./routes/user/user");
 const verify_requests = require("./routes/user/verify");
 const appointment_requests = require("./routes/appointment");
-const imaging_center_requests = require("./routes/user/imaging-center");
+const imaging_center_requests = require("./routes/imaging-center");
+const doctor_requests = require("./routes/doctor");
 
 
 const db_client = new Client({
@@ -49,6 +50,7 @@ user_requests(app, db_client, jsonParser);
 verify_requests(app, db_client, jsonParser);
 appointment_requests(app, db_client, jsonParser);
 imaging_center_requests(app, db_client, jsonParser);
+doctor_requests(app, db_client, jsonParser);
 
 app.listen(port, () => {
     console.log(`Pezeshkan-sharif listening at http://localhost:${port}`);

@@ -20,6 +20,7 @@ function user_requests(app, db, jsonParser) {
         const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
         if (rows.length === 0) return res.status(401).send('Invalid Token!')
         let {ssid, created_at, user_type} = rows[0]
+        console.log(ssid, user_type)
 
         if (!validateJwtToken(token)) {
             res.status(401).send('Invalid Token!')
@@ -105,32 +106,6 @@ function user_requests(app, db, jsonParser) {
             const {rows: new_user} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`)
             res.status(200).json({...new_user[0], user_type})
         }
-    });
-
-    /**
-     * @swagger
-     * /doctor/{ssid}:
-     *   get:
-     *     summary: Get Doctor info
-     *     parameters:
-     *       - in: path
-     *         name: ssid
-     *         schema:
-     *           type: string
-     *         required: true
-     *         description: The SSID of the doctor
-     *     responses:
-     *       200:
-     *         description: Doctor info returned successfully.
-     *       404:
-     *         description: Doctor not found.
-     */
-    app.get('/doctor/:ssid', async function (req, res) {
-        const {ssid} = req.params;
-        const {rows} = await db.query({text: 'select * from public."doctor_v1" where ssid=$1', values: [ssid]})
-            .catch(console.log);
-        if (rows.length === 0) return res.status(404).send('Doctor not found!')
-        res.status(200).json(rows[0]);
     });
 }
 

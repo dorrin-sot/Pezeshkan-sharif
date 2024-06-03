@@ -1,5 +1,4 @@
 const {validateJwtToken} = require('../utils/jwt');
-const {gregorianToJalali} = require('shamsi-date-converter')
 
 function appointment_requests(app, db, jsonParser) {
     /**
@@ -145,20 +144,20 @@ function appointment_requests(app, db, jsonParser) {
         } else if (user_type !== 'patient') {
             res.status(400).send('Non-Patient users cannot create appointment!')
         } else {
-            const {year, month, day, hour, doctor, imaging_center} = req.body;
-            const greg = new Date(year, month, day)
+            let {year, month, day, hour, doctor, imaging_center} = req.body;
+            month -= 1;
+            let greg = new Date(year, month, day, hour)
             const weekday = greg.toLocaleDateString('en-US', {weekday: 'long'}).toLowerCase()
-            const jalali = gregorianToJalali(greg);
 
             await db.query({
                 text: 'insert into public."time" ' +
-                    '(year, month, day, hour, weekday) values ' +
-                    '($1, $2, $3, $4, $5) ' +
-                    'on conflict on constraint time_year_month_day_hour_key do nothing',
-                values: [jalali[0], jalali[1], jalali[2], hour, weekday]
+                    '(date_time, weekday) values ' +
+                    '($1, $2) ' +
+                    'on conflict on constraint time_date_time_key do nothing',
+                values: [greg, weekday]
             }).catch(console.log);
 
-            const {rows: times} = await db.query(`select id from public."time" where year=${jalali[0]} and month=${jalali[1]} and day=${jalali[2]} and hour=${hour}`)
+            const {rows: times} = await db.query(`select id from public."time" where extract(years from date_time)=${year} and extract(months from date_time)=${month+1} and extract(days from date_time)=${day} and extract(hours from date_time)=${hour} and extract(minutes from date_time)=0`)
                 .catch(console.log);
             const time_id = times[0]['id']
 
