@@ -58,4 +58,7 @@ class Doctor extends User {
 
   @override
   bool get isDoctor => true;
+
+  @override
+  bool get isIncomplete => super.isIncomplete || specialty == null;
 }

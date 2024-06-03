@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 class CreateAppointmentPage extends StatefulWidget {
-  final String doctorSsid;
+  final String? doctorSsid, imagingCenterId;
 
-  const CreateAppointmentPage({super.key, required this.doctorSsid});
+  const CreateAppointmentPage({
+    super.key,
+    this.doctorSsid,
+    this.imagingCenterId,
+  }) : assert((doctorSsid ?? imagingCenterId) != null);
 
   @override
   State<CreateAppointmentPage> createState() => _CreateAppointmentPageState();

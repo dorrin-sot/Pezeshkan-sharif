@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/dialogs/work_hours.dart';
+import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/main.dart';
@@ -12,6 +14,7 @@ import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/triple.dart';
 import 'package:tahlil_front/widgets/text_field.dart';
+import 'package:tahlil_front/widgets/toast.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -119,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             birthdateController: birthdateController,
                           ),
                         )
-                      : SizedBox(width: 200, child: _ViewBody(profile)),
+                      : FittedBox(fit: BoxFit.fill, child: _ViewBody(profile)),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
@@ -199,8 +202,29 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _editProfile() {
-    // todo
+  Future<void> _editProfile() async {
+    final profile = _profileService.profileCached!;
+    final response = await _profileService.editProfile({
+      'first_name': firstNameController.text.nullIfEmpty,
+      'last_name': lastNameController.text.nullIfEmpty,
+      'phone_number': phoneNumberController.text.nullIfEmpty,
+      'email_address': emailAddressController.text.nullIfEmpty,
+      'province': provinceController.text.nullIfEmpty,
+      'city': cityController.text.nullIfEmpty,
+      'street': streetController.text.nullIfEmpty,
+      if (profile.isDoctor) 'specialty': specialtyController.text.nullIfEmpty,
+      if (profile.isPatient) 'birth_date': birthdateController.text.nullIfEmpty,
+    });
+    final toast = FToast();
+    toast.init(rootNavigatorKey.currentContext!);
+    toast.showToast(
+      child: CustomToast(
+        text: response.second,
+        toastType: response.first ? ToastType.success : ToastType.error,
+      ),
+      gravity: ToastGravity.BOTTOM_LEFT,
+    );
+    if (response.first) setState(() => isEditMode = false);
   }
 
   Future<void> _logout() async {
@@ -226,7 +250,7 @@ class _ViewBodyState extends State<_ViewBody> {
     final theme = Theme.of(context);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -245,9 +269,9 @@ class _ViewBodyState extends State<_ViewBody> {
               'Your Medical ID is ', const Icon(Icons.numbers), user.medicalId)
         else if (user is Patient)
           Triple('You were born on ', const Icon(Icons.calendar_month),
-              user.birthDate),
-        Triple('You were verified by ', const Icon(Icons.person),
-            user.referrerName ?? '-'),
+              user.birthDate ?? '-'),
+        // Triple('You were verified by ', const Icon(Icons.person),
+        //     user.referrerName ?? '-'),
         Triple('Your Phone number is ', const Icon(Icons.phone),
             user.phoneNumber ?? '-'),
         Triple('Your Email Address is ', const Icon(Icons.email),
@@ -387,7 +411,7 @@ class _EditBodyState extends State<_EditBody> {
             label: 'BirthDate',
             required: true,
             controller: _birthdateController!,
-            hint: 'YYYY-mm-dd',
+            hint: 'yyyy-MM-dd',
           ),
         CustomTextField(
           icon: const Icon(Icons.location_city),

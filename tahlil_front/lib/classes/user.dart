@@ -41,4 +41,12 @@ class User {
       : isPatient
           ? UserType.patient
           : UserType.referrer;
+
+  bool get isIncomplete => [
+        phoneNumber,
+        emailAddress,
+        province,
+        city,
+        street,
+      ].any((e) => e == null);
 }

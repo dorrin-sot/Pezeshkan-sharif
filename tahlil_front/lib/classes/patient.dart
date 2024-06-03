@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:tahlil_front/classes/user.dart';
 
 class Patient extends User {
@@ -35,9 +36,15 @@ class Patient extends User {
           street: json['street'],
           isVerified: json['is_verified'],
           isDeclined: json['is_declined'],
-          birthDate: json['birth_date'],
+          birthDate: json['birth_date'] == null
+              ? null
+              : DateFormat('yyyy-MM-dd')
+                  .format(DateTime.parse(json['birth_date'])),
         );
 
   @override
   bool get isPatient => true;
+
+  @override
+  bool get isIncomplete => super.isIncomplete || birthDate == null;
 }

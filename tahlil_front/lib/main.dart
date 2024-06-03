@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
@@ -15,6 +16,7 @@ import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/theme.dart';
+import 'package:tahlil_front/widgets/toast.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -138,7 +140,9 @@ class TahlilApp extends StatelessWidget {
           GoRoute(
             path: '/verification',
             redirect: (context, state) async {
-              if ((await needsAuthRedirect(context, state)) != null) return 'auth';
+              if ((await needsAuthRedirect(context, state)) != null) {
+                return 'auth';
+              }
               if ((await _profileService.profile)?.isReferrer ?? false) {
                 return null;
               }
@@ -149,7 +153,9 @@ class TahlilApp extends StatelessWidget {
           GoRoute(
             path: '/appointments',
             redirect: (context, state) async {
-              if ((await needsAuthRedirect(context, state)) != null) return 'auth';
+              if ((await needsAuthRedirect(context, state)) != null) {
+                return 'auth';
+              }
               if ((await _profileService.profile)?.isReferrer ?? false) {
                 return 'not-found';
               }
@@ -166,17 +172,45 @@ class TahlilApp extends StatelessWidget {
             builder: (context, state) => const ExplorePage(doctors: false),
           ),
           GoRoute(
-            path: '/create-appointment/:doctor',
+            path: '/create-appointment',
             redirect: (context, state) async {
-              if ((await needsAuthRedirect(context, state)) != null) return 'auth';
-              if ((await _profileService.profile)?.isPatient ?? false) {
+              final params = state.uri.queryParameters;
+
+              if ((params['doctor'] ?? params['imaging-center']) == null) {
+                return 'not-found';
+              }
+              if ((await needsAuthRedirect(context, state)) != null) {
+                return 'auth';
+              }
+              final profile = await _profileService.profile;
+              if (profile!.isPatient) {
+                if (profile.isIncomplete) {
+                  final toast = FToast();
+                  toast.init(context);
+                  toast.showToast(
+                    child: const CustomToast(
+                      text: 'Your profile is incomplete!',
+                      toastType: ToastType.warning,
+                    ),
+                    gravity: ToastGravity.BOTTOM_LEFT,
+                  );
+                  return '/profile';
+                }
                 return null;
               }
               return 'not-found';
             },
-            builder: (context, state) => CreateAppointmentPage(
-              doctorSsid: state.pathParameters['doctor']!,
-            ),
+            builder: (context, state) {
+              final params = state.uri.queryParameters;
+              if (params['doctor'] != null) {
+                return CreateAppointmentPage(
+                  doctorSsid: params['doctor']!,
+                );
+              }
+              return CreateAppointmentPage(
+                imagingCenterId: params['imaging-center']!,
+              );
+            },
           )
         ],
       )

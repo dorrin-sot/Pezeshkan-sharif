@@ -6,6 +6,7 @@ import 'package:tahlil_front/classes/referrer.dart';
 import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/enums/weekday.dart';
 import 'package:tahlil_front/services/network.dart';
+import 'package:tahlil_front/utils/pair.dart';
 
 class ProfileService {
   static ProfileService? _instance;
@@ -40,9 +41,24 @@ class ProfileService {
     return profileCached;
   }
 
-  Future<User?> forceUpdateProfile() {
-    profileCached = null;
-    return profile;
+  Future<Pair<bool, String>> editProfile(Map<String, String?> map) async {
+    final response = await _networkService.put('/profile', map);
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.bodyString!);
+      switch (body['user_type']) {
+        case 'patient':
+          profileCached = Patient.fromJson(body);
+          break;
+        case 'doctor':
+          profileCached = Doctor.fromJson(body);
+          break;
+        case 'referrer':
+          profileCached = Referrer.fromJson(body);
+          break;
+      }
+      return Pair(true, 'Profile Edited successfully!');
+    }
+    return Pair(false, response.body ?? '');
   }
 
   bool editWorkTimes(Map<Weekday, String> workTimes) {

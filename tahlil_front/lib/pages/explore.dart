@@ -124,7 +124,7 @@ class _ExplorePageState extends State<ExplorePage> {
                       borderRadius: BorderRadius.circular(5),
                       child: InkWell(
                         onTap: () => RouterService.go(
-                            '/create-appointment/${user.ssid}'),
+                            '/create-appointment?doctor=${user.ssid}'),
                         child: Padding(
                           padding: const EdgeInsets.all(7),
                           child: Column(

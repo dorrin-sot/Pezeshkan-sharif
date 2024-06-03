@@ -10,8 +10,10 @@ class NetworkService extends GetConnect {
   void onInit() {
     withCredentials = true;
     maxAuthRetries = 3;
-    httpClient.baseUrl = 'https://pezeshkan-sharif.liara.run';
   }
+
+  String _buildUrl(String path, Map<String, dynamic>? query) =>
+      Uri.https('pezeshkan-sharif.liara.run', path, query).toString();
 
   @override
   Future<Response<T>> get<T>(
@@ -22,10 +24,9 @@ class NetworkService extends GetConnect {
     Decoder<T>? decoder,
   }) async {
     Response<T> response = await super.get(
-      url,
+      _buildUrl(url, query),
       headers: headers,
       contentType: contentType,
-      query: query,
       decoder: decoder,
     );
     if (response.statusCode == 401 &&
@@ -37,10 +38,9 @@ class NetworkService extends GetConnect {
         if ((await post('/auth/refresh', {})).statusCode == 200) break;
       }
       response = await super.get(
-        url,
+        _buildUrl(url, query),
         headers: headers,
         contentType: contentType,
-        query: query,
         decoder: decoder,
       );
     }
@@ -58,16 +58,14 @@ class NetworkService extends GetConnect {
     Progress? uploadProgress,
   }) async {
     Response<T> response = await super.post(
-      url,
+      _buildUrl(url!, query),
       body,
       contentType: contentType,
       headers: headers,
-      query: query,
       decoder: decoder,
       uploadProgress: uploadProgress,
     );
     if (response.statusCode == 401 &&
-        url != null &&
         !url.contains('login') &&
         !url.contains('register') &&
         !url.contains('refresh') &&
@@ -76,13 +74,75 @@ class NetworkService extends GetConnect {
         if ((await super.post('/auth/refresh', {})).statusCode == 200) break;
       }
       response = await super.post(
-        url,
+        _buildUrl(url, query),
         body,
         contentType: contentType,
         headers: headers,
-        query: query,
         decoder: decoder,
         uploadProgress: uploadProgress,
+      );
+    }
+    return response;
+  }
+
+  @override
+  Future<Response<T>> put<T>(
+    String url,
+    dynamic body, {
+    String? contentType,
+    Map<String, String>? headers,
+    Map<String, dynamic>? query,
+    Decoder<T>? decoder,
+    Progress? uploadProgress,
+  }) async {
+    Response<T> response = await super.put(
+      _buildUrl(url, query),
+      body,
+      contentType: contentType,
+      headers: headers,
+      decoder: decoder,
+      uploadProgress: uploadProgress,
+    );
+    print(response.body);
+    if (response.statusCode == 401) {
+      for (int i = 0; i < maxAuthRetries; i++) {
+        if ((await super.post('/auth/refresh', {})).statusCode == 200) break;
+      }
+      response = await super.put(
+        _buildUrl(url, query),
+        body,
+        contentType: contentType,
+        headers: headers,
+        decoder: decoder,
+        uploadProgress: uploadProgress,
+      );
+    }
+    return response;
+  }
+
+  @override
+  Future<Response<T>> delete<T>(
+    String url, {
+    String? contentType,
+    Map<String, String>? headers,
+    Map<String, dynamic>? query,
+    Decoder<T>? decoder,
+  }) async {
+    Response<T> response = await super.delete(
+      _buildUrl(url, query),
+      contentType: contentType,
+      headers: headers,
+      decoder: decoder,
+    );
+    if (response.statusCode == 401) {
+      for (int i = 0; i < maxAuthRetries; i++) {
+        if ((await super.post('/auth/refresh', {})).statusCode == 200) break;
+      }
+      response = await super.delete(
+        _buildUrl(url, query),
+        contentType: contentType,
+        headers: headers,
+        decoder: decoder,
       );
     }
     return response;
