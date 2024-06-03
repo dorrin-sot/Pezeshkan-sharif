@@ -72,6 +72,7 @@ function user_requests(app, db, jsonParser) {
         let {token} = req.cookies;
 
         const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length === 0) return res.status(401).send('Invalid Token!')
         const {ssid, created_at, user_type} = rows[0]
         if (!validateJwtToken(token)) {
             res.status(401).send('Invalid Token!')
@@ -102,7 +103,7 @@ function user_requests(app, db, jsonParser) {
             }
 
             const {rows: new_user} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`)
-            res.status(200).json(new_user)
+            res.status(200).json({...new_user[0], user_type})
         }
     });
 }
