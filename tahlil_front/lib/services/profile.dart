@@ -17,31 +17,31 @@ class ProfileService {
 
   final NetworkService _networkService = NetworkService.instance;
 
-  User? _profile;
+  User? profileCached;
 
   Future<User?> get profile async {
-    if (_profile == null) {
+    if (profileCached == null) {
       final response = await _networkService.get('/profile');
       if (response.isOk) {
         final body = jsonDecode(response.bodyString!);
         switch (body['user_type']) {
           case 'patient':
-            _profile = Patient.fromJson(body);
+            profileCached = Patient.fromJson(body);
             break;
           case 'doctor':
-            _profile = Doctor.fromJson(body);
+            profileCached = Doctor.fromJson(body);
             break;
           case 'referrer':
-            _profile = Referrer.fromJson(body);
+            profileCached = Referrer.fromJson(body);
             break;
         }
       }
     }
-    return _profile;
+    return profileCached;
   }
 
   Future<User?> forceUpdateProfile() {
-    _profile = null;
+    profileCached = null;
     return profile;
   }
 

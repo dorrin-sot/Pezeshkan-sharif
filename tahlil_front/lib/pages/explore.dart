@@ -120,7 +120,7 @@ class _ExplorePageState extends State<ExplorePage> {
                     final Doctor user = snapshot.data![i];
                     return Material(
                       elevation: 2,
-                      color: Theme.of(context).cardColor,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(5),
                       child: InkWell(
                         onTap: () => RouterService.go(

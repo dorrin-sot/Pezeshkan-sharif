@@ -99,7 +99,7 @@ class _VerificationPageState extends State<VerificationPage> {
 
             return Material(
               elevation: 2,
-              color: Theme.of(context).cardColor,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(5),
               child: InkWell(
                 onTap: () {},

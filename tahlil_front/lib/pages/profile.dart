@@ -89,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
         return Center(
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
               boxShadow: const [
                 BoxShadow(color: Colors.black45, blurRadius: 2),

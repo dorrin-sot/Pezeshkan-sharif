@@ -10,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText, readOnly;
   final Function()? toggleObscureText;
   final Function(String)? onChanged;
+  final EdgeInsets? padding;
 
   const CustomTextField({
     super.key,
@@ -25,12 +26,13 @@ class CustomTextField extends StatelessWidget {
     this.toggleObscureText,
     required this.controller,
     this.onChanged,
+    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: padding ?? const EdgeInsets.all(8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,7 +44,7 @@ class CustomTextField extends StatelessWidget {
               readOnly: readOnly,
               onChanged: onChanged,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
+                border: const UnderlineInputBorder(),
                 icon: icon,
                 label: label == null
                     ? null

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:tahlil_front/classes/appointment.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/services/network.dart';
 
@@ -25,5 +26,17 @@ class AppointmentService {
   Future<List> allImagingCenters({String? search}) {
     // todo
     return Future.value([]);
+  }
+
+  Future<List<Appointment>> getAppointments() async {
+    final response = await _networkService.get('/appointments');
+
+    return (jsonDecode(response.bodyString!) as List).map((json) {
+      if (json['doctor'] != null) {
+        return DoctorAppointment.fromJson(json);
+      } else {
+        return ImagingCenterAppointment.fromJson(json);
+      }
+    }).toList();
   }
 }

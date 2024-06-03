@@ -44,7 +44,7 @@ class _WorkHoursDialogState extends State<WorkHoursDialog> {
         padding: const EdgeInsets.all(40),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: theme.cardColor,
+          color: Colors.white,
         ),
         child: Material(
           child: Column(

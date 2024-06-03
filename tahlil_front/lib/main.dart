@@ -49,9 +49,18 @@ class TahlilApp extends StatelessWidget {
                 return Row(
                   children: [
                     const Text('Pezeshkan-sharif'),
+                    const SizedBox(width: 25),
+                    if (snapshot.data != UserType.referrer)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: TextButton(
+                          onPressed: () => RouterService.go('/appointments'),
+                          child: const Text('Appointments'),
+                        ),
+                      ),
                     if (snapshot.data == UserType.patient)
                       Padding(
-                        padding: const EdgeInsets.only(left: 35),
+                        padding: const EdgeInsets.only(left: 10),
                         child: TextButton(
                           onPressed: () => RouterService.go('/doctors'),
                           child: const Text('Explore Doctors'),
