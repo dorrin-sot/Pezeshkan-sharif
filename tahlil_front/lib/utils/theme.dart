@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 
 ThemeData generateTheme(ThemeMode themeData) {
-  late ThemeData theme;
-  if (themeData == ThemeMode.light) {
-    theme = ThemeData.from(
-      colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: Colors.purple,
-        accentColor: Colors.purple,
-        cardColor: Colors.red.shade100,
-        backgroundColor: Colors.white,
-        errorColor: Colors.red.shade800,
+  final theme =
+      themeData == ThemeMode.light ? ThemeData.light() : ThemeData.dark();
+  final buttonBorderRadius = BorderRadius.circular(4);
+
+  return theme.copyWith(
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: buttonBorderRadius),
+        textStyle: TextStyle(fontWeight: FontWeight.bold),
       ),
-    );
-  } else {
-    theme = ThemeData.from(
-      colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: Colors.amber,
-        accentColor: Colors.deepPurple,
-        cardColor: Colors.black45,
-        backgroundColor: Colors.black87,
-        errorColor: Colors.red.shade400,
-        brightness: Brightness.dark,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: buttonBorderRadius),
+        textStyle: TextStyle(fontWeight: FontWeight.bold),
       ),
-    );
-  }
-  return theme;
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: buttonBorderRadius),
+        textStyle: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
 }

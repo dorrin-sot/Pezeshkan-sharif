@@ -257,7 +257,7 @@ class _SortFilterToolbarWidgetState extends State<_SortFilterToolbarWidget> {
               ),
               const SizedBox(width: 15),
               Expanded(
-                child: ElevatedButton(
+                child: FilledButton(
                   onPressed: _submit,
                   child: const Text('Submit'),
                 ),

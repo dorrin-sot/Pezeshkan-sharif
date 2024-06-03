@@ -268,8 +268,8 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
                   : UserType.referrer,
         ),
         if (user is Doctor)
-          Triple(
-              'Your Medical ID is ', const Icon(Icons.numbers), user.medicalId)
+          Triple('Your Medical ID is ', const Icon(Icons.medical_information),
+              user.medicalId)
         else if (user is Patient)
           Triple('You were born on ', const Icon(Icons.calendar_month),
               user.birthDate ?? '-'),
@@ -418,19 +418,19 @@ class _ProfileEditBodyState extends State<ProfileEditBody> {
             hint: 'yyyy-MM-dd',
           ),
         CustomTextField(
-          icon: const Icon(Icons.location_city),
+          icon: const Icon(Icons.pin_drop),
           label: 'Province',
           required: true,
           controller: _provinceController,
         ),
         CustomTextField(
-          icon: const Icon(Icons.location_city),
+          icon: const Icon(Icons.pin_drop),
           label: 'City',
           required: true,
           controller: _cityController,
         ),
         CustomTextField(
-          icon: const Icon(Icons.location_city),
+          icon: const Icon(Icons.pin_drop),
           label: 'Street',
           required: true,
           controller: _streetController,

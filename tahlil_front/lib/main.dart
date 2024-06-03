@@ -50,32 +50,44 @@ class TahlilApp extends StatelessWidget {
               builder: (context, snapshot) {
                 return Row(
                   children: [
-                    const Text('Pezeshkan-sharif'),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => RouterService.go('/'),
+                        child: const Text(
+                          'Pezeshkan-sharif',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 25),
-                    if (snapshot.data != UserType.referrer)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: TextButton(
-                          onPressed: () => RouterService.go('/appointments'),
-                          child: const Text('Appointments'),
+                    if (snapshot.data != null) ...[
+                      if (snapshot.data != UserType.referrer)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: TextButton(
+                            onPressed: () => RouterService.go('/appointments'),
+                            child: const Text('Appointments'),
+                          ),
                         ),
-                      ),
-                    if (snapshot.data == UserType.patient)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: TextButton(
-                          onPressed: () => RouterService.go('/doctors'),
-                          child: const Text('Explore Doctors'),
+                      if (snapshot.data == UserType.patient)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: TextButton(
+                            onPressed: () => RouterService.go('/doctors'),
+                            child: const Text('Explore Doctors'),
+                          ),
                         ),
-                      ),
-                    if (snapshot.data == UserType.patient)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: TextButton(
-                          onPressed: () => RouterService.go('/imaging-centers'),
-                          child: const Text('Explore Imaging Centers'),
+                      if (snapshot.data == UserType.patient)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: TextButton(
+                            onPressed: () =>
+                                RouterService.go('/imaging-centers'),
+                            child: const Text('Explore Imaging Centers'),
+                          ),
                         ),
-                      ),
+                    ]
                   ],
                 );
               },
@@ -222,8 +234,8 @@ class TahlilApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      // theme: _lightTheme,
-      // darkTheme: darkTheme,
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
       themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
       routerConfig: _router,

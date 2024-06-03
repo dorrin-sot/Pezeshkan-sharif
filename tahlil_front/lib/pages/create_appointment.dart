@@ -11,8 +11,10 @@ import 'package:tahlil_front/classes/work_time.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/main.dart';
+import 'package:tahlil_front/services/appointment.dart';
 import 'package:tahlil_front/services/doctor.dart';
 import 'package:tahlil_front/services/imaging_center.dart';
+import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/appointment_data_source.dart';
 import 'package:tahlil_front/utils/pair.dart';
 import 'package:tahlil_front/utils/triple.dart';
@@ -32,9 +34,9 @@ class CreateAppointmentPage extends StatefulWidget {
 }
 
 class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
-  final DoctorService _doctorService = DoctorService.instance;
-  final ImagingCenterService _imagingCenterService =
-      ImagingCenterService.instance;
+  final _doctorService = DoctorService.instance;
+  final _imagingCenterService = ImagingCenterService.instance;
+  final _appointmentService = AppointmentService.instance;
 
   CalendarController calendarController = CalendarController();
   DateTime? selectedDateTime;
@@ -320,19 +322,34 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
     );
   }
 
-  void _createAppointment() {
+  Future<void> _createAppointment() async {
+    String msg;
+    bool success;
     if (selectedDateTime == null) {
-      final toast = FToast();
-      toast.init(rootNavigatorKey.currentContext!);
-      toast.showToast(
-        child: const CustomToast(
-          text: 'Please Select a valid date and time for the appointment!',
-          toastType: ToastType.error,
-        ),
-        gravity: ToastGravity.BOTTOM_LEFT,
-      );
+      msg = 'Please Select a valid date and time for the appointment!';
+      success = false;
     } else {
-      // todo
+      final response = await _appointmentService.createAppointment(
+        selectedDateTime!,
+        doctor: widget.doctorSsid,
+        imagingCenter: widget.imagingCenterId,
+      );
+      success = response.first;
+      msg = response.second;
+    }
+    final toast = FToast();
+    toast.init(rootNavigatorKey.currentContext!);
+    toast.showToast(
+      child: CustomToast(
+        text: msg,
+        toastType: success ? ToastType.success : ToastType.error,
+      ),
+      gravity: ToastGravity.BOTTOM_LEFT,
+    );
+    if (success) {
+      RouterService.go(
+        widget.doctorSsid != null ? '/doctors' : '/imaging-centers',
+      );
     }
   }
 }

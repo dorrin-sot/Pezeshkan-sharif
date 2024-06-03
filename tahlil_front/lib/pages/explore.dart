@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:tahlil_front/classes/doctor.dart';
+import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/services/appointment.dart';
 import 'package:tahlil_front/services/router.dart';
@@ -103,9 +105,9 @@ class _ExplorePageState extends State<ExplorePage> {
                 itemCount: snapshot.data!.length,
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 50),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                gridDelegate:  SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 500,
-                  mainAxisExtent: 225,
+                  mainAxisExtent: widget.doctors ? 225 : 150,
                   mainAxisSpacing: 15,
                   crossAxisSpacing: 15,
                 ),
@@ -116,119 +118,74 @@ class _ExplorePageState extends State<ExplorePage> {
                   final bodyMedium = textTheme.bodyMedium
                       ?.copyWith(fontWeight: FontWeight.bold);
 
-                  if (widget.doctors) {
-                    final Doctor user = snapshot.data![i];
-                    return Material(
-                      elevation: 2,
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                      child: InkWell(
-                        onTap: () => RouterService.go(
-                            '/create-appointment?doctor=${user.ssid}'),
-                        child: Padding(
-                          padding: const EdgeInsets.all(7),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${user.firstName} ${user.lastName}',
-                                style: titleMedium,
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        const FaIcon(FontAwesomeIcons.idCard),
-                                        const SizedBox(width: 10),
-                                        Text(user.ssid, style: bodyMedium),
-                                      ],
-                                    ),
+                  final user =
+                      widget.doctors ? (snapshot.data![i] as Doctor) : null;
+                  final imagingCenter = widget.doctors
+                      ? null
+                      : (snapshot.data![i] as ImagingCenter);
+
+                  return Material(
+                    elevation: 2,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                    child: InkWell(
+                      onTap: () => RouterService.go(widget.doctors
+                          ? '/create-appointment?doctor=${user!.ssid}'
+                          : '/create-appointment?imaging-center=${imagingCenter!.id}'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(7),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              // ignore: prefer_interpolation_to_compose_strings
+                              (user?.firstName + ' ' + user?.lastName) ??
+                                  imagingCenter!.name,
+                              style: titleMedium,
+                            ),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.phone),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        user?.phoneNumber ??
+                                            imagingCenter?.phoneNumber ??
+                                            '-',
+                                        style: bodyMedium,
+                                      ),
+                                    ],
                                   ),
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        const FaIcon(FontAwesomeIcons.idBadge),
-                                        const SizedBox(width: 10),
-                                        Text(user.medicalId, style: bodyMedium),
-                                      ],
-                                    ),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.email),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        user?.emailAddress ??
+                                            imagingCenter?.emailAddress ??
+                                            '-',
+                                        style: bodyMedium,
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.phone),
-                                        const SizedBox(width: 10),
-                                        Text(user.phoneNumber ?? '-',
-                                            style: bodyMedium),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.email),
-                                        const SizedBox(width: 10),
-                                        Text(user.emailAddress ?? '-',
-                                            style: bodyMedium),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
+                                )
+                              ],
+                            ),
+                            if (widget.doctors) ...[
                               const SizedBox(height: 10),
                               Row(
                                 children: [
                                   const FaIcon(FontAwesomeIcons.userDoctor),
                                   const SizedBox(width: 10),
                                   Text(
-                                    user.specialty ?? '-',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  const Icon(Icons.location_city),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    // ignore: prefer_interpolation_to_compose_strings
-                                    (user.province +
-                                            ', ' +
-                                            user.city +
-                                            ', ' +
-                                            user.street) ??
-                                        '-',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  const Icon(Icons.work),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    user.workTimes
-                                            .map((wt) => '$wt')
-                                            .join(', ')
-                                            .nullIfEmpty ??
-                                        '-',
+                                    user!.specialty ?? '-',
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
@@ -237,13 +194,50 @@ class _ExplorePageState extends State<ExplorePage> {
                                 ],
                               ),
                             ],
-                          ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                const Icon(Icons.pin_drop),
+                                const SizedBox(width: 10),
+                                Text(
+                                  // ignore: prefer_interpolation_to_compose_strings
+                                  (user?.province +
+                                          ', ' +
+                                          user?.city +
+                                          ', ' +
+                                          user?.street) ??
+                                      // ignore: prefer_interpolation_to_compose_strings
+                                      (imagingCenter?.province +
+                                          ', ' +
+                                          imagingCenter?.city +
+                                          ', ' +
+                                          imagingCenter?.street) ??
+                                      '-',
+                                  style: bodyMedium,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                const Icon(Icons.work),
+                                const SizedBox(width: 10),
+                                Text(
+                                  (user?.workTimes ?? imagingCenter?.workTimes)
+                                          ?.map((wt) => '$wt')
+                                          .join(', ')
+                                          .capitalize
+                                          ?.nullIfEmpty ??
+                                      '-',
+                                  style: bodyMedium,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  } else {
-                    return Container(); // todo
-                  }
+                    ),
+                  );
                 },
               ),
             ),

@@ -164,7 +164,7 @@ class _VerificationPageState extends State<VerificationPage> {
                             Expanded(
                               child: Row(
                                 children: [
-                                  const FaIcon(FontAwesomeIcons.idBadge),
+                                  const Icon(Icons.medical_information),
                                   const SizedBox(width: 10),
                                   Text(user.medicalId, style: bodyMedium),
                                 ],
@@ -220,7 +220,7 @@ class _VerificationPageState extends State<VerificationPage> {
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          const Icon(Icons.location_city),
+                          const Icon(Icons.pin_drop),
                           const SizedBox(width: 10),
                           Text(
                             // ignore: prefer_interpolation_to_compose_strings
