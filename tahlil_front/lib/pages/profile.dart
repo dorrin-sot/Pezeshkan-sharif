@@ -180,7 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     onPressed: () => showDialog(
                                       context: context,
                                       builder: (_) => WorkHoursDialog(profile),
-                                    ),
+                                    ).then((_) => setState(() {})),
                                   ),
                                 ),
                               Padding(

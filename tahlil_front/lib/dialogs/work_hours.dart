@@ -31,6 +31,7 @@ class _WorkHoursDialogState extends State<WorkHoursDialog> {
               .where((wt) => wt.weekday == wd)
               .map((wt) => '${wt.startHour}-${wt.endHour}')
               .join(','));
+      workTimes[wd] = controllers[wd]!.text;
     }
   }
 
@@ -88,14 +89,7 @@ class _WorkHoursDialogState extends State<WorkHoursDialog> {
                         child: FilledButton.icon(
                           icon: const Icon(Icons.check),
                           label: const Text('Save Changes'),
-                          onPressed: () {
-                            final success = _validate();
-                            setState(() {});
-                            if (success &&
-                                _profileService.editWorkTimes(workTimes))
-                              Navigator.of(context).pop(false);
-                          },
-                          // onPressed: _editProfile,
+                          onPressed: _editWorkHours,
                         ),
                       ),
                     ),
@@ -131,5 +125,13 @@ class _WorkHoursDialogState extends State<WorkHoursDialog> {
       }
     }
     return errors.values.where((e) => e != null).isEmpty;
+  }
+
+  Future<void> _editWorkHours() async {
+    final success = _validate();
+    setState(() {});
+    if (success && await _profileService.editWorkTimes(workTimes)) {
+      Navigator.of(context).pop(false);
+    }
   }
 }

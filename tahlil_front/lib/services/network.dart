@@ -13,8 +13,8 @@ class NetworkService extends GetConnect {
   }
 
   String _buildUrl(String path, Map<String, dynamic>? query) =>
-      Uri.https('pezeshkan-sharif.liara.run', path, query).toString();
-      // Uri.http('127.0.0.1:80', path, query).toString();
+      // Uri.https('pezeshkan-sharif.liara.run', path, query).toString();
+      Uri.http('127.0.0.1:80', path, query).toString();
 
   @override
   Future<Response<T>> get<T>(

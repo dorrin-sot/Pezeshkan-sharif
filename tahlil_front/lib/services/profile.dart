@@ -61,8 +61,15 @@ class ProfileService {
     return Pair(false, response.body ?? '');
   }
 
-  bool editWorkTimes(Map<Weekday, String> workTimes) {
-    // todo
-    return true;
+  Future<bool> editWorkTimes(Map<Weekday, String> workTimes) async {
+    final response = await _networkService.put(
+      '/work-hours',
+      workTimes.map((k, v) => MapEntry('$k', v)),
+    );
+    if (response.isOk) {
+      profileCached = null;
+      await profile;
+    }
+    return response.isOk;
   }
 }
