@@ -22,7 +22,7 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter --version
-      - run: flutter build web --release --base-href '/Pezeshkan-sharif'
+      - run: flutter build web --release --base-href '/Pezeshkan-sharif/'
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
