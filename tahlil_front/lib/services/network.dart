@@ -12,9 +12,12 @@ class NetworkService extends GetConnect {
     maxAuthRetries = 3;
   }
 
-  String _buildUrl(String path, Map<String, dynamic>? query) =>
-      Uri.https('pezeshkan-sharif.liara.run', path, query).toString();
-      // Uri.http('127.0.0.1:80', path, query).toString();
+  String _buildUrl(String path, Map<String, dynamic>? query) => Uri(
+        scheme: const String.fromEnvironment('scheme'),
+        host: const String.fromEnvironment('base_url'),
+        path: path.substring(1),
+        queryParameters: query,
+      ).toString();
 
   @override
   Future<Response<T>> get<T>(
