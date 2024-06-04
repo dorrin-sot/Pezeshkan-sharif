@@ -20,10 +20,9 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          # flutter-version-file: tahlil_front/pubspec.yaml
       - run: flutter pub get
       - run: flutter --version
-      - run: flutter build web --release --base-href '/'
+      - run: flutter build web --release --base-href '/Pezeshkan-sharif'
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
