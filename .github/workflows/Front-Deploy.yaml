@@ -20,10 +20,14 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: flutter pub get
-      - run: flutter --version
-      - run: flutter build web --release --base-href '/Pezeshkan-sharif/'
-      - run: |
+      - name: Install Dependencies
+        run: flutter pub get
+      - name: Check Flutter Version
+        run: flutter --version
+      - name: Build
+        run: flutter build web --release --base-href '/Pezeshkan-sharif/' --dart-define=base_url=pezeshkan-sharif.liara.run --dart-define=base_scheme=https
+      - name: Push Build Files
+        run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git --work-tree build/web add --all
