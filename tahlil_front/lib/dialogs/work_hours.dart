@@ -46,6 +46,7 @@ class _WorkHoursDialogState extends State<WorkHoursDialog> {
           color: Colors.white,
         ),
         child: Material(
+          color: Colors.transparent,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
