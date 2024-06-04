@@ -1,0 +1,23 @@
+name: Front-end Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - tahlil_front/**
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: tahlil_front
+
+    steps:
+      - uses: actions/checkout@v2 # Only works with v2
+      - uses: subosito/flutter-action@v1
+      - uses: bluefireteam/flutter-gh-pages@v7
+        with:
+          workingDir: tahlil_front
