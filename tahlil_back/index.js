@@ -35,7 +35,7 @@ app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cookieParser());
 if (process.env['NODE_ENV'] === 'production') {
     app.use(cors({
-        origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+        origin: ["http://localhost:3000", "http://127.0.0.1:3000", "https://dorrin-sot.github.io"],
         methods: "GET,PATCH,PUT,POST,DELETE",
         preflightContinue: false,
         optionsSuccessStatus: 200,
