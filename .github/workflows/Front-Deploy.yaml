@@ -16,8 +16,17 @@ jobs:
         working-directory: tahlil_front
 
     steps:
-      - uses: actions/checkout@v2 # Only works with v2
-      - uses: subosito/flutter-action@v1
-      - uses: bluefireteam/flutter-gh-pages@v7
+      - uses: actions/checkout@v4 # Only works with v2
+      - uses: subosito/flutter-action@v2
         with:
-          workingDir: tahlil_front
+          channel: stable
+          flutter-version-file: pubspec.yaml # path to pubspec.yaml
+      - run: flutter pub get
+      - run: flutter --version
+      - run: flutter build web --release --base-href '/'
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git --work-tree build/web add --all
+          git commit -m "Automatic deployment by github-actions"
+          git push origin HEAD:gh-pages --force
