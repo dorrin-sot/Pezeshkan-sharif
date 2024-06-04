@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:tahlil_front/classes/appointment.dart' as ap;
 import 'package:tahlil_front/services/appointment.dart';
+import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/appointment_data_source.dart';
 
 class AppointmentsPage extends StatefulWidget {
@@ -104,6 +105,14 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
               appointments,
               showAppointmentInfo: true,
             ),
+            onTap: (details) {
+              // if (details.targetElement == CalendarElement.appointment) {
+              final appointment =
+                  details.appointments?.cast<ap.Appointment>().firstOrNull;
+              if (appointment != null) {
+                RouterService.go('/appointment/${appointment.id}');
+              }
+            },
             timeSlotViewSettings: const TimeSlotViewSettings(
               nonWorkingDays: [],
               minimumAppointmentDuration: Duration(hours: 1),

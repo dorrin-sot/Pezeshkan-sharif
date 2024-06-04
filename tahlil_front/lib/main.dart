@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
+import 'package:tahlil_front/pages/appointment.dart';
 import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
 import 'package:tahlil_front/pages/create_appointment.dart';
@@ -174,6 +175,20 @@ class TahlilApp extends StatelessWidget {
               return null;
             },
             builder: (context, state) => const AppointmentsPage(),
+          ),
+          GoRoute(
+            path: '/appointment/:id',
+            redirect: (context, state) async {
+              if ((await needsAuthRedirect(context, state)) != null) {
+                return '/auth';
+              }
+              if ((await _profileService.profile)?.isReferrer ?? false) {
+                return '/not-found';
+              }
+              return null;
+            },
+            builder: (context, state) =>
+                AppointmentPage(int.parse(state.pathParameters['id']!)),
           ),
           GoRoute(
             path: '/doctors',
