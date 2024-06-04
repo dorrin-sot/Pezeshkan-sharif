@@ -153,12 +153,12 @@ class TahlilApp extends StatelessWidget {
             path: '/verification',
             redirect: (context, state) async {
               if ((await needsAuthRedirect(context, state)) != null) {
-                return 'auth';
+                return '/auth';
               }
               if ((await _profileService.profile)?.isReferrer ?? false) {
                 return null;
               }
-              return 'not-found';
+              return '/not-found';
             },
             builder: (context, state) => const VerificationPage(),
           ),
@@ -166,10 +166,10 @@ class TahlilApp extends StatelessWidget {
             path: '/appointments',
             redirect: (context, state) async {
               if ((await needsAuthRedirect(context, state)) != null) {
-                return 'auth';
+                return '/auth';
               }
               if ((await _profileService.profile)?.isReferrer ?? false) {
-                return 'not-found';
+                return '/not-found';
               }
               return null;
             },
@@ -189,10 +189,10 @@ class TahlilApp extends StatelessWidget {
               final params = state.uri.queryParameters;
 
               if ((params['doctor'] ?? params['imaging-center']) == null) {
-                return 'not-found';
+                return '/not-found';
               }
               if ((await needsAuthRedirect(context, state)) != null) {
-                return 'auth';
+                return '/auth';
               }
               final profile = await _profileService.profile;
               if (profile!.isPatient) {
@@ -210,7 +210,7 @@ class TahlilApp extends StatelessWidget {
                 }
                 return null;
               }
-              return 'not-found';
+              return '/not-found';
             },
             builder: (context, state) {
               final params = state.uri.queryParameters;
@@ -248,7 +248,7 @@ class TahlilApp extends StatelessWidget {
     GoRouterState state,
   ) async {
     if (await _authService.isLoggedIn()) return null;
-    return 'auth';
+    return '/auth';
   }
 
   static FutureOr<String?> needsNoAuthRedirect(
