@@ -20,9 +20,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
-      - name: update-liara
-        env:
-          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+      - name: Install Liara
         run: |
           npm i -g @liara/cli@4
-          liara deploy --api-token="$LIARA_TOKEN" --app="pezeshkan-sharif" --port=80 --detach
+      - name: Deploy
+        env:
+          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+        run: liara deploy --api-token="$LIARA_TOKEN" --app="pezeshkan-sharif" --port=443 --detach
