@@ -273,6 +273,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                         showWeekNumber: true,
                         showNavigationArrow: true,
                         allowViewNavigation: true,
+                        showDatePickerButton: true,
                         minDate: DateTime.now(),
                         maxDate: DateTime.now().add(const Duration(days: 100)),
                         dataSource: AppointmentDataSource(dataSource),
@@ -305,11 +306,12 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                           setState(() {});
                         },
                         timeSlotViewSettings: const TimeSlotViewSettings(
-                            nonWorkingDays: [],
-                            minimumAppointmentDuration: Duration(hours: 1),
-                            dateFormat: 'dd',
-                            dayFormat: 'EEE',
-                            timeFormat: 'HH'),
+                          nonWorkingDays: [],
+                          minimumAppointmentDuration: Duration(hours: 1),
+                          dateFormat: 'dd',
+                          dayFormat: 'EEE',
+                          timeFormat: 'HH',
+                        ),
                       );
                     },
                   ),

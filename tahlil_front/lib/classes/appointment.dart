@@ -46,7 +46,7 @@ class DoctorAppointment extends Appointment {
 
 class ImagingCenterAppointment extends Appointment {
   final int imagingCenterId;
-  final String imaginCenterName;
+  final String imagingCenterName;
 
   ImagingCenterAppointment({
     required super.id,
@@ -54,7 +54,7 @@ class ImagingCenterAppointment extends Appointment {
     required super.patientName,
     required super.time,
     required this.imagingCenterId,
-    required this.imaginCenterName,
+    required this.imagingCenterName,
   });
 
   ImagingCenterAppointment.fromJson(dynamic json)
@@ -63,7 +63,7 @@ class ImagingCenterAppointment extends Appointment {
           patientSsid: json['patient'],
           patientName: json['patient_full_name'],
           imagingCenterId: json['imaging_center'],
-          imaginCenterName: json['imaging_center_name'],
+          imagingCenterName: json['imaging_center_name'],
           time: Time.fromJson(json),
         );
 }
