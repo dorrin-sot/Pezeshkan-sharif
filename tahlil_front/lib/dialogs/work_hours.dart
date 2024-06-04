@@ -25,7 +25,6 @@ class _WorkHoursDialogState extends State<WorkHoursDialog> {
   void initState() {
     super.initState();
     final user = widget.user;
-    print(user.workTimes);
     for (final wd in Weekday.values) {
       controllers[wd] = TextEditingController(
           text: user.workTimes
@@ -118,7 +117,6 @@ class _WorkHoursDialogState extends State<WorkHoursDialog> {
       if (!RegExp(r'^[0-9,-]*$').hasMatch(val)) {
         incorrectFormat(key);
       } else if (val.isEmpty) {
-        if (key == Weekday.thursday) print('2');
         correctFormat(key);
       } else {
         try {

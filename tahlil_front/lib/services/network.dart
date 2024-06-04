@@ -104,7 +104,6 @@ class NetworkService extends GetConnect {
       decoder: decoder,
       uploadProgress: uploadProgress,
     );
-    print(response.body);
     if (response.statusCode == 401) {
       for (int i = 0; i < maxAuthRetries; i++) {
         if ((await super.post('/auth/refresh', {})).statusCode == 200) break;

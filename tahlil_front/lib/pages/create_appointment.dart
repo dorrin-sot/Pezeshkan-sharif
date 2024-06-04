@@ -283,14 +283,6 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                               'monday tuesday wednesday thursday friday '
                                       'saturday sunday'
                                   .split(' ');
-                          print(date);
-                          print(workTimes);
-                          print(workTimes
-                              .map((wt) => Triple(
-                                  wt.startHour <= date.hour,
-                                  date.hour < wt.endHour,
-                                  '${wt.weekday}' == week[date.weekday]))
-                              .toList());
                           if (workTimes.any((wt) =>
                                   wt.startHour <= date.hour &&
                                   date.hour < wt.endHour &&
