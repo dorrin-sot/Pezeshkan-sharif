@@ -1,5 +1,6 @@
 const {validateJwtToken} = require('../../utils/jwt');
-
+const {delete_file, pfp_storage} = require("../../utils/files");
+const {auth_midware} = require("../middlewares/auth");
 
 function user_requests(app, db, jsonParser) {
     /**
@@ -105,6 +106,80 @@ function user_requests(app, db, jsonParser) {
 
             const {rows: new_user} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`)
             res.status(200).json({...new_user[0], user_type})
+        }
+    });
+
+    /**
+     * @swagger
+     * /pfp:
+     *   post:
+     *     summary: Upload user's Profile Picture
+     *     requestBody:
+     *       required: true
+     *       content:
+     *          multipart/form-data:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 pfp:
+     *                   type: string
+     *                   format: binary
+     *     responses:
+     *       200:
+     *         description: Uploaded profile picture successfully!
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.post('/pfp', auth_midware(db), pfp_storage.single('pfp'), async function (req, res) {
+        let {token} = req.cookies;
+
+        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length === 0) return res.status(401).send('Invalid Token!')
+        let {ssid, created_at} = rows[0]
+
+        const file = req.file;
+        const download_link = `${req.protocol}://${req.get('host')}/files/profile-pictures/${file.filename}`;
+        if (process.env.NODE_ENV === 'production') {
+            await db.query({
+                text: 'update public."user" set pfp=$1 where ssid=$2',
+                values: [download_link, ssid]
+            }).catch(console.log)
+        }
+        res.status(200).send(download_link);
+    });
+
+    /**
+     * @swagger
+     * /pfp:
+     *   delete:
+     *     summary: Delete user's Profile Picture
+     *     responses:
+     *       204:
+     *         description: Delete user's profile picture.
+     *       404:
+     *         description: User didn't have profile picture.
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.delete('/pfp', async function (req, res) {
+        let {token} = req.cookies;
+
+        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length === 0) return res.status(401).send('Invalid Token!')
+        let {ssid, created_at} = rows[0]
+        if (!validateJwtToken(token)) {
+            res.status(401).send('Invalid Token!')
+        } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+            res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+        } else {
+            delete_file(`files/profile-pictures/${ssid}`);
+            if (process.env.NODE_ENV === 'production') {
+                await db.query({text: 'update public."user" set pfp=null where ssid=$1', values: [ssid]})
+                    .catch(console.log)
+            }
+            res.status(204).send('Profile Picture deleted Successfully!')
         }
     });
 }

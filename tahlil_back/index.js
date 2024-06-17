@@ -52,6 +52,8 @@ appointment_requests(app, db_client, jsonParser);
 imaging_center_requests(app, db_client, jsonParser);
 doctor_requests(app, db_client, jsonParser);
 
+app.use('/files', express.static('files'));
+
 app.listen(port, () => {
     console.log(`Pezeshkan-sharif listening at http://localhost:${port}`);
     console.log(`Swagger app listening at http://localhost:${port}/swagger`);
