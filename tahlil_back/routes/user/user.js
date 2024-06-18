@@ -138,15 +138,15 @@ function user_requests(app, db, jsonParser) {
         if (rows.length === 0) return res.status(401).send('Invalid Token!')
         let {ssid, created_at} = rows[0]
 
-        const file = req.file;
-        const download_link = `https://pezeshkan-sharif.liara.run/files/profile-pictures/${file.filename}`;
         if (process.env.NODE_ENV === 'production') {
+            const file = req.file;
+            const download_link = `https://pezeshkan-sharif.liara.run/files/profile-pictures/${file.filename}`;
             await db.query({
                 text: 'update public."user" set pfp=$1 where ssid=$2',
                 values: [download_link, ssid]
             }).catch(console.log)
         }
-        res.status(200).send(download_link);
+        res.status(200).send('Profile Picture Updated successfully!');
     });
 
     /**
