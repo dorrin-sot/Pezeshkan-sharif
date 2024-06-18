@@ -139,7 +139,7 @@ function user_requests(app, db, jsonParser) {
         let {ssid, created_at} = rows[0]
 
         const file = req.file;
-        const download_link = `${req.protocol}://${req.get('host')}/files/profile-pictures/${file.filename}`;
+        const download_link = `https://pezeshkan-sharif.liara.run/files/profile-pictures/${file.filename}`;
         if (process.env.NODE_ENV === 'production') {
             await db.query({
                 text: 'update public."user" set pfp=$1 where ssid=$2',
