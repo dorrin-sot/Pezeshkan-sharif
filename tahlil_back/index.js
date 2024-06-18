@@ -15,6 +15,7 @@ const verify_requests = require("./routes/user/verify");
 const appointment_requests = require("./routes/appointment");
 const imaging_center_requests = require("./routes/imaging-center");
 const doctor_requests = require("./routes/doctor");
+const patient_requests = require("./routes/user/patient");
 
 
 const db_client = new Client({
@@ -51,6 +52,7 @@ verify_requests(app, db_client, jsonParser);
 appointment_requests(app, db_client, jsonParser);
 imaging_center_requests(app, db_client, jsonParser);
 doctor_requests(app, db_client, jsonParser);
+patient_requests(app, db_client, jsonParser);
 
 app.use('/files', express.static('files'));
 
