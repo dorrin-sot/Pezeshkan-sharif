@@ -13,7 +13,7 @@ class NetworkService extends GetConnect {
   }
 
   String _buildUrl(String path, Map<String, dynamic>? query) => Uri(
-        scheme: const String.fromEnvironment('scheme'),
+        scheme: const String.fromEnvironment('base_scheme'),
         host: const String.fromEnvironment('base_url'),
         path: path.substring(1),
         queryParameters: query,
