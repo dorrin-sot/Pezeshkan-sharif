@@ -13,6 +13,7 @@ class User {
   final String? city;
   final String? street;
   final bool isVerified, isDeclined;
+  final String? pfp;
 
   User({
     required this.ssid,
@@ -26,6 +27,7 @@ class User {
     this.province,
     this.city,
     this.street,
+    this.pfp,
     required this.isVerified,
     required this.isDeclined,
   });

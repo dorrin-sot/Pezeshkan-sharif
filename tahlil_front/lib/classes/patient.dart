@@ -16,6 +16,7 @@ class Patient extends User {
     super.province,
     super.city,
     super.street,
+    super.pfp,
     required super.isVerified,
     required super.isDeclined,
     required this.birthDate,
@@ -40,6 +41,7 @@ class Patient extends User {
               ? null
               : DateFormat('yyyy-MM-dd')
                   .format(DateTime.parse(json['birth_date'])),
+          pfp: json['pfp'],
         );
 
   @override

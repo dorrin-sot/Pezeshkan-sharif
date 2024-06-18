@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -138,6 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: isEditMode
                           ? [
+                              _ProfilePictureWidget(profile),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 5),
@@ -160,6 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ]
                           : [
+                              _ProfilePictureWidget(profile),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 5),
@@ -234,6 +238,95 @@ class _ProfilePageState extends State<ProfilePage> {
     if ((await _authService.logout()).first) {
       GoRouter.of(shellNavigatorKey.currentContext!).go('/');
     }
+  }
+
+  Widget _ProfilePictureWidget(User user) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 30, left: 10, right: 10),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(300),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black45, blurRadius: 3)
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(300),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(300),
+                    onTap: _editPFP,
+                    child: user.pfp == null
+                        ? Image.asset('assets/profile.png')
+                        : Image(
+                            fit: BoxFit.cover,
+                            image: CachedNetworkImageProvider(user.pfp!),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (user.pfp != null)
+            Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.error,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: IconButton(
+                  color: Theme.of(context).colorScheme.onError,
+                  onPressed: _deletePFP,
+                  icon: Icon(Icons.delete),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editPFP() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if ((result?.files.length ?? 0) > 0) {
+      final file = result!.files.first;
+      final response =
+          await _profileService.uploadProfilePicture(file.name, file.bytes!);
+      if (response.first) setState(() {});
+
+      final toast = FToast();
+      toast.init(rootNavigatorKey.currentContext!);
+      toast.showToast(
+        child: CustomToast(
+          text: response.second,
+          toastType: response.first ? ToastType.success : ToastType.error,
+        ),
+        gravity: ToastGravity.BOTTOM_LEFT,
+      );
+    }
+  }
+
+  Future<void> _deletePFP() async {
+    final response = await _profileService.deleteProfilePicture();
+    if (response.first) setState(() {});
+
+    final toast = FToast();
+    toast.init(rootNavigatorKey.currentContext!);
+    toast.showToast(
+      child: CustomToast(
+        text: response.second,
+        toastType: response.first ? ToastType.success : ToastType.error,
+      ),
+      gravity: ToastGravity.BOTTOM_LEFT,
+    );
   }
 }
 

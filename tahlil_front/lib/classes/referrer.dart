@@ -11,6 +11,7 @@ class Referrer extends User {
     super.province,
     super.city,
     super.street,
+    super.pfp,
     required super.isVerified,
     required super.isDeclined,
   });
@@ -28,6 +29,7 @@ class Referrer extends User {
           street: json['street'],
           isVerified: json['is_verified'],
           isDeclined: json['is_declined'],
+          pfp: json['pfp'],
         );
 
   @override

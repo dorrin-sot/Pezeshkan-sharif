@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:get/get.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/referrer.dart';
 import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/enums/weekday.dart';
 import 'package:tahlil_front/services/network.dart';
+import 'package:tahlil_front/utils/multipart_file_bytes.dart';
 import 'package:tahlil_front/utils/pair.dart';
 
 class ProfileService {
@@ -71,5 +74,26 @@ class ProfileService {
       await profile;
     }
     return response.isOk;
+  }
+
+  Future<Pair<bool, String>> uploadProfilePicture(
+      String path, Uint8List bytes) async {
+    final response = await _networkService.post(
+      '/pfp',
+      FormData({'pfp': MultipartFileBytes(bytes, filename: path)}),
+    );
+    if (response.isOk) {
+      profileCached = null;
+      await profile;
+    }
+    return Pair(response.isOk, response.body);
+  }
+
+  Future<Pair<bool, String>> deleteProfilePicture() async {
+    final response = await _networkService.delete('/pfp');
+    if (response.isOk) {
+      profileCached = null;
+      await profile;
+    }return Pair(response.isOk, response.body ?? '');
   }
 }

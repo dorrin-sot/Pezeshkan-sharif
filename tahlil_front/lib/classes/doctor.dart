@@ -19,6 +19,7 @@ class Doctor extends User {
     super.province,
     super.city,
     super.street,
+    super.pfp,
     required super.isVerified,
     required super.isDeclined,
     required this.medicalId,
@@ -54,6 +55,7 @@ class Doctor extends User {
                   )
                   .toList() ??
               [],
+          pfp: json['pfp'],
         );
 
   @override
