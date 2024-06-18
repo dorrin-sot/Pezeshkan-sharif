@@ -83,6 +83,14 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             );
           }
 
+          final minDate = [
+            ...appointments.map((a) => a.time.dateTime),
+            DateTime.now()
+          ].reduce((val, elem) => val.isBefore(elem) ? val : elem);
+          final maxDate = appointments
+              .map((a) => a.time.dateTime)
+              .reduce((val, elem) => val.isAfter(elem) ? val : elem);
+
           return SfCalendar(
             view: CalendarView.schedule,
             firstDayOfWeek: 6,
@@ -97,10 +105,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
               CalendarView.week,
               CalendarView.month,
             ],
-            minDate: DateTime.now(),
-            maxDate: appointments
-                .map((a) => a.time.dateTime)
-                .reduce((val, elem) => val.isAfter(elem) ? val : elem),
+            minDate: minDate,
+            maxDate: maxDate,
             dataSource: AppointmentDataSource(
               appointments,
               showAppointmentInfo: true,
