@@ -97,7 +97,7 @@ function auth_requests(app, db, jsonParser) {
      *
      */
     app.post('/auth/login', jsonParser, async function (req, res) {
-        const {ssid, password} = req.body;
+        const {ssid, name, password} = req.body;
         let user_type = 'doctor';
         let {rowCount, rows} = await db.query(`select * from public."doctor" where ssid='${ssid}' and password='${password}'`);
         if (rowCount === 0) {
@@ -111,14 +111,19 @@ function auth_requests(app, db, jsonParser) {
             rowCount = rows.length;
         }
         if (rowCount === 0) {
-            res.status(401).send('SSID or Password is incorrect.');
+            user_type = 'imaging_center';
+            rows = (await db.query(`select * from public."imaging_center" where name='${name}' and password='${password}'`))['rows'];
+            rowCount = rows.length;
+        }
+        if (rowCount === 0) {
+            res.status(401).send('Username or Password is incorrect.');
         } else if (!rows[0]['is_verified']) {
             res.status(401).send('Unverified users can\'t login.');
         } else {
             const token = generateJwtToken(ssid);
             db.query({
                 text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
-                values: [ssid, token, (new Date()).toISOString(), user_type]
+                values: [user_type === 'imaging_center' ? name : ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
                 res.cookie('token', token,
                     process.env['NODE_ENV'] === 'production' ? {httpOnly: false, sameSite: 'none', secure: true} : {});
