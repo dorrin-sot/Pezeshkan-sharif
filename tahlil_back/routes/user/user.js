@@ -89,6 +89,7 @@ function user_requests(app, db, jsonParser) {
             const body = req.body;
             if (body['ssid']) return res.status(400).send('SSID Can\'t be changed!')
             if (user_type == 'doctor' && body['medical_id']) return res.status(400).send('Medical ID Can\'t be changed!')
+            if (user_type === 'imaging_center' && body['name']) return res.status(400).send('Name Can\'t be changed!')
 
             let i = 1
             let query = `update public."${user_type}" set `
@@ -98,7 +99,8 @@ function user_requests(app, db, jsonParser) {
                 values.push(value)
             }
             if (i > 1) {
-                query = query.substring(0, query.length - 1) + ` where ssid=\$${i++}`
+                query = query.substring(0, query.length - 1);
+                query += user_type === 'imaging_center' ? ` where name=\$${i++}` : ` where ssid=\$${i++}`;
                 values.push(ssid)
                 let error = false
                 await db.query({text: query, values})
@@ -109,8 +111,13 @@ function user_requests(app, db, jsonParser) {
                 if (error) return
             }
 
-            const {rows: new_user} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`)
-            res.status(200).json({...new_user[0], user_type})
+            if (user_type === 'imaging_center') {
+                const {rows: new_user} = await db.query(`select * from public."${user_type}" where name='${ssid}'`)
+                res.status(200).json({...new_user[0], user_type})
+            } else {
+                const {rows: new_user} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`)
+                res.status(200).json({...new_user[0], user_type})
+            }
         }
     });
 
