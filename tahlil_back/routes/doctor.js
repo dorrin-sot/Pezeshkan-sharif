@@ -86,7 +86,7 @@ function doctor_requests(app, db, jsonParser) {
 
     /**
      * @swagger
-     * /work-hours:
+     * /doctor/work-hours:
      *   put:
      *     summary: Edit Work Hours
      *     requestBody:
@@ -115,7 +115,7 @@ function doctor_requests(app, db, jsonParser) {
      *         description: Unauthorized access. Try logging in or refreshing token.
      *
      */
-    app.put('/work-hours', jsonParser, async function (req, res) {
+    app.put('/doctor/work-hours', jsonParser, async function (req, res) {
         let {token} = req.cookies;
 
         const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
