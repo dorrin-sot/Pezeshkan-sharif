@@ -32,6 +32,9 @@ function verify_requests(app, db, jsonParser) {
             await db.query({text: `select *, 'patient' as user_type from public."patient" where referrer=$1`, values: [ssid]})
                 .then(({rows}) => rows.forEach((e) => results.push(e)))
                 .catch(console.log);
+            await db.query({text: `select *, 'imaging_center' as user_type from public."imaging_center" where referrer=$1`, values: [ssid]})
+                .then(({rows}) => rows.forEach((e) => results.push(e)))
+                .catch(console.log);
 
             res.status(200).send(results)
         }
