@@ -38,11 +38,15 @@ class User {
 
   bool get isReferrer => false;
 
+  bool get isImagingCenter => false;
+
   UserType get userType => isDoctor
       ? UserType.doctor
       : isPatient
           ? UserType.patient
-          : UserType.referrer;
+          : isReferrer
+              ? UserType.referrer
+              : UserType.imaging_center;
 
   bool get isIncomplete => [
         phoneNumber,

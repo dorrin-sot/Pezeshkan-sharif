@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
+import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/router.dart';
@@ -24,12 +24,13 @@ class _AuthPageState extends State<AuthPage> {
   bool _isLogin = true, _passwordShown = false;
   UserType _userType = UserType.referrer;
   final _ssidController = TextEditingController();
+  final _nameController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _repeatPasswordController = TextEditingController();
+  final _referrerController = TextEditingController();
   final _medicalIdController = TextEditingController();
-  final _birthdateController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class _AuthPageState extends State<AuthPage> {
         child: Padding(
           padding: const EdgeInsets.all(50),
           child: SizedBox(
-            width: 350,
+            width: _isLogin ? 350 : 475,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -63,28 +64,42 @@ class _AuthPageState extends State<AuthPage> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                if (!_isLogin)
-                  SegmentedButton<UserType>(
-                    segments: UserType.values
-                        .map((ut) => ButtonSegment(
-                              value: ut,
-                              label: Text('$ut'),
-                            ))
-                        .toList(),
-                    selected: <UserType>{_userType},
-                    onSelectionChanged: (newUserType) => setState(() {
-                      _userType = newUserType.last;
-                    }),
-                  ),
-                const SizedBox(height: 10),
-                CustomTextField(
-                  icon: const FaIcon(FontAwesomeIcons.idCard),
-                  label: 'SSID',
-                  required: true,
-                  controller: _ssidController,
-                  hint: 'e.g. 1234567890',
+                SegmentedButton<UserType>(
+                  segments: (_isLogin
+                          ? [UserType.referrer, UserType.imaging_center]
+                          : UserType.values)
+                      .map((ut) => ButtonSegment(
+                            value: ut,
+                            label: FittedBox(
+                              child: Text(
+                                _isLogin && ut == UserType.referrer
+                                    ? 'User'
+                                    : '$ut',
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                  showSelectedIcon: false,
+                  selected: <UserType>{_userType},
+                  onSelectionChanged: (newUserType) =>
+                      setState(() => _userType = newUserType.last),
                 ),
-                if (!_isLogin) ...[
+                const SizedBox(height: 10),
+                if (_userType == UserType.imaging_center)
+                  CustomTextField(
+                    icon: const FaIcon(FontAwesomeIcons.idCard),
+                    label: 'Name',
+                    required: true,
+                    controller: _nameController,
+                  )
+                else
+                  CustomTextField(
+                    icon: const FaIcon(FontAwesomeIcons.idCard),
+                    label: 'SSID',
+                    required: true,
+                    controller: _ssidController,
+                  ),
+                if (!_isLogin && _userType != UserType.imaging_center) ...[
                   CustomTextField(
                     icon: const Icon(Icons.abc),
                     label: 'First Name',
@@ -118,6 +133,13 @@ class _AuthPageState extends State<AuthPage> {
                     toggleObscureText: () =>
                         setState(() => _passwordShown = !_passwordShown),
                   ),
+                  if (_userType != UserType.referrer)
+                    CustomTextField(
+                      icon: const Icon(Icons.verified_user),
+                      label: 'Referrer',
+                      required: true,
+                      controller: _referrerController,
+                    ),
                   if (_userType == UserType.doctor)
                     CustomTextField(
                       icon: const Icon(Icons.medical_information),
@@ -126,14 +148,6 @@ class _AuthPageState extends State<AuthPage> {
                       controller: _medicalIdController,
                       hint: 'e.g. 12345',
                     )
-                  else if (_userType == UserType.patient)
-                    CustomTextField(
-                      icon: const Icon(Icons.calendar_month),
-                      label: 'BirthDate',
-                      required: true,
-                      controller: _birthdateController,
-                      hint: 'YYYY-mm-dd',
-                    ),
                 ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -145,7 +159,12 @@ class _AuthPageState extends State<AuthPage> {
                     ),
                     const SizedBox(width: 5),
                     TextButton(
-                      onPressed: () => setState(() => _isLogin = !_isLogin),
+                      onPressed: () => setState(() {
+                        if (_userType != UserType.imaging_center) {
+                          _userType = UserType.referrer;
+                        }
+                        _isLogin = !_isLogin;
+                      }),
                       child: Text(_isLogin ? 'Register Here!' : 'Login Here!'),
                     )
                   ],
@@ -165,21 +184,23 @@ class _AuthPageState extends State<AuthPage> {
 
   void _login() async => _postSubmit(
         await _authService.login(
-          ssid: _ssidController.text,
+          ssid: _userType == UserType.referrer ? _ssidController.text : null,
+          name: _userType != UserType.referrer ? _nameController.text : null,
           password: _passwordController.text,
         ),
       );
 
   Future<void> _register() async => _postSubmit(
         await _authService.register(
-          ssid: _ssidController.text,
+          ssid: _ssidController.text.nullIfEmpty,
+          name: _nameController.text.nullIfEmpty,
           firstName: _firstNameController.text,
           lastName: _lastNameController.text,
           password: _passwordController.text,
           repeatPassword: _repeatPasswordController.text,
+          referrer: _referrerController.text,
           userType: _userType,
           medicalId: _medicalIdController.text,
-          birthDate: _birthdateController.text,
         ),
       );
 

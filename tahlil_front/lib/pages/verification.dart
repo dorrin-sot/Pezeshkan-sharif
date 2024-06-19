@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tahlil_front/classes/doctor.dart';
+import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
-import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/services/verification.dart';
+
+import '../classes/user.dart';
 
 class VerificationPage extends StatefulWidget {
   const VerificationPage({super.key});
@@ -114,37 +116,59 @@ class _VerificationPageState extends State<VerificationPage> {
                         children: [
                           Badge(
                             label: Text(
-                              user.isDoctor ? 'Doctor' : 'Patient',
+                              user.isDoctor
+                                  ? 'Doctor'
+                                  : user.isPatient
+                                      ? 'Patient'
+                                      : 'Imaging Center',
                               style: labelSmall,
                             ),
-                            offset: Offset(15, -4),
+                            offset: const Offset(15, -4),
                             backgroundColor: Theme.of(context).primaryColor,
                             child: Text(
-                              '${user.firstName} ${user.lastName}',
+                              user is ImagingCenter
+                                  ? user.name
+                                  : '${user.firstName} ${user.lastName}',
                               style: titleMedium,
                             ),
                           ),
                           Expanded(child: Container()),
                           Padding(
                             padding: const EdgeInsets.only(right: 5),
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.cancel),
-                              label: const Text('Decline'),
-                              onPressed: user.isDeclined
-                                  ? null
-                                  : () => _verificationService
-                                      .decline(user.ssid)
-                                      .then((_) => setState(() {})),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: user.isDeclined
+                                    ? Colors.grey.shade300
+                                    : Colors.red.shade900,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: IconButton(
+                                color: Colors.white,
+                                icon: const Icon(Icons.cancel_outlined),
+                                onPressed: user.isDeclined
+                                    ? null
+                                    : () => _verificationService
+                                        .decline(user)
+                                        .then((_) => setState(() {})),
+                              ),
                             ),
                           ),
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.check),
-                            label: const Text('Accept'),
-                            onPressed: user.isVerified
-                                ? null
-                                : () => _verificationService
-                                    .accept(user.ssid)
-                                    .then((_) => setState(() {})),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: user.isVerified
+                                  ? Colors.grey.shade300
+                                  : Colors.green.shade900,
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: IconButton(
+                              color: Colors.white,
+                              icon: const Icon(Icons.check),
+                              onPressed: user.isVerified
+                                  ? null
+                                  : () => _verificationService
+                                      .accept(user)
+                                      .then((_) => setState(() {})),
+                            ),
                           ),
                         ],
                       ),
@@ -156,7 +180,9 @@ class _VerificationPageState extends State<VerificationPage> {
                               children: [
                                 const FaIcon(FontAwesomeIcons.idCard),
                                 const SizedBox(width: 10),
-                                Text(user.ssid, style: bodyMedium),
+                                Text(
+                                    '${user is ImagingCenter ? user.id : user.ssid}',
+                                    style: bodyMedium),
                               ],
                             ),
                           ),
@@ -197,26 +223,28 @@ class _VerificationPageState extends State<VerificationPage> {
                           )
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          if (user is Patient)
-                            const Icon(Icons.calendar_month)
-                          else
-                            const FaIcon(FontAwesomeIcons.userDoctor),
-                          const SizedBox(width: 10),
-                          Text(
-                            ((user is Patient)
-                                    ? user.birthDate
-                                    : (user as Doctor).specialty) ??
-                                '-',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
+                      if (user is! ImagingCenter) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            if (user is Patient)
+                              const Icon(Icons.calendar_month)
+                            else
+                              const FaIcon(FontAwesomeIcons.userDoctor),
+                            const SizedBox(width: 10),
+                            Text(
+                              ((user is Patient)
+                                      ? user.birthDate
+                                      : (user as Doctor).specialty) ??
+                                  '-',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 10),
                       Row(
                         children: [
@@ -224,7 +252,7 @@ class _VerificationPageState extends State<VerificationPage> {
                           const SizedBox(width: 10),
                           Text(
                             // ignore: prefer_interpolation_to_compose_strings
-                            (user.province +
+                            ((user.province as String?) +
                                     ', ' +
                                     user.city +
                                     ', ' +

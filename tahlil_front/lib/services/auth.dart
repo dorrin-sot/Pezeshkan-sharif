@@ -20,16 +20,22 @@ class AuthService {
   }
 
   Future<Pair<bool, String>> login({
-    required String ssid,
+    String? ssid,
+    String? name,
     required String password,
   }) async {
-    if (ssid.isEmpty || password.isEmpty) {
+    if (((ssid?.isEmpty ?? false) && (name?.isEmpty ?? false)) ||
+        password.isEmpty) {
       return Pair(false, 'All fields are required!');
     }
 
     final response = await _networkService.post(
       '/auth/login',
-      {'ssid': ssid, 'password': password},
+      {
+        if (ssid != null) 'ssid': ssid,
+        if (name != null) 'name': name,
+        'password': password,
+      },
     );
     if (response.statusCode == 200) {
       _profileService.profileCached = null;
@@ -39,23 +45,33 @@ class AuthService {
   }
 
   Future<Pair<bool, String>> register({
-    required String ssid,
+    String? ssid,
+    String? name,
     required String firstName,
     required String lastName,
     required String password,
     required String repeatPassword,
+    required String referrer,
     required UserType userType,
     String medicalId = '',
-    String birthDate = '',
   }) async {
-    if (ssid.isEmpty ||
-        firstName.isEmpty ||
-        lastName.isEmpty ||
-        password.isEmpty ||
-        repeatPassword.isEmpty ||
-        (userType == UserType.doctor && medicalId.isEmpty) ||
-        (userType == UserType.patient && birthDate.isEmpty)) {
-      return Pair(false, 'All fields are required!');
+    if (userType == UserType.imaging_center) {
+      if ((name?.isEmpty ?? false) ||
+          password.isEmpty ||
+          repeatPassword.isEmpty ||
+          referrer.isEmpty) {
+        return Pair(false, 'All fields are required!');
+      }
+    } else {
+      if ((ssid?.isEmpty ?? false) ||
+          firstName.isEmpty ||
+          lastName.isEmpty ||
+          password.isEmpty ||
+          repeatPassword.isEmpty ||
+          (userType != UserType.referrer && referrer.isEmpty) ||
+          (userType == UserType.doctor && medicalId.isEmpty)) {
+        return Pair(false, 'All fields are required!');
+      }
     }
     if (password.length < 8) {
       return Pair(false, 'Password must be at least 8 characters!');
@@ -63,11 +79,33 @@ class AuthService {
     if (password != repeatPassword) {
       return Pair(false, 'Password and Repeat Password must match!');
     }
-    final response = await _networkService.post(
-      '/auth/login',
-      {'ssid': ssid, 'password': password},
-    );
-    return Pair(response.statusCode == 200, response.body ?? '');
+    if (userType == UserType.imaging_center) {
+      final response = await _networkService.post(
+        '/imaging-center',
+        {
+          'name': name,
+          'password': password,
+          'repeat_password': repeatPassword,
+          if (referrer.isNotEmpty) 'referrer': referrer,
+        },
+      );
+      return Pair(response.statusCode == 201, response.body ?? '');
+    } else {
+      final response = await _networkService.post(
+        '/auth/register',
+        {
+          'ssid': ssid,
+          'first_name': firstName,
+          'last_name': lastName,
+          'password': password,
+          'repeat_password': repeatPassword,
+          if (referrer.isNotEmpty) 'referrer': referrer,
+          if (userType == UserType.doctor) 'medical_id': medicalId,
+          'user_type': '$userType'.toLowerCase().replaceAll(' ', '_')
+        },
+      );
+      return Pair(response.statusCode == 201, response.body ?? '');
+    }
   }
 
   Future<Pair<bool, String>> logout() async {

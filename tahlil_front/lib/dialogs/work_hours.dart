@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/enums/weekday.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/widgets/text_field.dart';
 
 class WorkHoursDialog extends StatefulWidget {
-  final Doctor user;
+  final dynamic user;
 
   const WorkHoursDialog(this.user, {super.key});
 

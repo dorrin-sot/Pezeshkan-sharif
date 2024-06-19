@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:get/get.dart';
 import 'package:tahlil_front/classes/doctor.dart';
+import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/referrer.dart';
 import 'package:tahlil_front/classes/user.dart';
@@ -38,6 +39,9 @@ class ProfileService {
           case 'referrer':
             profileCached = Referrer.fromJson(body);
             break;
+          case 'imaging_center':
+            profileCached = ImagingCenter.fromJson(body);
+            break;
         }
       }
     }
@@ -58,6 +62,9 @@ class ProfileService {
         case 'referrer':
           profileCached = Referrer.fromJson(body);
           break;
+        case 'imaging_center':
+          profileCached = ImagingCenter.fromJson(body);
+          break;
       }
       return Pair(true, 'Profile Edited successfully!');
     }
@@ -65,8 +72,10 @@ class ProfileService {
   }
 
   Future<bool> editWorkTimes(Map<Weekday, String> workTimes) async {
+    final path =
+        '/${profileCached?.userType}'.replaceAll(' ', '-').toLowerCase();
     final response = await _networkService.put(
-      '/work-hours',
+      '$path/work-hours',
       workTimes.map((k, v) => MapEntry('$k', v)),
     );
     if (response.isOk) {
@@ -94,6 +103,7 @@ class ProfileService {
     if (response.isOk) {
       profileCached = null;
       await profile;
-    }return Pair(response.isOk, response.body ?? '');
+    }
+    return Pair(response.isOk, response.body ?? '');
   }
 }

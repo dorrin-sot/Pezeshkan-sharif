@@ -1,20 +1,27 @@
+import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/classes/work_time.dart';
 import 'package:tahlil_front/enums/weekday.dart';
 
-class ImagingCenter {
+class ImagingCenter extends User {
   final int id;
   final String name;
-  final String? phoneNumber, emailAddress, province, city, street;
   final List<WorkTime> workTimes;
 
   ImagingCenter({
     required this.id,
     required this.name,
-    this.phoneNumber,
-    this.emailAddress,
-    this.province,
-    this.city,
-    this.street,
+    required super.referrerSsid,
+    super.firstName = '',
+    super.lastName = '',
+    super.ssid = '',
+    required super.password,
+    super.phoneNumber,
+    super.emailAddress,
+    super.province,
+    super.city,
+    super.street,
+    required super.isVerified,
+    required super.isDeclined,
     required this.workTimes,
   });
 
@@ -22,11 +29,15 @@ class ImagingCenter {
       : this(
           id: json['id'],
           name: json['name'],
+          password: json['password'],
           phoneNumber: json['phone_number'],
           emailAddress: json['email_address'],
           province: json['province'],
           city: json['city'],
           street: json['street'],
+          referrerSsid: json['referrer'],
+          isVerified: json['is_verified'],
+          isDeclined: json['is_declined'],
           workTimes: (json['work_times'] as String?)
                   ?.split(', ')
                   .map(
@@ -39,4 +50,7 @@ class ImagingCenter {
                   .toList() ??
               [],
         );
+
+  @override
+  bool get isImagingCenter => true;
 }

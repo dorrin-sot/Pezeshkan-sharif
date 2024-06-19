@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahlil_front/classes/doctor.dart';
+import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/dialogs/work_hours.dart';
@@ -140,7 +141,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: isEditMode
                           ? [
-                              _ProfilePictureWidget(profile),
+                              if (profile.userType != UserType.imaging_center)
+                                _ProfilePictureWidget(profile),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 5),
@@ -163,7 +165,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ]
                           : [
-                              _ProfilePictureWidget(profile),
+                              if (profile.userType != UserType.imaging_center)
+                                _ProfilePictureWidget(profile),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 5),
@@ -174,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       setState(() => isEditMode = true),
                                 ),
                               ),
-                              if (profile is Doctor)
+                              if (profile is Doctor || profile is ImagingCenter)
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 5),
@@ -212,8 +215,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _editProfile() async {
     final profile = _profileService.profileCached!;
     final response = await _profileService.editProfile({
-      'first_name': firstNameController.text.nullIfEmpty,
-      'last_name': lastNameController.text.nullIfEmpty,
+      if (!profile.isImagingCenter)
+        'first_name': firstNameController.text.nullIfEmpty,
+      if (!profile.isImagingCenter)
+        'last_name': lastNameController.text.nullIfEmpty,
       'phone_number': phoneNumberController.text.nullIfEmpty,
       'email_address': emailAddressController.text.nullIfEmpty,
       'province': provinceController.text.nullIfEmpty,
@@ -350,16 +355,14 @@ class _ProfileViewBodyState extends State<ProfileViewBody> {
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Triple('Hello ', null, '${user.firstName} ${user.lastName}'),
         Triple(
-          'You are a ',
-          const Icon(Icons.person),
-          user.isDoctor
-              ? UserType.doctor
-              : user.isPatient
-                  ? UserType.patient
-                  : UserType.referrer,
+          'Hello ',
+          null,
+          user.isImagingCenter
+              ? (user as ImagingCenter).name
+              : '${user.firstName} ${user.lastName}',
         ),
+        Triple('You are a ', const Icon(Icons.person), user.userType),
         if (user is Doctor)
           Triple('Your Medical ID is ', const Icon(Icons.medical_information),
               user.medicalId)
@@ -470,18 +473,20 @@ class _ProfileEditBodyState extends State<ProfileEditBody> {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        CustomTextField(
-          icon: const Icon(Icons.abc),
-          label: 'First Name',
-          required: true,
-          controller: _firstNameController,
-        ),
-        CustomTextField(
-          icon: const Icon(Icons.abc),
-          label: 'Last Name',
-          required: true,
-          controller: _lastNameController,
-        ),
+        if (!user.isImagingCenter) ...[
+          CustomTextField(
+            icon: const Icon(Icons.abc),
+            label: 'First Name',
+            required: true,
+            controller: _firstNameController,
+          ),
+          CustomTextField(
+            icon: const Icon(Icons.abc),
+            label: 'Last Name',
+            required: true,
+            controller: _lastNameController,
+          ),
+        ],
         CustomTextField(
           icon: const Icon(Icons.phone),
           label: 'Phone Number',

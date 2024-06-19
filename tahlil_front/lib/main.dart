@@ -153,11 +153,11 @@ class TahlilApp extends StatelessWidget {
           GoRoute(
             path: '/verification',
             redirect: (context, state) async {
-              if ((await needsAuthRedirect(context, state)) != null) {
+              if ((await needsAuthRedirect(context, state)) != state.fullPath) {
                 return '/auth';
               }
               if ((await _profileService.profile)?.isReferrer ?? false) {
-                return null;
+                return state.fullPath;
               }
               return '/not-found';
             },
@@ -166,26 +166,26 @@ class TahlilApp extends StatelessWidget {
           GoRoute(
             path: '/appointments',
             redirect: (context, state) async {
-              if ((await needsAuthRedirect(context, state)) != null) {
+              if ((await needsAuthRedirect(context, state)) != state.fullPath) {
                 return '/auth';
               }
               if ((await _profileService.profile)?.isReferrer ?? false) {
                 return '/not-found';
               }
-              return null;
+              return state.fullPath;
             },
             builder: (context, state) => const AppointmentsPage(),
           ),
           GoRoute(
             path: '/appointment/:id',
             redirect: (context, state) async {
-              if ((await needsAuthRedirect(context, state)) != null) {
+              if ((await needsAuthRedirect(context, state)) != state.fullPath) {
                 return '/auth';
               }
               if ((await _profileService.profile)?.isReferrer ?? false) {
                 return '/not-found';
               }
-              return null;
+              return state.fullPath;
             },
             builder: (context, state) =>
                 AppointmentPage(int.parse(state.pathParameters['id']!)),
@@ -206,7 +206,7 @@ class TahlilApp extends StatelessWidget {
               if ((params['doctor'] ?? params['imaging-center']) == null) {
                 return '/not-found';
               }
-              if ((await needsAuthRedirect(context, state)) != null) {
+              if ((await needsAuthRedirect(context, state)) != state.fullPath) {
                 return '/auth';
               }
               final profile = await _profileService.profile;
@@ -223,7 +223,7 @@ class TahlilApp extends StatelessWidget {
                   );
                   return '/profile';
                 }
-                return null;
+                return state.fullPath;
               }
               return '/not-found';
             },
@@ -262,7 +262,7 @@ class TahlilApp extends StatelessWidget {
     BuildContext context,
     GoRouterState state,
   ) async {
-    if (await _authService.isLoggedIn()) return null;
+    if (await _authService.isLoggedIn()) return state.fullPath;
     return '/auth';
   }
 
@@ -270,7 +270,7 @@ class TahlilApp extends StatelessWidget {
     BuildContext context,
     GoRouterState state,
   ) async {
-    if (!(await _authService.isLoggedIn())) return null;
+    if (!(await _authService.isLoggedIn())) return state.fullPath;
     return '/';
   }
 }

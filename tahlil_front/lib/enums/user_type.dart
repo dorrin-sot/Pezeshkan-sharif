@@ -1,7 +1,8 @@
 enum UserType {
   patient,
   doctor,
-  referrer;
+  referrer,
+  imaging_center;
 
   @override
   String toString() {
@@ -9,6 +10,7 @@ enum UserType {
       case UserType.patient: return 'Patient';
       case UserType.doctor: return 'Doctor';
       case UserType.referrer: return 'Referrer';
+      case UserType.imaging_center: return 'Imaging Center';
     }
   }
 }

@@ -12,12 +12,17 @@ class NetworkService extends GetConnect {
     maxAuthRetries = 3;
   }
 
-  String _buildUrl(String path, Map<String, dynamic>? query) => Uri(
-        scheme: const String.fromEnvironment('base_scheme'),
-        host: const String.fromEnvironment('base_url'),
-        path: path.substring(1),
-        queryParameters: query,
-      ).toString();
+  String _buildUrl(String path, Map<String, dynamic>? query) {
+    const scheme = String.fromEnvironment('base_scheme');
+    const url = String.fromEnvironment('base_url');
+    return Uri(
+      scheme: scheme,
+      host: url,
+      port: scheme == 'http' ? 80 : 443,
+      path: path.substring(1),
+      queryParameters: query,
+    ).toString();
+  }
 
   @override
   Future<Response<T>> get<T>(
