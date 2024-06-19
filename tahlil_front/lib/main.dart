@@ -116,16 +116,6 @@ class TahlilApp extends StatelessWidget {
               ),
             ],
           ),
-          // drawer: Drawer(
-          //   child: Column(
-          //     children: [
-          //       Padding(
-          //         padding: const EdgeInsets.symmetric(vertical: 15),
-          //         child: Image.asset('assets/doctor.png'),
-          //       )
-          //     ],
-          //   ),
-          // ),
           body: child,
         ),
         routes: [
@@ -145,12 +135,16 @@ class TahlilApp extends StatelessWidget {
           GoRoute(
             path: '/auth',
             redirect: needsNoAuthRedirect,
-            builder: (context, state) => const AuthPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AuthPage(),
+            ),
           ),
           GoRoute(
             path: '/profile',
             redirect: needsAuthRedirect,
-            builder: (context, state) => const ProfilePage(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ProfilePage(),
+            ),
           ),
           GoRoute(
             path: '/verification',
@@ -163,7 +157,9 @@ class TahlilApp extends StatelessWidget {
               }
               return '/not-found';
             },
-            builder: (context, state) => const VerificationPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: VerificationPage(),
+            ),
           ),
           GoRoute(
             path: '/appointments',
@@ -176,7 +172,9 @@ class TahlilApp extends StatelessWidget {
               }
               return state.fullPath;
             },
-            builder: (context, state) => const AppointmentsPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AppointmentsPage(),
+            ),
           ),
           GoRoute(
             path: '/appointment/:id',
@@ -189,16 +187,21 @@ class TahlilApp extends StatelessWidget {
               }
               return state.fullPath;
             },
-            builder: (context, state) =>
-                AppointmentPage(int.parse(state.pathParameters['id']!)),
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AppointmentPage(int.parse(state.pathParameters['id']!)),
+            ),
           ),
           GoRoute(
             path: '/doctors',
-            builder: (context, state) => const ExplorePage(doctors: true),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ExplorePage(doctors: true),
+            ),
           ),
           GoRoute(
             path: '/imaging-centers',
-            builder: (context, state) => const ExplorePage(doctors: false),
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: const ExplorePage(doctors: false),
+            ),
           ),
           GoRoute(
             path: '/create-appointment',
@@ -229,21 +232,27 @@ class TahlilApp extends StatelessWidget {
               }
               return '/not-found';
             },
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final params = state.uri.queryParameters;
               if (params['doctor'] != null) {
-                return CreateAppointmentPage(
-                  doctorSsid: params['doctor']!,
+                return NoTransitionPage(
+                  child: CreateAppointmentPage(
+                    doctorSsid: params['doctor']!,
+                  ),
                 );
               }
-              return CreateAppointmentPage(
-                imagingCenterId: params['imaging-center']!,
+              return NoTransitionPage(
+                child: CreateAppointmentPage(
+                  imagingCenterId: params['imaging-center']!,
+                ),
               );
             },
           ),
           GoRoute(
             path: '/not-found',
-            builder: (context, state) => const NotFoundPage(),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: NotFoundPage(),
+            ),
           ),
         ],
       )
@@ -278,5 +287,13 @@ class TahlilApp extends StatelessWidget {
   ) async {
     if (!(await _authService.isLoggedIn())) return state.fullPath;
     return '/';
+  }
+
+  static NoTransitionPage DefaultTransitionPageBuilder<T>(GoRouterState state,
+      {required Widget child}) {
+    return NoTransitionPage<T>(
+      key: state.pageKey,
+      child: child,
+    );
   }
 }
