@@ -28,10 +28,15 @@ function user_requests(app, db, jsonParser) {
         } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
         } else {
-            if (user_type === 'doctor') user_type += '_v1';
-            const {rows} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`);
-            user_type = user_type.replace('_v1', '');
-            res.status(200).json({...rows[0], user_type})
+            if (user_type === 'imaging_center') {
+                const {rows} = await db.query(`select * from public."imaging_center" where name='${ssid}'`);
+                res.status(200).json({...rows[0], user_type})
+            } else {
+                if (user_type === 'doctor') user_type += '_v1';
+                const {rows} = await db.query(`select * from public."${user_type}" where ssid='${ssid}'`);
+                user_type = user_type.replace('_v1', '');
+                res.status(200).json({...rows[0], user_type})
+            }
         }
     });
 
