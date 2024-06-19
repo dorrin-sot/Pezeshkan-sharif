@@ -19,6 +19,7 @@ function auth_requests(app, db, jsonParser) {
      *               last_name: string
      *               password: string
      *               repeat_password: string
+     *               referrer: string
      *               medical_id: string
      *               user_type: string
      *             example:
@@ -27,6 +28,7 @@ function auth_requests(app, db, jsonParser) {
      *               last_name: lname
      *               password: passpass123
      *               repeat_password: passpass123
+     *               referrer: 1234567892
      *               medical_id: 12345
      *               user_type: doctor
      *     responses:
@@ -34,11 +36,14 @@ function auth_requests(app, db, jsonParser) {
      *         description: Successful register.
      *       401:
      *         description: An error occurred during register. Messages in body.
+     *       404:
+     *         description: Referrer not Found.
      *
      */
     app.post('/auth/register', jsonParser, async function (req, res) {
-        const {ssid, first_name, last_name, password, repeat_password, medical_id, user_type} = req.body;
+        const {ssid, first_name, last_name, password, repeat_password, medical_id, referrer, user_type} = req.body;
         const {rowCount} = await db.query(`select * from public."user" where ssid='${ssid}'`);
+
         if (rowCount > 0) {
             res.status(401).send('SSID should be Unique.')
         } else if (password !== repeat_password) {
@@ -47,25 +52,34 @@ function auth_requests(app, db, jsonParser) {
             res.status(401).send('Password should be at least 8 characters long.')
         } else if (!['doctor', 'patient', 'referrer'].includes(user_type)) {
             res.status(401).send("User Type should be between 'doctor', 'patient', 'referrer'.")
-        } else if (user_type === 'doctor' && (medical_id || '').length == 0) {
+        } else if (user_type === 'doctor' && (medical_id || '').length === 0) {
             res.status(401).send("Medical ID is required for doctors.")
+        } else if (user_type !== 'referrer' && (referrer || '').length === 0) {
+            res.status(401).send("Referrer is required.")
         } else {
+            const keys = ['ssid', 'first_name', 'last_name', 'password'];
             const values = [ssid, first_name, last_name, password];
+            if (user_type !== 'referrer') {
+                const {rowCount} = await db.query(`select * from public."referrer" where ssid='${referrer}'`)
+                if (rowCount === 0) return res.status(404).send('Referrer not Found!')
+                keys.push('referrer');
+                values.push(referrer);
+            }
             if (user_type === 'doctor') {
+                keys.push('medical_id');
                 values.push(medical_id);
                 const {rowCount} = await db.query(`select * from public."doctor_v1" where medical_id='${medical_id}'`);
-                if (rowCount > 0) {
-                    res.status(401).send('Medical ID should be Unique.')
-                    return
-                }
+                if (rowCount > 0) return res.status(401).send('Medical ID should be Unique.')
             } else if (user_type === 'referrer') {
-                values.push(true) // referrer is verified by default
+                // referrer is verified by default
+                keys.push('is_verified');
+                values.push(true);
             }
 
             await db.query({
                 text: `insert into public.${user_type} ` +
-                    `(ssid, first_name, last_name, password${user_type == 'doctor' ? ", medical_id" : ""}${user_type == 'referrer' ? ", is_verified" : ""}) ` +
-                    `values ($1, $2, $3, $4${user_type != 'patient' ? ", $5" : ""})`,
+                    `(${keys.join(', ')}) ` +
+                    `values (${values.map((_, i) => `\$${i + 1}`).join(', ')})`,
                 values: values,
             }).catch(console.log);
             res.status(201).send('Register Successful!');
@@ -122,7 +136,7 @@ function auth_requests(app, db, jsonParser) {
         } else {
             const token = generateJwtToken(ssid);
             db.query({
-                text: `insert into public.login_token (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
+                text: `insert into public."login_token" (ssid, token, created_at, user_type) values ($1, $2, $3, $4)`,
                 values: [user_type === 'imaging_center' ? name : ssid, token, (new Date()).toISOString(), user_type]
             }).then((_) => {
                 res.cookie('token', token,
