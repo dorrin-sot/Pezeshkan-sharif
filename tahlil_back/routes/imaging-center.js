@@ -1,6 +1,3 @@
-const {validateJwtToken} = require('../utils/jwt');
-
-
 function imaging_center_requests(app, db, jsonParser) {
     /**
      * @swagger
