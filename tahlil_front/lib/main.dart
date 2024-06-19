@@ -11,6 +11,7 @@ import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
 import 'package:tahlil_front/pages/create_appointment.dart';
 import 'package:tahlil_front/pages/explore.dart';
+import 'package:tahlil_front/pages/not_found.dart';
 import 'package:tahlil_front/pages/profile.dart';
 import 'package:tahlil_front/pages/verification.dart';
 import 'package:tahlil_front/services/auth.dart';
@@ -38,6 +39,7 @@ class TahlilApp extends StatelessWidget {
   final _router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/',
+    onException: (_, context, state) => RouterService.go('/not-found'),
     routes: [
       ShellRoute(
         navigatorKey: shellNavigatorKey,
@@ -238,7 +240,11 @@ class TahlilApp extends StatelessWidget {
                 imagingCenterId: params['imaging-center']!,
               );
             },
-          )
+          ),
+          GoRoute(
+            path: '/not-found',
+            builder: (context, state) => const NotFoundPage(),
+          ),
         ],
       )
     ],
