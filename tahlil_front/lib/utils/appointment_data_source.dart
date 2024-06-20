@@ -30,13 +30,13 @@ class AppointmentDataSource extends CalendarDataSource<ap.Appointment> {
     if (!showAppointmentInfo) return '';
     final appointment = appointments[index];
     if (ProfileService.instance.profileCached?.isDoctor ?? false) {
-      return appointment.patientName;
+      return appointment.patient.fullName;
     }
     if (appointment is ap.ImagingCenterAppointment) {
-      return appointment.patientName;
+      return appointment.patient.fullName;
     }
-    if (appointment is ap.DoctorAppointment) return appointment.doctorName;
-    return (appointment as ap.ImagingCenterAppointment).imagingCenterName;
+    if (appointment is ap.DoctorAppointment) return appointment.doctor.fullName;
+    return (appointment as ap.ImagingCenterAppointment).imagingCenter.name;
   }
 
   @override

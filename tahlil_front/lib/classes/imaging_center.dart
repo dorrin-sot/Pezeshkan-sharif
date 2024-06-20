@@ -10,7 +10,7 @@ class ImagingCenter extends User {
   ImagingCenter({
     required this.id,
     required this.name,
-    required super.referrerSsid,
+    super.referrerSsid,
     super.firstName = '',
     super.lastName = '',
     super.ssid = '',

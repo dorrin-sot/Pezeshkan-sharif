@@ -227,10 +227,12 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                             (i, time) => MapEntry(
                               i,
                               ap.Appointment(
-                                  id: i,
-                                  patientSsid: '',
-                                  patientName: '',
-                                  time: time),
+                                id: i,
+                                patientSsid: '',
+                                patientFirstName: '',
+                                patientLastName: '',
+                                time: time,
+                              ),
                             ),
                           )
                           .values

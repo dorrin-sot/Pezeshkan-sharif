@@ -54,5 +54,8 @@ class User {
         province,
         city,
         street,
+        pfp,
       ].any((e) => e == null);
+
+  String get fullName => '$firstName $lastName';
 }

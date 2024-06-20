@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -16,6 +15,7 @@ import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/triple.dart';
+import 'package:tahlil_front/widgets/profile_picture.dart';
 import 'package:tahlil_front/widgets/text_field.dart';
 import 'package:tahlil_front/widgets/toast.dart';
 
@@ -250,34 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.only(bottom: 30, left: 10, right: 10),
       child: Stack(
         children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(300),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black45, blurRadius: 3)
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(300),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(300),
-                    onTap: _editPFP,
-                    child: user.pfp == null
-                        ? Image.asset('assets/profile.png')
-                        : Image(
-                            fit: BoxFit.cover,
-                            image: CachedNetworkImageProvider(user.pfp!),
-                          ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          ProfilePictureWidget(user, editPFP: _editPFP),
           if (user.pfp != null)
             Align(
               alignment: Alignment.topRight,

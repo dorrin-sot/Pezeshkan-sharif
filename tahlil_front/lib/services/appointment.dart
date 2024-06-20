@@ -61,4 +61,20 @@ class AppointmentService {
     });
     return Pair(response.isOk, response.bodyString ?? '-');
   }
+
+  Future<Appointment?> getAppointment(int id) async {
+    final response = await _networkService.get('/appointment/$id');
+    if (response.isOk) {
+      final body = jsonDecode(response.bodyString!);
+      switch (body['type']) {
+        case 'doctor':
+          return DoctorAppointment.fromJson(body);
+        case 'imaging_center':
+          return ImagingCenterAppointment.fromJson(body);
+        default:
+          throw ArgumentError(body['type']);
+      }
+    }
+    return null;
+  }
 }

@@ -185,7 +185,7 @@ class TahlilApp extends StatelessWidget {
               if ((await _profileService.profile)?.isReferrer ?? false) {
                 return '/not-found';
               }
-              return state.fullPath;
+              return null;
             },
             pageBuilder: (context, state) => NoTransitionPage(
               child: AppointmentPage(int.parse(state.pathParameters['id']!)),
@@ -199,8 +199,8 @@ class TahlilApp extends StatelessWidget {
           ),
           GoRoute(
             path: '/imaging-centers',
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ExplorePage(doctors: false),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ExplorePage(doctors: false),
             ),
           ),
           GoRoute(

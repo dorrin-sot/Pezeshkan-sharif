@@ -23,6 +23,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         future: _appointmentService.getAppointments(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            print(snapshot.error);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
