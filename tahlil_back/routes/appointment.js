@@ -233,7 +233,7 @@ function appointment_requests(app, db, jsonParser) {
                 rowCount = result['rowCount']
             }
 
-            if (rowCount === 0 || ![appointment[0]['patient'], appointment[0][type]].includes(ssid))
+            if (rowCount === 0 || ![appointment[0]['patient'], appointment[0]['doctor'], appointment[0]['imaging_center_name']].includes(ssid))
                 return res.status(404).send('Appointment not found!')
 
             res.status(200).json({...appointment[0], type})
