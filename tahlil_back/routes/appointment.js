@@ -93,7 +93,7 @@ function appointment_requests(app, db, jsonParser) {
         } else {
             const {rows: list1} = await db.query(`select * from public."doctor_appointment_v1" where patient='${ssid}' or doctor='${ssid}'`)
                 .catch(console.log);
-            const {rows: list2} = await db.query(`select * from public."imaging_center_appointment_v1" where patient='${ssid} or imaging_center_name=${ssid}'`)
+            const {rows: list2} = await db.query(`select * from public."imaging_center_appointment_v1" where patient='${ssid}' or imaging_center_name='${ssid}'`)
                 .catch(console.log);
             res.status(200).json([...list1, ...list2])
         }
