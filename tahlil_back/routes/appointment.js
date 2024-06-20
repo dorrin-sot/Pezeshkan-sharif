@@ -1,4 +1,6 @@
 const {validateJwtToken} = require('../utils/jwt');
+const {auth_midware} = require("./middlewares/auth");
+const {pfp_storage, opg_images_storage} = require("../utils/files");
 
 function appointment_requests(app, db, jsonParser) {
     /**
@@ -239,6 +241,58 @@ function appointment_requests(app, db, jsonParser) {
             res.status(200).json({...appointment[0], type})
         }
     });
+
+    /**
+     * @swagger
+     * /appointment/{id}/images:
+     *   post:
+     *     summary: Upload appointment images
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *         description: The ID of the appointment
+     *     requestBody:
+     *       required: true
+     *       content:
+     *          multipart/form-data:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 images:
+     *                   type: array
+     *                   items:
+     *                     type: string
+     *                     format: binary
+     *     responses:
+     *       201:
+     *         description: Appointment returned as json
+     *       404:
+     *         description: Appointment not found
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.post('/appointment/:id/images',
+        auth_midware(db, ['imaging_center']),
+        opg_images_storage.array('images', 10),
+        async function (req, res) {
+            const {id: appointment} = req.params;
+
+            if (process.env.NODE_ENV === 'production') {
+                const files = req.files;
+                await Promise.all(
+                    files.map((file) => `https://pezeshkan-sharif.liara.run/${file.path}`)
+                        .map((link) => db.query({
+                            text: `insert into public."opg_image" (appointment, image_link) values ($1, $2)`,
+                            values: [appointment, link]
+                        }))
+                );
+            }
+            res.status(200).send('Images Uploaded successfully!');
+        });
 }
 
 module.exports = appointment_requests;

@@ -153,7 +153,7 @@ function user_requests(app, db, jsonParser) {
 
         if (process.env.NODE_ENV === 'production') {
             const file = req.file;
-            const download_link = `https://pezeshkan-sharif.liara.run/files/profile-pictures/${file.filename}`;
+            const download_link = `https://pezeshkan-sharif.liara.run/${file.path}`;
             await db.query({
                 text: 'update public."user" set pfp=$1 where ssid=$2',
                 values: [download_link, ssid]
