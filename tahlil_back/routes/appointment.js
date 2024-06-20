@@ -186,6 +186,59 @@ function appointment_requests(app, db, jsonParser) {
             }
         }
     });
+
+    /**
+     * @swagger
+     * /appointment/{id}:
+     *   get:
+     *     summary: Get appointment Info
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *         description: The ID of the appointment
+     *     responses:
+     *       200:
+     *         description: Appointment returned as json
+     *       404:
+     *         description: Appointment not found
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.get('/appointment/:id', async function (req, res) {
+        let {token} = req.cookies;
+
+        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length === 0) return res.status(401).send('Invalid Token!');
+        const {ssid, created_at, user_type} = rows[0]
+
+        if (!validateJwtToken(token)) {
+            res.status(401).send('Invalid Token!')
+        } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+            res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+        } else {
+            const {id: appointment_id} = req.params;
+            let type = 'doctor'
+            let {rows: appointment, rowCount} = await db.query({text: `select * from public."${type}_appointment_v1" where id=$1`, values: [parseInt(appointment_id)]})
+                .catch(console.log)
+
+            if (rowCount === 0) {
+                type = 'imaging_center'
+                const result = await db.query({text: `select * from public."${type}_appointment_v1" where id=$1`, values: [parseInt(appointment_id)]})
+                    .catch(console.log)
+                appointment = result['rows']
+                rowCount = result['rowCount']
+            }
+
+            if (rowCount === 0 || ![appointment[0]['patient'], appointment[0][type]].includes(ssid))
+                return res.status(404).send('Appointment not found!')
+
+            res.status(200).json({...appointment[0], type})
+        }
+    });
 }
 
 module.exports = appointment_requests;
