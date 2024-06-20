@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:file_picker/src/platform_file.dart';
+import 'package:get/get_connect/http/src/multipart/form_data.dart';
 import 'package:tahlil_front/classes/appointment.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/services/network.dart';
+import 'package:tahlil_front/utils/multipart_file_bytes.dart';
 import 'package:tahlil_front/utils/pair.dart';
 
 class AppointmentService {
@@ -76,5 +79,22 @@ class AppointmentService {
       }
     }
     return null;
+  }
+
+  Future<Pair<bool, String>> uploadImages({
+    required int appointment,
+    required List<PlatformFile> files,
+  }) async {
+    final response = await _networkService.post(
+      '/appointment/$appointment/images',
+      FormData(
+        {
+          'images': files
+              .map((f) => MultipartFileBytes(f.bytes, filename: f.name))
+              .toList()
+        },
+      ),
+    );
+    return Pair(response.isOk, response.body);
   }
 }

@@ -4,7 +4,8 @@ enum Weekday {
   monday,
   tuesday,
   wednesday,
-  thursday;
+  thursday,
+  friday;
 
   static Weekday find(String name) =>
       Weekday.values.where((wd) => '$wd' == name).first;

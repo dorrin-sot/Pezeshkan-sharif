@@ -2,8 +2,6 @@ import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/time.dart';
-import 'package:tahlil_front/classes/work_time.dart';
-import 'package:tahlil_front/enums/weekday.dart';
 
 class Appointment {
   final int id;
@@ -46,16 +44,16 @@ class DoctorAppointment extends Appointment {
   DoctorAppointment({
     required super.id,
     required super.time,
-    required String patientSsid,
-    required String patientFirstName,
-    required String patientLastName,
-    String? patientProvince,
-    String? patientCity,
-    String? patientStreet,
-    String? patientEmailAddress,
-    String? patientPhoneNumber,
-    String? patientBirthdate,
-    String? patientPfp,
+    required super.patientSsid,
+    required super.patientFirstName,
+    required super.patientLastName,
+    super.patientProvince,
+    super.patientCity,
+    super.patientStreet,
+    super.patientEmailAddress,
+    super.patientPhoneNumber,
+    super.patientBirthdate,
+    super.patientPfp,
     required String doctorSsid,
     required String doctorFirstName,
     required String doctorLastName,
@@ -68,7 +66,7 @@ class DoctorAppointment extends Appointment {
     String? doctorPfp,
     String? doctorWorkTimes,
     String? doctorSpecialty,
-  })  : doctor = Doctor(
+  }) : doctor = Doctor(
           ssid: doctorSsid,
           firstName: doctorFirstName,
           lastName: doctorLastName,
@@ -80,32 +78,10 @@ class DoctorAppointment extends Appointment {
           medicalId: doctorMedicalId,
           pfp: doctorPfp,
           specialty: doctorSpecialty,
-          workTimes: doctorWorkTimes
-                  ?.split(', ')
-                  .map(
-                    (t) => WorkTime(
-                      weekday: Weekday.find(t.split(' ')[0]),
-                      startHour: int.parse(t.split(' ')[1].split('-')[0]),
-                      endHour: int.parse(t.split(' ')[1].split('-')[1]),
-                    ),
-                  )
-                  .toList() ??
-              [],
+          workTimes: doctorWorkTimes,
           password: '',
           isVerified: true,
           isDeclined: false,
-        ),
-        super(
-          patientSsid: patientSsid,
-          patientFirstName: patientFirstName,
-          patientLastName: patientLastName,
-          patientProvince: patientProvince,
-          patientCity: patientCity,
-          patientStreet: patientStreet,
-          patientEmailAddress: patientEmailAddress,
-          patientPhoneNumber: patientPhoneNumber,
-          patientBirthdate: patientBirthdate,
-          patientPfp: patientPfp,
         );
 
   DoctorAppointment.fromJson(dynamic json)
@@ -143,16 +119,16 @@ class ImagingCenterAppointment extends Appointment {
   ImagingCenterAppointment({
     required super.id,
     required super.time,
-    required String patientSsid,
-    required String patientFirstName,
-    required String patientLastName,
-    String? patientProvince,
-    String? patientCity,
-    String? patientStreet,
-    String? patientEmailAddress,
-    String? patientPhoneNumber,
-    String? patientBirthdate,
-    String? patientPfp,
+    required super.patientSsid,
+    required super.patientFirstName,
+    required super.patientLastName,
+    super.patientProvince,
+    super.patientCity,
+    super.patientStreet,
+    super.patientEmailAddress,
+    super.patientPhoneNumber,
+    super.patientBirthdate,
+    super.patientPfp,
     required int imagingCenterId,
     required String imagingCenterName,
     String? imagingCenterProvince,
@@ -161,7 +137,7 @@ class ImagingCenterAppointment extends Appointment {
     String? imagingCenterEmailAddress,
     String? imagingCenterPhoneNumber,
     String? imagingCenterWorkTimes,
-  })  : imagingCenter = ImagingCenter(
+  }) : imagingCenter = ImagingCenter(
           id: imagingCenterId,
           name: imagingCenterName,
           province: imagingCenterProvince,
@@ -169,32 +145,10 @@ class ImagingCenterAppointment extends Appointment {
           street: imagingCenterStreet,
           emailAddress: imagingCenterEmailAddress,
           phoneNumber: imagingCenterPhoneNumber,
-          workTimes: imagingCenterWorkTimes
-                  ?.split(', ')
-                  .map(
-                    (t) => WorkTime(
-                      weekday: Weekday.find(t.split(' ')[0]),
-                      startHour: int.parse(t.split(' ')[1].split('-')[0]),
-                      endHour: int.parse(t.split(' ')[1].split('-')[1]),
-                    ),
-                  )
-                  .toList() ??
-              [],
+          workTimes: imagingCenterWorkTimes,
           password: '',
           isVerified: true,
           isDeclined: false,
-        ),
-        super(
-          patientSsid: patientSsid,
-          patientFirstName: patientFirstName,
-          patientLastName: patientLastName,
-          patientProvince: patientProvince,
-          patientCity: patientCity,
-          patientStreet: patientStreet,
-          patientEmailAddress: patientEmailAddress,
-          patientPhoneNumber: patientPhoneNumber,
-          patientBirthdate: patientBirthdate,
-          patientPfp: patientPfp,
         );
 
   ImagingCenterAppointment.fromJson(dynamic json)

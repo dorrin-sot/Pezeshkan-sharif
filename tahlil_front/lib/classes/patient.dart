@@ -19,8 +19,14 @@ class Patient extends User {
     super.pfp,
     required super.isVerified,
     required super.isDeclined,
-    required this.birthDate,
-  });
+    required String? birthDate,
+  }) : birthDate = birthDate == null
+            ? null
+            : DateFormat('yyyy-MM-dd').format(
+                DateFormat('yyyy-MM-ddThh:mm:ss')
+                    .parse(birthDate, true)
+                    .toLocal(),
+              );
 
   Patient.fromJson(dynamic json)
       : this(
@@ -37,10 +43,7 @@ class Patient extends User {
           street: json['street'],
           isVerified: json['is_verified'],
           isDeclined: json['is_declined'],
-          birthDate: json['birth_date'] == null
-              ? null
-              : DateFormat('yyyy-MM-dd')
-                  .format(DateTime.parse(json['birth_date'])),
+          birthDate: json['birth_date'],
           pfp: json['pfp'],
         );
 

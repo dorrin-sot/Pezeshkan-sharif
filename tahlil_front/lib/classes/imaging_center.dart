@@ -22,8 +22,18 @@ class ImagingCenter extends User {
     super.street,
     required super.isVerified,
     required super.isDeclined,
-    required this.workTimes,
-  });
+    required String? workTimes,
+  }) : workTimes = workTimes
+                ?.split(', ')
+                .map(
+                  (t) => WorkTime(
+                    weekday: Weekday.find(t.split(' ')[0]),
+                    startHour: int.parse(t.split(' ')[1].split('-')[0]),
+                    endHour: int.parse(t.split(' ')[1].split('-')[1]),
+                  ),
+                )
+                .toList() ??
+            [];
 
   ImagingCenter.fromJson(dynamic json)
       : this(
@@ -38,17 +48,7 @@ class ImagingCenter extends User {
           referrerSsid: json['referrer'],
           isVerified: json['is_verified'],
           isDeclined: json['is_declined'],
-          workTimes: (json['work_times'] as String?)
-                  ?.split(', ')
-                  .map(
-                    (t) => WorkTime(
-                      weekday: Weekday.find(t.split(' ')[0]),
-                      startHour: int.parse(t.split(' ')[1].split('-')[0]),
-                      endHour: int.parse(t.split(' ')[1].split('-')[1]),
-                    ),
-                  )
-                  .toList() ??
-              [],
+          workTimes: json['work_times'],
         );
 
   @override

@@ -1,4 +1,6 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:tahlil_front/classes/appointment.dart';
@@ -6,11 +8,14 @@ import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/user.dart';
+import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
+import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/appointment.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/pair.dart';
 import 'package:tahlil_front/widgets/profile_picture.dart';
+import 'package:tahlil_front/widgets/toast.dart';
 
 class AppointmentPage extends StatefulWidget {
   final int id;
@@ -85,7 +90,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           imagingCenter: true,
                         )
                     else
-                      _DetailedInfoWidget(profile, appointment, patient: true),
+                      _GeneralInfoWidget(profile, appointment, patient: true),
                     const SizedBox(width: 20),
                     if (profile.isPatient)
                       if (appointment is DoctorAppointment)
@@ -191,8 +196,30 @@ class _AppointmentPageState extends State<AppointmentPage> {
     bool doctor = false,
     bool patient = false,
   }) {
-    // todo
-    return SplitWidget(flex: 4);
+    final theme = Theme.of(context).textTheme;
+    final titleLarge = theme.titleLarge?.copyWith(fontWeight: FontWeight.w900);
+    final bodyLarge = theme.bodyLarge?.copyWith(fontWeight: FontWeight.w900);
+    return SplitWidget(
+      flex: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('${appointment.time}'.capitalize!, style: bodyLarge),
+          if (patient) ...[
+            // todo show patient history
+          ] else ...[
+            // todo show doctor or imaging center statistics
+          ],
+          Expanded(child: Container()),
+          if (profile.isImagingCenter)
+            TextButton.icon(
+              icon: Icon(Icons.upload),
+              label: Text('Upload Images'),
+              onPressed: () => _uploadImages(appointment),
+            )
+        ],
+      ),
+    );
   }
 
   Widget SplitWidget({int flex = 1, Widget? child}) {
@@ -210,5 +237,28 @@ class _AppointmentPageState extends State<AppointmentPage> {
         child: child,
       ),
     );
+  }
+
+  Future<void> _uploadImages(Appointment appointment) async {
+    final result = await FilePicker.platform
+        .pickFiles(type: FileType.image, allowMultiple: true);
+
+    if ((result?.files.length ?? 0) > 0) {
+      final response = await _appointmentService.uploadImages(
+        appointment: appointment.id,
+        files: result!.files,
+      );
+      if (response.first) setState(() {});
+
+      final toast = FToast();
+      toast.init(rootNavigatorKey.currentContext!);
+      toast.showToast(
+        child: CustomToast(
+          text: response.second,
+          toastType: response.first ? ToastType.success : ToastType.error,
+        ),
+        gravity: ToastGravity.BOTTOM_LEFT,
+      );
+    }
   }
 }

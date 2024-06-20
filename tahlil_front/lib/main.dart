@@ -228,7 +228,7 @@ class TahlilApp extends StatelessWidget {
                   );
                   return '/profile';
                 }
-                return state.fullPath;
+                return null;
               }
               return '/not-found';
             },

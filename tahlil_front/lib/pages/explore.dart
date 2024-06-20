@@ -105,7 +105,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 itemCount: snapshot.data!.length,
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 50),
-                gridDelegate:  SliverGridDelegateWithMaxCrossAxisExtent(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 500,
                   mainAxisExtent: widget.doctors ? 225 : 150,
                   mainAxisSpacing: 15,
@@ -129,9 +129,11 @@ class _ExplorePageState extends State<ExplorePage> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(5),
                     child: InkWell(
-                      onTap: () => RouterService.go(widget.doctors
-                          ? '/create-appointment?doctor=${user!.ssid}'
-                          : '/create-appointment?imaging-center=${imagingCenter!.id}'),
+                      onTap: () => RouterService.go(
+                        widget.doctors
+                            ? '/create-appointment?doctor=${user!.ssid}'
+                            : '/create-appointment?imaging-center=${imagingCenter!.id}',
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(7),
                         child: Column(

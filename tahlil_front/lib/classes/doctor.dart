@@ -24,8 +24,18 @@ class Doctor extends User {
     required super.isDeclined,
     required this.medicalId,
     required this.specialty,
-    required this.workTimes,
-  });
+    required String? workTimes,
+  }) : workTimes = workTimes
+                ?.split(', ')
+                .map(
+                  (t) => WorkTime(
+                    weekday: Weekday.find(t.split(' ')[0]),
+                    startHour: int.parse(t.split(' ')[1].split('-')[0]),
+                    endHour: int.parse(t.split(' ')[1].split('-')[1]),
+                  ),
+                )
+                .toList() ??
+            [];
 
   Doctor.fromJson(dynamic json)
       : this(
@@ -44,17 +54,7 @@ class Doctor extends User {
           isDeclined: json['is_declined'],
           medicalId: json['medical_id'],
           specialty: json['specialty'],
-          workTimes: (json['work_times'] as String?)
-                  ?.split(', ')
-                  .map(
-                    (t) => WorkTime(
-                      weekday: Weekday.find(t.split(' ')[0]),
-                      startHour: int.parse(t.split(' ')[1].split('-')[0]),
-                      endHour: int.parse(t.split(' ')[1].split('-')[1]),
-                    ),
-                  )
-                  .toList() ??
-              [],
+          workTimes: json['work_times'],
           pfp: json['pfp'],
         );
 
