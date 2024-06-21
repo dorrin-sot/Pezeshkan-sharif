@@ -39,10 +39,13 @@ class Appointment {
           isVerified: true,
           isDeclined: false,
         );
+
+  String get type => '';
 }
 
 class DoctorAppointment extends Appointment {
   final Doctor doctor;
+  final String notes;
 
   DoctorAppointment({
     required super.id,
@@ -58,6 +61,7 @@ class DoctorAppointment extends Appointment {
     super.patientPhoneNumber,
     super.patientBirthdate,
     super.patientPfp,
+    required this.notes,
     required String doctorSsid,
     required String doctorFirstName,
     required String doctorLastName,
@@ -101,6 +105,7 @@ class DoctorAppointment extends Appointment {
           patientPhoneNumber: json['patient_phone_number'],
           patientBirthdate: json['patient_birth_date'],
           patientPfp: json['patient_pfp'],
+          notes: json['notes'] ?? '-',
           doctorProvince: json['doctor_province'],
           doctorSsid: json['doctor'],
           doctorFirstName: json['doctor_first_name'],
@@ -116,6 +121,9 @@ class DoctorAppointment extends Appointment {
           time: Time.fromJson(json),
           rating: (json['rating'] as String?)?.toDouble(),
         );
+
+  @override
+  String get type => 'Doctor\'s Appointment';
 }
 
 class ImagingCenterAppointment extends Appointment {
@@ -181,4 +189,7 @@ class ImagingCenterAppointment extends Appointment {
           time: Time.fromJson(json),
           rating: (json['rating'] as String?)?.toDouble(),
         );
+
+  @override
+  String get type => 'Imaging Center\'s Appointment';
 }

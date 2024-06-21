@@ -37,16 +37,21 @@ class AppointmentService {
         .toList();
   }
 
-  Future<List<Appointment>> getAppointments() async {
-    final response = await _networkService.get('/appointments');
+  Future<List<Appointment>> getAppointments({String? patient}) async {
+    final response = await _networkService.get(
+      '/appointments',
+      query: {if (patient != null) 'patient': patient},
+    );
 
-    return (jsonDecode(response.bodyString!) as List).map((json) {
+    final result = (jsonDecode(response.bodyString!) as List).map((json) {
       if (json['doctor'] != null) {
         return DoctorAppointment.fromJson(json);
       } else {
         return ImagingCenterAppointment.fromJson(json);
       }
     }).toList();
+    result.sort((a1, a2) => a1.time.dateTime.compareTo(a2.time.dateTime));
+    return result;
   }
 
   Future<Pair<bool, String>> createAppointment(

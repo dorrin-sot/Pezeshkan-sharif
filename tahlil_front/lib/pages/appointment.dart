@@ -18,6 +18,7 @@ import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/appointment.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/pair.dart';
+import 'package:tahlil_front/widgets/accordion_item.dart';
 import 'package:tahlil_front/widgets/empty.dart' as empty;
 import 'package:tahlil_front/widgets/error.dart' as error;
 import 'package:tahlil_front/widgets/profile_picture.dart';
@@ -224,55 +225,25 @@ class _AppointmentPageState extends State<AppointmentPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('${appointment.time}'.capitalize!, style: bodyLarge),
-          if (patient &&
-              (_profileService.profileCached?.isDoctor ?? false)) ...[
-            // todo show patient history
+          Text('${appointment.time}'.capitalize!, style: titleLarge),
+          const Padding(
+            padding: EdgeInsets.only(top: 10, bottom: 20),
+            child: Divider(),
+          ),
+          if (patient) ...[
+            if (profile.isDoctor)
+              Expanded(child: PatientHistoryWidget(appointment))
+            else ...[
+              Expanded(child: CurrentAppointmentImages(appointment)),
+              TextButton.icon(
+                icon: const Icon(Icons.upload),
+                label: const Text('Upload Images'),
+                onPressed: () => _uploadImages(appointment),
+              )
+            ],
           ] else ...[
             // todo show doctor or imaging center statistics
           ],
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 30),
-              child: FutureBuilder<List<String>>(
-                  future:
-                      _appointmentService.getAppointmentImages(appointment.id),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return error.ErrorWidget(
-                        msg: 'Encountered an error loading appointment images.',
-                        refresh: () => setState(() {}),
-                      );
-                    }
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.data!.isEmpty) {
-                      return empty.EmptyWidget(
-                        msg: 'This Patient doesn\'t have any images.',
-                        refresh: () => setState(() {}),
-                      );
-                    }
-
-                    final images = snapshot.data ?? [];
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: images
-                          .map((link) => ImageItemWidget(appointment, link))
-                          .toList(),
-                    );
-                  }),
-            ),
-          ),
-          if (profile.isImagingCenter)
-            TextButton.icon(
-              icon: const Icon(Icons.upload),
-              label: const Text('Upload Images'),
-              onPressed: () => _uploadImages(appointment),
-            )
         ],
       ),
     );
@@ -326,6 +297,136 @@ class _AppointmentPageState extends State<AppointmentPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget CurrentAppointmentImages(Appointment appointment) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      child: FutureBuilder<List<String>>(
+          future: _appointmentService.getAppointmentImages(appointment.id),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return error.ErrorWidget(
+                msg: 'Encountered an error loading appointment images.',
+                refresh: () => setState(() {}),
+              );
+            }
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.data!.isEmpty) {
+              return empty.EmptyWidget(
+                msg: 'This Patient doesn\'t have any images.',
+                refresh: () => setState(() {}),
+              );
+            }
+
+            final images = snapshot.data ?? [];
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: images
+                  .map((link) => ImageItemWidget(appointment, link))
+                  .toList(),
+            );
+          }),
+    );
+  }
+
+  Widget PatientHistoryWidget(Appointment appointment) {
+    return FutureBuilder<Map<Appointment, List<String>>>(
+      future: _appointmentService
+          .getAppointments(patient: appointment.patient.ssid)
+          .then(
+            (list) => Future.wait(
+              list.map(
+                (a) async => MapEntry(
+                  a,
+                  await _appointmentService.getAppointmentImages(a.id),
+                ),
+              ),
+            ),
+          )
+          .then((list) => Map.fromEntries(list)),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return error.ErrorWidget(
+            msg: 'Encountered an error loading appointment images.',
+            refresh: () => setState(() {}),
+          );
+        }
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (snapshot.data!.entries.isEmpty) {
+          return empty.EmptyWidget(
+            msg: 'This Patient doesn\'t have any images.',
+            refresh: () => setState(() {}),
+          );
+        }
+
+        final appointments = snapshot.data!;
+
+        return Column(
+          children: appointments.entries.map((e) {
+            final appointment = e.key;
+            final images = e.value;
+
+            final notesStyle = Theme.of(context).textTheme.bodySmall;
+            final notesStyleBold =
+                notesStyle?.copyWith(fontWeight: FontWeight.w900);
+
+            return AccordionItemWidget(
+              title: '${appointment.time}',
+              badge: appointment.type,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: (appointment is ImagingCenterAppointment)
+                      ? images
+                          .map((link) => ImageItemWidget(appointment, link))
+                          .toList()
+                      : [
+                          Row(
+                            children: [
+                              Material(
+                                elevation: 3,
+                                borderRadius: BorderRadius.circular(5),
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Doctor\'s notes:', style: notesStyleBold),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 5, left: 5),
+                                        child: Text(
+                                          (appointment as DoctorAppointment).notes,
+                                          style: notesStyle,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
