@@ -25,6 +25,8 @@ final GlobalKey<NavigatorState> rootNavigatorKey =
 final GlobalKey<NavigatorState> shellNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'shell');
 
+int get timestamp => DateTime.now().millisecondsSinceEpoch;
+
 void main() {
   runApp(TahlilApp());
 }

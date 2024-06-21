@@ -10,6 +10,7 @@ class NetworkService extends GetConnect {
   void onInit() {
     withCredentials = true;
     maxAuthRetries = 3;
+    timeout = const Duration(seconds: 15);
   }
 
   String _buildUrl(String path, Map<String, dynamic>? query) {
@@ -80,7 +81,7 @@ class NetworkService extends GetConnect {
         !url.contains('refresh') &&
         !url.contains('is_logged_in')) {
       for (int i = 0; i < maxAuthRetries; i++) {
-        if ((await super.post('/auth/refresh', {})).statusCode == 200) break;
+        if ((await super.post('/auth/refresh', {})).isOk) break;
       }
       response = await super.post(
         _buildUrl(url, query),

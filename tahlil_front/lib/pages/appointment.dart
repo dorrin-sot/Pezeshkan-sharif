@@ -1,3 +1,6 @@
+import 'dart:js' as js;
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,6 +17,8 @@ import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/appointment.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/pair.dart';
+import 'package:tahlil_front/widgets/empty.dart' as empty;
+import 'package:tahlil_front/widgets/error.dart' as error;
 import 'package:tahlil_front/widgets/profile_picture.dart';
 import 'package:tahlil_front/widgets/toast.dart';
 
@@ -35,30 +40,11 @@ class _AppointmentPageState extends State<AppointmentPage> {
     return FutureBuilder<Appointment?>(
       future: _appointmentService.getAppointment(widget.id),
       builder: (context, snapshot) {
+
         if (snapshot.hasError) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset('assets/error.png', width: 600),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Encountered an error loading your profile!',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 5),
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () => Future(() => setState(() {})),
-                  )
-                ],
-              )
-            ],
+          return error.ErrorWidget(
+            msg: 'Encountered an error loading appointment information.',
+            refresh: () => setState(() {}),
           );
         }
         if (!snapshot.hasData) {
@@ -66,6 +52,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
             child: CircularProgressIndicator(),
           );
         }
+
         final appointment = snapshot.data!;
 
         return FutureBuilder<User?>(
@@ -210,14 +197,100 @@ class _AppointmentPageState extends State<AppointmentPage> {
           ] else ...[
             // todo show doctor or imaging center statistics
           ],
-          Expanded(child: Container()),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              child: FutureBuilder<List<String>>(
+                  future:
+                      _appointmentService.getAppointmentImages(appointment.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return error.ErrorWidget(
+                        msg: 'Encountered an error loading appointment images.',
+                        refresh: () => setState(() {}),
+                      );
+                    }
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.data!.isEmpty) {
+                      return empty.EmptyWidget(
+                        msg: 'This Patient doesn\'t have any images.',
+                        refresh: () => setState(() {}),
+                      );
+                    }
+
+                    final images = snapshot.data ?? [];
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: images
+                          .map((link) => ImageItemWidget(appointment, link))
+                          .toList(),
+                    );
+                  }),
+            ),
+          ),
           if (profile.isImagingCenter)
             TextButton.icon(
-              icon: Icon(Icons.upload),
-              label: Text('Upload Images'),
+              icon: const Icon(Icons.upload),
+              label: const Text('Upload Images'),
               onPressed: () => _uploadImages(appointment),
             )
         ],
+      ),
+    );
+  }
+
+  Widget ImageItemWidget(Appointment appointment, String link) {
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: SizedBox(
+        height: 60,
+        child: Material(
+          elevation: 1,
+          borderRadius: BorderRadius.circular(5),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Material(
+                    elevation: 2,
+                    borderRadius: BorderRadius.circular(50),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: Image(
+                        fit: BoxFit.cover,
+                        image: CachedNetworkImageProvider(link),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(child: Container()),
+                if (_profileService.profileCached!.isImagingCenter)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.delete),
+                      label: const Text('Delete Image'),
+                      onPressed: () => _deleteImage(appointment, link),
+                    ),
+                  ),
+                FilledButton.icon(
+                  icon: const Icon(Icons.remove_red_eye),
+                  label: const Text('View Image'),
+                  onPressed: () => js.context.callMethod('open', [link]),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -260,5 +333,23 @@ class _AppointmentPageState extends State<AppointmentPage> {
         gravity: ToastGravity.BOTTOM_LEFT,
       );
     }
+  }
+
+  Future<void> _deleteImage(Appointment appointment, String link) async {
+    final response = await _appointmentService.deleteImage(
+      appointment: appointment.id,
+      image: link,
+    );
+    if (response.first) setState(() {});
+
+    final toast = FToast();
+    toast.init(rootNavigatorKey.currentContext!);
+    toast.showToast(
+      child: CustomToast(
+        text: response.second,
+        toastType: response.first ? ToastType.success : ToastType.error,
+      ),
+      gravity: ToastGravity.BOTTOM_LEFT,
+    );
   }
 }

@@ -18,6 +18,8 @@ import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/appointment_data_source.dart';
 import 'package:tahlil_front/utils/pair.dart';
 import 'package:tahlil_front/utils/triple.dart';
+import 'package:tahlil_front/widgets/empty.dart' as empty;
+import 'package:tahlil_front/widgets/error.dart' as error;
 import 'package:tahlil_front/widgets/toast.dart';
 
 class CreateAppointmentPage extends StatefulWidget {
@@ -187,30 +189,10 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                             list[0] as List<WorkTime>, list[1] as List<Time>)),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Image.asset('assets/error.png', width: 600),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Encountered an error loading your profile!',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 5),
-                                IconButton(
-                                  icon: const Icon(Icons.refresh),
-                                  onPressed: () =>
-                                      Future(() => setState(() {})),
-                                )
-                              ],
-                            )
-                          ],
+                        return error.ErrorWidget(
+                          msg:
+                              'Encountered an error loading appointment images.',
+                          refresh: () => setState(() {}),
                         );
                       }
                       if (!snapshot.hasData) {
@@ -240,30 +222,9 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                           .toList();
 
                       if (workTimes.isEmpty) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Image.asset('assets/empty.png', width: 600),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'No User has you as their referrer!',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 5),
-                                IconButton(
-                                  icon: const Icon(Icons.refresh),
-                                  onPressed: () =>
-                                      Future(() => setState(() {})),
-                                )
-                              ],
-                            )
-                          ],
+                        return empty.EmptyWidget(
+                          msg: 'This Patient doesn\'t have any images.',
+                          refresh: () => setState(() {}),
                         );
                       }
 

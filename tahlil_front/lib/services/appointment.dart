@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:file_picker/src/platform_file.dart';
-import 'package:get/get_connect/http/src/multipart/form_data.dart';
+import 'package:get/get.dart';
 import 'package:tahlil_front/classes/appointment.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
@@ -87,14 +87,28 @@ class AppointmentService {
   }) async {
     final response = await _networkService.post(
       '/appointment/$appointment/images',
-      FormData(
-        {
-          'images': files
-              .map((f) => MultipartFileBytes(f.bytes, filename: f.name))
-              .toList()
-        },
-      ),
+      FormData({
+        'images': files
+            .map((f) => MultipartFileBytes(f.bytes!, filename: f.name))
+            .toList()
+      }),
     );
     return Pair(response.isOk, response.body);
+  }
+
+  Future<List<String>> getAppointmentImages(int appointment) async {
+    final response =
+        await _networkService.get('/appointment/$appointment/images');
+    return (jsonDecode(response.bodyString ?? '[]') as List).cast<String>();
+  }
+
+  Future<Pair<bool, String>> deleteImage(
+      {required int appointment, required String image}) async {
+    final response = await _networkService
+        .delete('/appointment/$appointment/images/${image.split('/').last}');
+    return Pair(
+      response.isOk,
+      response.isOk ? 'Image deleted successfully!' : response.bodyString ?? '',
+    );
   }
 }

@@ -3,11 +3,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
+import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/services/verification.dart';
-
-import '../classes/user.dart';
+import 'package:tahlil_front/widgets/empty.dart' as empty;
+import 'package:tahlil_front/widgets/error.dart' as error;
 
 class VerificationPage extends StatefulWidget {
   const VerificationPage({super.key});
@@ -96,29 +97,9 @@ class _VerificationPageState extends State<VerificationPage> {
             future: _verificationService.verifyList(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/error.png', width: 600),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Encountered an error loading your profile!',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 5),
-                        IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: () => Future(() => setState(() {})),
-                        )
-                      ],
-                    )
-                  ],
+                return error.ErrorWidget(
+                  msg: 'Encountered an error loading appointment images.',
+                  refresh: () => setState(() {}),
                 );
               }
               if (!snapshot.hasData) {
@@ -126,6 +107,7 @@ class _VerificationPageState extends State<VerificationPage> {
                   child: CircularProgressIndicator(),
                 );
               }
+
               final users = snapshot.data!.where((u) {
                 if (!showAccepted && u.isVerified) return false;
                 if (!showDeclined && u.isDeclined) return false;
@@ -133,29 +115,9 @@ class _VerificationPageState extends State<VerificationPage> {
               }).toList();
 
               if (users.isEmpty) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/empty.png', width: 600),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'No User has you as their referrer!',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 5),
-                        IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: () => Future(() => setState(() {})),
-                        )
-                      ],
-                    )
-                  ],
+                return empty.EmptyWidget(
+                  msg: 'This Patient doesn\'t have any images.',
+                  refresh: () => setState(() {}),
                 );
               }
 

@@ -15,6 +15,7 @@ import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/profile.dart';
 import 'package:tahlil_front/utils/triple.dart';
+import 'package:tahlil_front/widgets/error.dart' as error;
 import 'package:tahlil_front/widgets/profile_picture.dart';
 import 'package:tahlil_front/widgets/text_field.dart';
 import 'package:tahlil_front/widgets/toast.dart';
@@ -48,29 +49,9 @@ class _ProfilePageState extends State<ProfilePage> {
       future: _profileService.profile,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset('assets/error.png', width: 600),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Encountered an error loading your profile!',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 5),
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () => Future(() => setState(() {})),
-                  )
-                ],
-              )
-            ],
+          return error.ErrorWidget(
+            msg: 'Encountered an error loading appointment images.',
+            refresh: () => setState(() {}),
           );
         }
         if (!snapshot.hasData) {
@@ -78,6 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: CircularProgressIndicator(),
           );
         }
+
         final profile = snapshot.data!;
         firstNameController.text = profile.firstName;
         lastNameController.text = profile.lastName;

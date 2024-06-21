@@ -4,6 +4,8 @@ import 'package:tahlil_front/classes/appointment.dart' as ap;
 import 'package:tahlil_front/services/appointment.dart';
 import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/appointment_data_source.dart';
+import 'package:tahlil_front/widgets/empty.dart' as empty;
+import 'package:tahlil_front/widgets/error.dart' as error;
 
 class AppointmentsPage extends StatefulWidget {
   const AppointmentsPage({super.key});
@@ -23,29 +25,9 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         future: _appointmentService.getAppointments(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset('assets/error.png', width: 600),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Encountered an error loading your profile!',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 5),
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () => Future(() => setState(() {})),
-                    )
-                  ],
-                )
-              ],
+            return error.ErrorWidget(
+              msg: 'Encountered an error loading appointment images.',
+              refresh: () => setState(() {}),
             );
           }
           if (!snapshot.hasData) {
@@ -53,43 +35,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
               child: CircularProgressIndicator(),
             );
           }
-
-          final appointments = snapshot.data ?? [];
-
-          if (appointments.isEmpty) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset('assets/empty.png', width: 600),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'No User has you as their referrer!',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 5),
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () => Future(() => setState(() {})),
-                    )
-                  ],
-                )
-              ],
+          if (snapshot.data!.isEmpty) {
+            return empty.EmptyWidget(
+              msg: 'This Patient doesn\'t have any images.',
+              refresh: () => setState(() {}),
             );
           }
 
-          final minDate = [
-            ...appointments.map((a) => a.time.dateTime),
-            DateTime.now()
-          ].reduce((val, elem) => val.isBefore(elem) ? val : elem);
-          final maxDate = appointments
-              .map((a) => a.time.dateTime)
-              .reduce((val, elem) => val.isAfter(elem) ? val : elem);
+          final appointments = snapshot.data!;
+          final times = appointments.map((a) => a.time.dateTime).toList();
+          times.add(DateTime.now());
+
+          final minDate =
+              times.reduce((val, elem) => val.isBefore(elem) ? val : elem);
+          final maxDate =
+              times.reduce((val, elem) => val.isAfter(elem) ? val : elem);
 
           return SfCalendar(
             view: CalendarView.schedule,
