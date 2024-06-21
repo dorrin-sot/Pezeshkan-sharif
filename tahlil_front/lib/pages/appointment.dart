@@ -3,6 +3,7 @@ import 'dart:js' as js;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -40,7 +41,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
     return FutureBuilder<Appointment?>(
       future: _appointmentService.getAppointment(widget.id),
       builder: (context, snapshot) {
-
         if (snapshot.hasError) {
           return error.ErrorWidget(
             msg: 'Encountered an error loading appointment information.',
@@ -170,7 +170,40 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 ],
               ),
             );
-          })
+          }),
+          Expanded(child: Container()),
+          if (_profileService.profileCached?.isPatient ?? false)
+            Center(
+              child: RatingBar.builder(
+                wrapAlignment: WrapAlignment.center,
+                initialRating: appointment.rating ?? 0,
+                allowHalfRating: true,
+                itemCount: 5,
+                glowRadius: 1,
+                itemBuilder: (context, index) {
+                  return Icon(
+                      [
+                        Icons.sentiment_very_dissatisfied,
+                        Icons.sentiment_dissatisfied,
+                        Icons.sentiment_neutral,
+                        Icons.sentiment_satisfied,
+                        Icons.sentiment_very_satisfied
+                      ][index],
+                      color: [
+                        Colors.red,
+                        Colors.redAccent,
+                        Colors.amber,
+                        Colors.lightGreen,
+                        Colors.green
+                      ][index]);
+                },
+                onRatingUpdate: (rating) async {
+                  if (await _appointmentService.rate(appointment, rating)) {
+                    setState(() {});
+                  }
+                },
+              ),
+            ),
         ],
       ),
     );
@@ -192,7 +225,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text('${appointment.time}'.capitalize!, style: bodyLarge),
-          if (patient) ...[
+          if (patient &&
+              (_profileService.profileCached?.isDoctor ?? false)) ...[
             // todo show patient history
           ] else ...[
             // todo show doctor or imaging center statistics

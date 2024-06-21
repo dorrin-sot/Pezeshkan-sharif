@@ -111,4 +111,12 @@ class AppointmentService {
       response.isOk ? 'Image deleted successfully!' : response.bodyString ?? '',
     );
   }
+
+  Future<bool> rate(Appointment appointment, double rating) async {
+    final response = await _networkService.put(
+      '/appointment/${appointment.id}',
+      {'rating': rating},
+    );
+    return response.isOk;
+  }
 }

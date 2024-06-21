@@ -214,6 +214,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                                 patientFirstName: '',
                                 patientLastName: '',
                                 time: time,
+                                rating: 0,
                               ),
                             ),
                           )

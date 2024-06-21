@@ -2,11 +2,13 @@ import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/time.dart';
+import 'package:tahlil_front/extensions/string_ext.dart';
 
 class Appointment {
   final int id;
   final Patient patient;
   final Time time;
+  final double? rating;
 
   Appointment({
     required this.id,
@@ -21,6 +23,7 @@ class Appointment {
     String? patientBirthdate,
     String? patientPfp,
     required this.time,
+    required this.rating,
   }) : patient = Patient(
           ssid: patientSsid,
           firstName: patientFirstName,
@@ -44,6 +47,7 @@ class DoctorAppointment extends Appointment {
   DoctorAppointment({
     required super.id,
     required super.time,
+    required super.rating,
     required super.patientSsid,
     required super.patientFirstName,
     required super.patientLastName,
@@ -110,6 +114,7 @@ class DoctorAppointment extends Appointment {
           doctorSpecialty: json['doctor_specialty'],
           doctorPfp: json['doctor_pfp'],
           time: Time.fromJson(json),
+          rating: (json['rating'] as String?)?.toDouble(),
         );
 }
 
@@ -122,6 +127,7 @@ class ImagingCenterAppointment extends Appointment {
     required super.patientSsid,
     required super.patientFirstName,
     required super.patientLastName,
+    required super.rating,
     super.patientProvince,
     super.patientCity,
     super.patientStreet,
@@ -173,5 +179,6 @@ class ImagingCenterAppointment extends Appointment {
           imagingCenterPhoneNumber: json['imaging_center_phone_number'],
           imagingCenterWorkTimes: json['imaging_center_work_times'],
           time: Time.fromJson(json),
+          rating: (json['rating'] as String?)?.toDouble(),
         );
 }
