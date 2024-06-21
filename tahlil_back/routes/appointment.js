@@ -413,18 +413,17 @@ function appointment_requests(app, db, jsonParser) {
         } else {
             const {id: appointment_id} = req.params;
             let type = 'doctor'
-            let {rows: appointment, rowCount} = await db.query({text: `select * from public."${type}_appointment_v1" where id=$1`, values: [parseInt(appointment_id)]})
+            let {rowCount} = await db.query({text: `select * from public."${type}_appointment_v1" where id=$1`, values: [parseInt(appointment_id)]})
                 .catch(console.log)
 
             if (rowCount === 0) {
                 type = 'imaging_center'
                 const result = await db.query({text: `select * from public."${type}_appointment_v1" where id=$1`, values: [parseInt(appointment_id)]})
                     .catch(console.log)
-                appointment = result['rows']
                 rowCount = result['rowCount']
             }
 
-            if (rowCount === 0 || ![appointment[0]['patient'], appointment[0]['doctor'], appointment[0]['imaging_center_name']].includes(ssid))
+            if (rowCount === 0)
                 return res.status(404).send('Appointment not found!')
 
             const {rows: list} = await db.query({text: 'select image_link from public."opg_image" where appointment=$1', values: [parseInt(appointment_id)]})
