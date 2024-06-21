@@ -127,7 +127,7 @@ function appointment_requests(app, db, jsonParser) {
      *               day: 1
      *               hour: 11
      *     responses:
-     *       200:
+     *       201:
      *         description: Appointment created successfully.
      *       400:
      *         description: Non-Patient users cannot create appointment or appointment is duplicate
@@ -170,7 +170,7 @@ function appointment_requests(app, db, jsonParser) {
                     text: `insert into public."appointment_doctor" (patient, doctor, time) values ($1, $2, $3)`,
                     values: [ssid, doctor, time_id]
                 })
-                    .then((_) => res.status(200).send('Appointment created successfully!'))
+                    .then((_) => res.status(201).send('Appointment created successfully!'))
                     .catch((e) => {
                         if (e.constraint === 'appointment_doctor_unique_key')
                             res.status(400).send('Appointment already exists!')
@@ -181,7 +181,7 @@ function appointment_requests(app, db, jsonParser) {
                     text: `insert into public."appointment_imaging_center" (patient, imaging_center, time) values ($1, $2, $3)`,
                     values: [ssid, imaging_center, time_id]
                 })
-                    .then((_) => res.status(200).send('Appointment created successfully!'))
+                    .then((_) => res.status(201).send('Appointment created successfully!'))
                     .catch((e) => {
                         if (e.constraint === 'appointment_imaging_center_unique_key')
                             res.status(400).send('Appointment already exists!')
@@ -293,7 +293,7 @@ function appointment_requests(app, db, jsonParser) {
                         }))
                 );
             }
-            res.status(200).send('Images Uploaded successfully!');
+            res.status(201).send('Images Uploaded successfully!');
         });
 
     /**
