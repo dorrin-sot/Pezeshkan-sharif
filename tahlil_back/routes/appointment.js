@@ -72,7 +72,13 @@ function appointment_requests(app, db, jsonParser) {
      * @swagger
      * /appointments:
      *   get:
-     *     summary: Get List of doctor or imaging center or patient's appointments
+     *     summary: if "patient" is set, return all of said patient's appointments; otherwise return current user's appointments
+     *     parameters:
+     *       - in: query
+     *         name: patient
+     *         schema:
+     *           type: string
+     *         description: The patient whose appointments need to be provided
      *     responses:
      *       200:
      *         description: Returns appointment list.
@@ -92,14 +98,28 @@ function appointment_requests(app, db, jsonParser) {
             res.status(401).send('Invalid Token!')
         } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
-        } else if (user_type === 'referrer') {
-            res.status(400).send('Referrer can not have appointments!')
         } else {
-            const {rows: list1} = await db.query(`select * from public."doctor_appointment_v1" where patient='${ssid}' or doctor='${ssid}'`)
-                .catch(console.log);
-            const {rows: list2} = await db.query(`select * from public."imaging_center_appointment_v1" where patient='${ssid}' or imaging_center_name='${ssid}'`)
-                .catch(console.log);
-            res.status(200).json([...list1, ...list2])
+            const {patient} = req.query;
+
+            if (patient) {
+                const {rowCount} = await db.query({text: 'select * from public."patient" where ssid=$1', values: [patient]})
+                    .catch(console.log);
+                if (rowCount === 0) return res.status(404).send('Patient not found!');
+
+                const {rows: list1} = await db.query(`select * from public."doctor_appointment_v1" where patient='${patient}'`)
+                    .catch(console.log);
+                const {rows: list2} = await db.query(`select * from public."imaging_center_appointment_v1" where patient='${patient}'`)
+                    .catch(console.log);
+                res.status(200).json([...list1, ...list2])
+            } else {
+                if (user_type === 'referrer') return res.status(400).send('Referrer can not have appointments!')
+
+                const {rows: list1} = await db.query(`select * from public."doctor_appointment_v1" where patient='${ssid}' or doctor='${ssid}'`)
+                    .catch(console.log);
+                const {rows: list2} = await db.query(`select * from public."imaging_center_appointment_v1" where patient='${ssid}' or imaging_center_name='${ssid}'`)
+                    .catch(console.log);
+                res.status(200).json([...list1, ...list2])
+            }
         }
     });
 
@@ -235,7 +255,7 @@ function appointment_requests(app, db, jsonParser) {
             res.status(401).send('Invalid Token!')
         } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
-        } else if (user_type!== 'patient') {
+        } else if (user_type !== 'patient') {
             res.status(400).send('Non-Patient users cannot create appointment!')
         } else {
             const {id: appointment_id} = req.params;
