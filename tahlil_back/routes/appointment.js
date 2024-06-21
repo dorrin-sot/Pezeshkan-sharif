@@ -194,8 +194,70 @@ function appointment_requests(app, db, jsonParser) {
     /**
      * @swagger
      * /appointment/{id}:
-     *   get:
+     *   put:
      *     summary: Get appointment Info
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *         description: The ID of the appointment
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               rating: number
+     *             example:
+     *               rating: 3.5
+     *     responses:
+     *       200:
+     *         description: Rating updated successfully
+     *       400:
+     *         description: Non-Patient users cannot create appointment
+     *       404:
+     *         description: Appointment not found
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.put('/appointment/:id', jsonParser, async function (req, res) {
+        let {token} = req.cookies;
+
+        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length === 0) return res.status(401).send('Invalid Token!');
+        const {ssid, created_at, user_type} = rows[0]
+
+        if (!validateJwtToken(token)) {
+            res.status(401).send('Invalid Token!')
+        } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+            res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+        } else if (user_type!== 'patient') {
+            res.status(400).send('Non-Patient users cannot create appointment!')
+        } else {
+            const {id: appointment_id} = req.params;
+            const {rating} = req.body;
+            let {rows: appointment, rowCount} = await db.query({text: `select * from public."appointment" where id=$1`, values: [parseInt(appointment_id)]})
+                .catch(console.log)
+
+            if (rowCount === 0 || ![appointment[0]['patient'], appointment[0]['doctor'], appointment[0]['imaging_center_name']].includes(ssid))
+                return res.status(404).send('Appointment not found!')
+
+            await db.query({text: `update public."appointment" set rating=$1 where id=$2`, values: [rating, parseInt(appointment_id)]})
+                .catch(console.log)
+
+            res.status(200).json('Rating updated successfully!')
+        }
+    });
+
+    /**
+     * @swagger
+     * /appointment/{id}:
+     *   put:
+     *     summary: Add rating for appointment
      *     parameters:
      *       - in: path
      *         name: id
