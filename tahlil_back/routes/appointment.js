@@ -2,7 +2,7 @@
 
 const {validateJwtToken} = require('../utils/jwt');
 const {auth_midware} = require("./middlewares/auth");
-const {pfp_storage, opg_images_storage} = require("../utils/files");
+const {pfp_storage, opg_images_storage, delete_file} = require("../utils/files");
 
 function appointment_requests(app, db, jsonParser) {
     /**
@@ -348,6 +348,66 @@ function appointment_requests(app, db, jsonParser) {
             const {rows: list} = await db.query({text: 'select image_link from public."opg_image" where appointment=$1', values: [parseInt(appointment_id)]})
                 .catch(console.log)
             res.status(200).json(list.map((i) => i['image_link']));
+        }
+    });
+
+    /**
+     * @swagger
+     * /appointment/{id}/images/{filename}:
+     *   delete:
+     *     summary: Get appointment images
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *         description: The ID of the appointment
+     *       - in: path
+     *         name: filename
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: The Name of the file to be deleted
+     *     responses:
+     *       204:
+     *         description: Image deleted successfully
+     *       404:
+     *         description: Appointment or image not found
+     *       401:
+     *         description: Unauthorized access. Try logging in or refreshing token.
+     *
+     */
+    app.delete('/appointment/:id/images/:filename', async function (req, res) {
+        let {token} = req.cookies;
+
+        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
+        if (rows.length === 0) return res.status(401).send('Invalid Token!');
+        const {ssid, created_at, user_type} = rows[0]
+
+        if (!validateJwtToken(token)) {
+            res.status(401).send('Invalid Token!')
+        } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
+            res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
+        } else if (user_type !== 'imaging_center') {
+            res.status(400).send('Non-Image-Center users cannot delete appointment images!')
+        } else {
+            const {id: appointment, filename} = req.params;
+
+            const {rowCount: count1} = await db.query(`select * from public."appointment" where id=${appointment}`)
+                .catch(console.log);
+            if (count1 === 0) return res.status(404).send('Appointment not found!')
+
+            const {rows: images, rowCount: count2} = await db.query(`select * from public."opg_image" where appointment=${appointment} and image_link like '\%${filename}'`)
+                .catch(console.log);
+
+            const file = `files/opg-images/${appointment}/${filename}`;
+            delete_file(file)
+
+            if (count2 === 0) return res.status(404).send('Image not found!')
+            await db.query(`delete from public."opg_image" where image_link='${images[0]['image_link']}'`)
+                .catch(console.log);
+            res.status(204).send('Image deleted successfully!')
         }
     });
 }
