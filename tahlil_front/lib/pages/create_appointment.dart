@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:tahlil_front/classes/appointment.dart' as ap;
 import 'package:tahlil_front/classes/doctor.dart';
+import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/time.dart';
+import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/classes/work_time.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
@@ -71,95 +73,92 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                     BoxShadow(color: Colors.black45, blurRadius: 2),
                   ],
                 ),
-                child: doctor != null
-                    ? FutureBuilder<Doctor?>(
-                        future: _doctorService.getDoctorInfo(doctor),
-                        builder: (context, snapshot) {
-                          final doctor = snapshot.data;
-                          if (doctor != null) {
+                child: FutureBuilder<User?>(
+                  future: doctor != null
+                      ? _doctorService.getDoctorInfo(doctor)
+                      : _imagingCenterService
+                          .getImagingCenterInfo(imagingCenter!),
+                  builder: (context, snapshot) {
+                    final user = snapshot.data;
+                    if (user != null) {
+                      return Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Triple<String, Widget?, dynamic>>[
+                            if (user is Doctor) ...[
+                              Triple('', null, user.fullName),
+                              Triple('Medical ID: ', const Icon(Icons.numbers),
+                                  user.medicalId),
+                            ] else if (user is ImagingCenter)
+                              Triple('', null, user.name),
+                            Triple('Phone number: ', const Icon(Icons.phone),
+                                user.phoneNumber ?? '-'),
+                            Triple('Email Address: ', const Icon(Icons.email),
+                                user.emailAddress ?? '-'),
+                            if (user is Doctor)
+                              Triple(
+                                  'Specialty: ',
+                                  const FaIcon(FontAwesomeIcons.userDoctor),
+                                  user.specialty ?? '-'),
+                            Triple(
+                                'Address: ',
+                                const Icon(Icons.pin_drop),
+                                // ignore: prefer_interpolation_to_compose_strings
+                                (user.province +
+                                        ', ' +
+                                        user.city +
+                                        ', ' +
+                                        user.street) ??
+                                    '-'),
+                            Triple(
+                              'Working Hours: ',
+                              const Icon(Icons.work),
+                              (user is Doctor
+                                      ? user.workTimes
+                                      : (user as ImagingCenter).workTimes)
+                                  .map((wt) => '$wt')
+                                  .join(', ')
+                                  .capitalize,
+                            ),
+                          ].map((tup) {
+                            final label = tup.first;
+                            final icon = tup.second;
+                            final value = tup.third;
                             return Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Triple<String, Widget?, dynamic>>[
-                                  Triple('', null,
-                                      '${doctor.firstName} ${doctor.lastName}'),
-                                  Triple(
-                                      'Medical ID: ',
-                                      const Icon(Icons.numbers),
-                                      doctor.medicalId),
-                                  Triple(
-                                      'Phone number: ',
-                                      const Icon(Icons.phone),
-                                      doctor.phoneNumber ?? '-'),
-                                  Triple(
-                                      'Email Address: ',
-                                      const Icon(Icons.email),
-                                      doctor.emailAddress ?? '-'),
-                                  Triple(
-                                      'Specialty: ',
-                                      const FaIcon(FontAwesomeIcons.userDoctor),
-                                      doctor.specialty ?? '-'),
-                                  Triple(
-                                      'Address: ',
-                                      const Icon(Icons.pin_drop),
-                                      // ignore: prefer_interpolation_to_compose_strings
-                                      (doctor.province +
-                                              ', ' +
-                                              doctor.city +
-                                              ', ' +
-                                              doctor.street) ??
-                                          '-'),
-                                  Triple(
-                                    'Working Hours: ',
-                                    const Icon(Icons.work),
-                                    doctor.workTimes
-                                        .map((wt) => '$wt')
-                                        .join(', ')
-                                        .capitalize,
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 5),
+                                    child: icon ?? Container(),
                                   ),
-                                ].map((tup) {
-                                  final label = tup.first;
-                                  final icon = tup.second;
-                                  final value = tup.third;
-                                  return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 5),
-                                    child: Row(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 5),
-                                          child: icon ?? Container(),
-                                        ),
-                                        RichText(
-                                          text: TextSpan(children: [
-                                            TextSpan(
-                                                text: label,
-                                                style:
-                                                    theme.textTheme.bodyMedium),
-                                            TextSpan(
-                                              text: '$value',
-                                              style: theme.textTheme.bodyLarge
-                                                  ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.w900),
-                                            ),
-                                          ]),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
+                                  RichText(
+                                    text: TextSpan(children: [
+                                      TextSpan(
+                                          text: label,
+                                          style: theme.textTheme.bodyMedium),
+                                      TextSpan(
+                                        text: '$value',
+                                        style: theme.textTheme.bodyLarge
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w900),
+                                      ),
+                                    ]),
+                                  ),
+                                ],
                               ),
                             );
-                          }
-                          return Container();
-                        },
-                      )
-                    : Container() // todo
+                          }).toList(),
+                        ),
+                      );
+                    }
+                    return Container();
+                  },
+                )
+                // todo
                 ),
             const SizedBox(height: 20),
             Expanded(
@@ -250,7 +249,7 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                           if (workTimes.any((wt) =>
                                   wt.startHour <= date.hour &&
                                   date.hour < wt.endHour &&
-                                  '${wt.weekday}' == week[date.weekday]) &&
+                                  '${wt.weekday}' == week[date.weekday - 1]) &&
                               !unavailableTimes
                                   .any((t) => t.dateTime == date)) {
                             selectedDateTime = details.date;

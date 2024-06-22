@@ -6,6 +6,7 @@ import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
 import 'package:tahlil_front/classes/referrer.dart';
+import 'package:tahlil_front/classes/statistics.dart';
 import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/enums/weekday.dart';
 import 'package:tahlil_front/services/network.dart';
@@ -105,5 +106,26 @@ class ProfileService {
       await profile;
     }
     return Pair(response.isOk, response.body ?? '');
+  }
+
+  Future<Statistics?> getStatistics({String? userType, String? id}) async {
+    final response = await (userType == null
+        ? _networkService.get('/stats')
+        : _networkService.get('/stats/$userType/$id'));
+    if (!response.isOk) return null;
+    final body = jsonDecode(response.bodyString ?? '{}');
+    final type = userType ?? '${profileCached?.userType.name}';
+    print(body);
+    print(type);
+    switch (type) {
+      case 'imaging_center':
+        return ImagingCenterStatistics.fromJson(body);
+      case 'doctor':
+        return DoctorStatistics.fromJson(body);
+      case 'referrer':
+        return ReferrerStatistics.fromJson(body);
+      default:
+        throw ArgumentError(type);
+    }
   }
 }
