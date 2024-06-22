@@ -87,7 +87,7 @@ async function get_statistics(db, ssid, user_type) {
             .catch(console.log);
 
         await db.query({
-            text: `select avg(rating) from public."${user_type}_appointment_v1"` +
+            text: `select avg(rating::integer) from public."${user_type}_appointment_v1"` +
                 `where ${id}=$1 and rating is not null`,
             values: [ssid]
         })
