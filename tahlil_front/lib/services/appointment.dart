@@ -124,4 +124,13 @@ class AppointmentService {
     );
     return response.isOk;
   }
+
+  Future<Pair<bool, String>> updateNotes(
+      Appointment appointment, String notes) async {
+    final response = await _networkService.put(
+      '/appointment/${appointment.id}',
+      {'notes': notes},
+    );
+    return Pair(response.isOk, response.bodyString!);
+  }
 }

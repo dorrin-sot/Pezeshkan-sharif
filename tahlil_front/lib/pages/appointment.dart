@@ -22,6 +22,7 @@ import 'package:tahlil_front/widgets/accordion_item.dart';
 import 'package:tahlil_front/widgets/empty.dart' as empty;
 import 'package:tahlil_front/widgets/error.dart' as error;
 import 'package:tahlil_front/widgets/profile_picture.dart';
+import 'package:tahlil_front/widgets/text_field.dart';
 import 'package:tahlil_front/widgets/toast.dart';
 
 class AppointmentPage extends StatefulWidget {
@@ -36,6 +37,8 @@ class AppointmentPage extends StatefulWidget {
 class _AppointmentPageState extends State<AppointmentPage> {
   final _appointmentService = AppointmentService.instance;
   final _profileService = ProfileService.instance;
+
+  final _notesController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +64,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               final profile = snapshot.data!;
+
+              if (appointment is DoctorAppointment &&
+                  profile.isDoctor &&
+                  appointment.notes != '-') {
+                _notesController.text = appointment.notes;
+              }
+
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 50,
@@ -172,8 +182,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
               ),
             );
           }),
-          Expanded(child: Container()),
-          if (_profileService.profileCached?.isPatient ?? false)
+          if (profile.isPatient)
             Center(
               child: RatingBar.builder(
                 wrapAlignment: WrapAlignment.center,
@@ -204,7 +213,28 @@ class _AppointmentPageState extends State<AppointmentPage> {
                   }
                 },
               ),
-            ),
+            )
+          else if (patient && profile.isDoctor)
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      controller: _notesController,
+                      label: 'Notes',
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  IconButton(
+                    onPressed: () => _updateNotes(appointment),
+                    icon: const Icon(Icons.send),
+                  )
+                ],
+              ),
+            )
+          else
+            Expanded(child: Container()),
         ],
       ),
     );
@@ -363,17 +393,19 @@ class _AppointmentPageState extends State<AppointmentPage> {
             child: CircularProgressIndicator(),
           );
         }
-        if (snapshot.data!.entries.isEmpty) {
+
+        final appointments =
+            snapshot.data!.entries.where((a2) => a2.key.id != appointment.id);
+
+        if (appointments.isEmpty) {
           return empty.EmptyWidget(
             msg: 'This Patient doesn\'t have any images.',
             refresh: () => setState(() {}),
           );
         }
 
-        final appointments = snapshot.data!;
-
         return Column(
-          children: appointments.entries.map((e) {
+          children: appointments.map((e) {
             final appointment = e.key;
             final images = e.value;
 
@@ -403,14 +435,17 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(10),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text('Doctor\'s notes:', style: notesStyleBold),
+                                      Text('Doctor\'s notes:',
+                                          style: notesStyleBold),
                                       Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 5, left: 5),
+                                        padding: const EdgeInsets.only(
+                                            top: 5, left: 5),
                                         child: Text(
-                                          (appointment as DoctorAppointment).notes,
+                                          (appointment as DoctorAppointment)
+                                              .notes,
                                           style: notesStyle,
                                         ),
                                       ),
@@ -474,6 +509,24 @@ class _AppointmentPageState extends State<AppointmentPage> {
     final response = await _appointmentService.deleteImage(
       appointment: appointment.id,
       image: link,
+    );
+    if (response.first) setState(() {});
+
+    final toast = FToast();
+    toast.init(rootNavigatorKey.currentContext!);
+    toast.showToast(
+      child: CustomToast(
+        text: response.second,
+        toastType: response.first ? ToastType.success : ToastType.error,
+      ),
+      gravity: ToastGravity.BOTTOM_LEFT,
+    );
+  }
+
+  Future<void> _updateNotes(Appointment appointment) async {
+    final response = await _appointmentService.updateNotes(
+      appointment,
+      _notesController.text,
     );
     if (response.first) setState(() {});
 
