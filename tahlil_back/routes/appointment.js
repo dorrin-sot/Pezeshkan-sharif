@@ -231,8 +231,10 @@ function appointment_requests(app, db, jsonParser) {
      *             type: object
      *             properties:
      *               rating: number
+     *               notes: string
      *             example:
      *               rating: 3.5
+     *               notes: Patient is very good
      *     responses:
      *       200:
      *         description: Rating updated successfully
@@ -255,21 +257,32 @@ function appointment_requests(app, db, jsonParser) {
             res.status(401).send('Invalid Token!')
         } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
-        } else if (user_type !== 'patient') {
-            res.status(400).send('Non-Patient users cannot create appointment!')
         } else {
             const {id: appointment_id} = req.params;
-            const {rating} = req.body;
-            let {rows: appointment, rowCount} = await db.query({text: `select * from public."appointment" where id=$1`, values: [parseInt(appointment_id)]})
+            const {rating, notes} = req.body;
+            let {rows: appointment, rowCount} = await db.query({
+                text: '(select id from public."appointment_doctor" where id=$1 and (patient=$2 or doctor=$2))' +
+                    'union' +
+                    '(select id from public."imaging_center_appointment_v1" where id=$1 and (patient=$2 or imaging_center_name=$2))',
+                values: [parseInt(appointment_id), ssid]
+            })
                 .catch(console.log)
 
-            if (rowCount === 0 || ![appointment[0]['patient'], appointment[0]['doctor'], appointment[0]['imaging_center_name']].includes(ssid))
-                return res.status(404).send('Appointment not found!')
+            if (rowCount === 0) return res.status(404).send('Appointment not found!');
 
-            await db.query({text: `update public."appointment" set rating=$1 where id=$2`, values: [rating, parseInt(appointment_id)]})
-                .catch(console.log)
+            if (rating) {
+                if (user_type !== 'patient') return res.status(400).send('Non-Patient users cannot rate appointment!')
 
-            res.status(200).json('Rating updated successfully!')
+                await db.query({text: `update public."appointment" set rating=$1 where id=$2`, values: [rating, parseInt(appointment_id)]})
+                    .catch(console.log)
+                res.status(200).send('Rating updated successfully!')
+            }
+            if (notes) {
+                if (user_type !== 'doctor') return res.status(400).send('Non-Doctor users cannot add notes!')
+                await db.query({text: `update public."appointment_doctor" set notes=$1 where id=$2`, values: [notes, parseInt(appointment_id)]})
+                    .catch(console.log)
+                res.status(200).send('Notes updated successfully!')
+            }
         }
     });
 
