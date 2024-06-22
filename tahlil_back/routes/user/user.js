@@ -21,7 +21,6 @@ function user_requests(app, db, jsonParser) {
         const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
         if (rows.length === 0) return res.status(401).send('Invalid Token!')
         let {ssid, created_at, user_type} = rows[0]
-        console.log(ssid, user_type)
 
         if (!validateJwtToken(token)) {
             res.status(401).send('Invalid Token!')
