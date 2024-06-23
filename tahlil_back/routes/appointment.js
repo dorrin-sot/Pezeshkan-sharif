@@ -2,7 +2,7 @@
 
 const {validateJwtToken} = require('../utils/jwt');
 const {auth_midware} = require("./middlewares/auth");
-const {pfp_storage, opg_images_storage, delete_file} = require("../utils/files");
+const {opg_images_storage, delete_file} = require("../utils/files");
 
 function appointment_requests(app, db, jsonParser) {
     /**
@@ -35,6 +35,32 @@ function appointment_requests(app, db, jsonParser) {
                 .catch(console.log);
             res.status(200).json(rows)
         }
+    });
+
+    /**
+     * @swagger
+     * /service/{code}:
+     *   get:
+     *     summary: Get Service info for code
+     *     parameters:
+     *       - in: path
+     *         name: code
+     *         schema:
+     *           type: string
+     *         description: The code of the service
+     *     responses:
+     *       200:
+     *         description: Returns service as a json.
+     *       404:
+     *         description: Service not found!
+     *
+     */
+    app.get('/service/:code', async function (req, res) {
+        const {code} = req.params;
+        const {rowCount, rows} = await db.query({text: 'select * from public."service" where code=$1', values: [code]})
+            .catch(console.log);
+        if (rowCount === 0) return res.status(404).send('Service not found!')
+        res.status(200).json(rows[0])
     });
 
     /**
@@ -316,7 +342,7 @@ function appointment_requests(app, db, jsonParser) {
             if (services) {
                 if (user_type !== 'doctor') return res.status(400).send('Non-Doctor users cannot add notes!')
 
-                await db.query({text: `delete from public."appointment_doctor_services" where appointment=$1`, values: [parseInt(appointment_id)]})
+                await db.query({text: `delete from public."appointment_doctor_service" where appointment=$1`, values: [parseInt(appointment_id)]})
                     .catch(console.log);
 
                 for (const code of services) {
@@ -325,7 +351,7 @@ function appointment_requests(app, db, jsonParser) {
 
                     if (rowCount === 0) return res.status(404).send(`Service "${code}" not found!`)
 
-                    await db.query({text: `insert into public."appointment_doctor_services" (appointment, service) values ($1, $2)`, values: [parseInt(appointment_id), code]})
+                    await db.query({text: `insert into public."appointment_doctor_service" (appointment, service) values ($1, $2)`, values: [parseInt(appointment_id), code]})
                         .catch(console.log)
                 }
 
