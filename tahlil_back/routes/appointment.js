@@ -7,6 +7,38 @@ const {pfp_storage, opg_images_storage, delete_file} = require("../utils/files")
 function appointment_requests(app, db, jsonParser) {
     /**
      * @swagger
+     * /services:
+     *   get:
+     *     summary: Get List of services (Optional search)
+     *     parameters:
+     *       - in: query
+     *         name: search
+     *         schema:
+     *           type: string
+     *         description: The query string to search with. if not provided, will return all services
+     *     responses:
+     *       200:
+     *         description: Returns service list as a json.
+     *
+     */
+    app.get('/services', async function (req, res) {
+        const {search} = req.query;
+        if (search) {
+            const {rows} = await db.query({
+                text: `select * from public."service" where details like $1`,
+                values: [`%${search}%`],
+            })
+                .catch(console.log);
+            res.status(200).json(rows)
+        } else {
+            const {rows} = await db.query(`select * from public."service"`)
+                .catch(console.log);
+            res.status(200).json(rows)
+        }
+    });
+
+    /**
+     * @swagger
      * /doctors:
      *   get:
      *     summary: Get List of doctors (Optional search)
