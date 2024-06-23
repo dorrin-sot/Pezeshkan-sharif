@@ -25,7 +25,6 @@ dependencies:
   shamsi_date: ^1.0.2
   syncfusion_flutter_calendar: ^25.2.6+1
   syncfusion_flutter_datagrid: ^25.2.7
-  textfield_tags: ^3.0.1
 
 dev_dependencies:
   flutter_test:

@@ -26,7 +26,6 @@ import 'package:tahlil_front/widgets/empty.dart' as empty;
 import 'package:tahlil_front/widgets/error.dart' as error;
 import 'package:tahlil_front/widgets/profile_picture.dart';
 import 'package:tahlil_front/widgets/toast.dart';
-import 'package:textfield_tags/textfield_tags.dart';
 
 class AppointmentPage extends StatefulWidget {
   final int id;
@@ -40,8 +39,6 @@ class AppointmentPage extends StatefulWidget {
 class _AppointmentPageState extends State<AppointmentPage> {
   final _appointmentService = AppointmentService.instance;
   final _profileService = ProfileService.instance;
-
-  final _servicesController = TextfieldTagsController<Service>();
 
   @override
   Widget build(BuildContext context) {
