@@ -22,14 +22,14 @@ jobs:
           channel: stable
       - name: Install Dependencies
         run: flutter pub get
+      - name: Install Liara
+        run: |
+          npm i -g @liara/cli@4
       - name: Check Flutter Version
         run: flutter --version
       - name: Build
-        run: flutter build web --release --base-href '/Pezeshkan-sharif/' --dart-define=base_url=pezeshkan-sharif.liara.run --dart-define=base_scheme=https
-      - name: Push Build Files
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git --work-tree build/web add --all
-          git commit -m "Automatic deployment by github-actions"
-          git push origin HEAD:gh-pages --force
+        run: flutter build web --release --base-href '/' --dart-define=base_url=pezeshkan-sharif.liara.run --dart-define=base_scheme=https
+      - name: Deploy
+        env:
+          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+        run: liara deploy --api-token="$LIARA_TOKEN" --app="pezeshkan-sharif-front" --port=3000 --platform=static --detach
