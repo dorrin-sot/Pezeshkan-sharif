@@ -7,23 +7,26 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:tahlil_front/classes/appointment.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
+import 'package:tahlil_front/classes/service.dart';
 import 'package:tahlil_front/classes/user.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
 import 'package:tahlil_front/main.dart';
 import 'package:tahlil_front/services/appointment.dart';
 import 'package:tahlil_front/services/profile.dart';
+import 'package:tahlil_front/services/router.dart';
 import 'package:tahlil_front/utils/pair.dart';
 import 'package:tahlil_front/widgets/accordion_item.dart';
 import 'package:tahlil_front/widgets/empty.dart' as empty;
 import 'package:tahlil_front/widgets/error.dart' as error;
 import 'package:tahlil_front/widgets/profile_picture.dart';
-import 'package:tahlil_front/widgets/text_field.dart';
 import 'package:tahlil_front/widgets/toast.dart';
+import 'package:textfield_tags/textfield_tags.dart';
 
 class AppointmentPage extends StatefulWidget {
   final int id;
@@ -38,7 +41,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   final _appointmentService = AppointmentService.instance;
   final _profileService = ProfileService.instance;
 
-  final _notesController = TextEditingController();
+  final _servicesController = TextfieldTagsController<Service>();
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +67,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
             builder: (context, snapshot) {
               if (!snapshot.hasData) return Container();
               final profile = snapshot.data!;
-
-              if (appointment is DoctorAppointment &&
-                  profile.isDoctor &&
-                  appointment.notes != '-') {
-                _notesController.text = appointment.notes;
-              }
 
               return Padding(
                 padding: const EdgeInsets.symmetric(
@@ -214,26 +211,26 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 },
               ),
             )
-          else if (patient && profile.isDoctor)
+          else if (patient && profile.isDoctor) ...[
             Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      controller: _notesController,
-                      label: 'Notes',
+              child: FutureBuilder<List<Service>>(
+                future: (appointment as DoctorAppointment).services,
+                builder: (context, snapshot) {
+                  return Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: SingleChildScrollView(
+                      child: ServicesWidget(snapshot.data ?? []),
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  IconButton(
-                    onPressed: () => _updateNotes(appointment),
-                    icon: const Icon(Icons.send),
-                  )
-                ],
+                  );
+                },
               ),
-            )
-          else
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.medication),
+              label: const Text('Edit Services'),
+              onPressed: () => RouterService.go('/services/${appointment.id}'),
+            ),
+          ] else
             Expanded(child: Container()),
         ],
       ),
@@ -409,10 +406,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
             final appointment = e.key;
             final images = e.value;
 
-            final notesStyle = Theme.of(context).textTheme.bodySmall;
-            final notesStyleBold =
-                notesStyle?.copyWith(fontWeight: FontWeight.w900);
-
             return AccordionItemWidget(
               title: '${appointment.time}',
               badge: appointment.type,
@@ -426,34 +419,22 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           .map((link) => ImageItemWidget(appointment, link))
                           .toList()
                       : [
-                          Row(
-                            children: [
-                              Material(
-                                elevation: 3,
-                                borderRadius: BorderRadius.circular(5),
-                                color: Colors.white,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Doctor\'s notes:',
-                                          style: notesStyleBold),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 5, left: 5),
-                                        child: Text(
-                                          (appointment as DoctorAppointment)
-                                              .notes,
-                                          style: notesStyle,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: FutureBuilder<List<Service>>(
+                              future:
+                                  (appointment as DoctorAppointment).services,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError ||
+                                    !snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return Container();
+                                }
+                                final services = snapshot.data!;
+
+                                return ServicesWidget(services);
+                              },
+                            ),
                           )
                         ],
                 ),
@@ -523,21 +504,47 @@ class _AppointmentPageState extends State<AppointmentPage> {
     );
   }
 
-  Future<void> _updateNotes(Appointment appointment) async {
-    final response = await _appointmentService.updateNotes(
-      appointment,
-      _notesController.text,
-    );
-    if (response.first) setState(() {});
+  Widget ServicesWidget(List<Service> services) {
+    final theme = Theme.of(context).textTheme;
 
-    final toast = FToast();
-    toast.init(rootNavigatorKey.currentContext!);
-    toast.showToast(
-      child: CustomToast(
-        text: response.second,
-        toastType: response.first ? ToastType.success : ToastType.error,
-      ),
-      gravity: ToastGravity.BOTTOM_LEFT,
+    final bodySmall = theme.bodySmall;
+    final bodyMedium = theme.bodyMedium;
+
+    final notesStyleBoldest = bodyMedium?.copyWith(fontWeight: FontWeight.w900);
+    final notesStyleBolder = bodySmall?.copyWith(fontWeight: FontWeight.w900);
+    final notesStyleBold = bodySmall?.copyWith(fontWeight: FontWeight.bold);
+    final notesStyle = bodySmall;
+
+    return RichText(
+      text: TextSpan(children: [
+        TextSpan(
+            text: 'Services (Total cost: ${services.totalCost}):\n',
+            style: notesStyleBoldest),
+        ...services
+            .map(
+              (s) => [
+                TextSpan(text: '  ${s.code}:\n', style: notesStyleBolder),
+                ...{
+                  'Details': s.details,
+                  'Professional Component': s.professionalComponent,
+                  'Technical Component': s.technicalComponent,
+                  'Material & Consumable Component':
+                      s.materialConsumableComponent,
+                  'Final Cost':
+                      NumberFormat('###,###,### IRR').format(s.finalCostIRR)
+                }
+                    .entries
+                    .map(
+                      (e) => [
+                        TextSpan(text: '    ${e.key}: ', style: notesStyleBold),
+                        TextSpan(text: '${e.value}\n', style: notesStyle),
+                      ],
+                    )
+                    .expand((i) => i),
+              ],
+            )
+            .expand((i) => i),
+      ]),
     );
   }
 }

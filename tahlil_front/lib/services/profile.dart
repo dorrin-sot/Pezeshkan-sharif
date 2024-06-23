@@ -115,8 +115,6 @@ class ProfileService {
     if (!response.isOk) return null;
     final body = jsonDecode(response.bodyString ?? '{}');
     final type = userType ?? '${profileCached?.userType.name}';
-    print(body);
-    print(type);
     switch (type) {
       case 'imaging_center':
         return ImagingCenterStatistics.fromJson(body);

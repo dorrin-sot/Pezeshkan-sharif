@@ -24,7 +24,6 @@ class _DashboardPageState extends State<DashboardPage> {
     return FutureBuilder<Statistics?>(
       future: _profileService.getStatistics(),
       builder: (context, snapshot) {
-        print(snapshot.error);
         if (snapshot.hasError) {
           return error.ErrorWidget(
             msg: 'Encountered an error loading appointment information.',

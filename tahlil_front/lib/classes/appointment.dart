@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
+import 'package:tahlil_front/classes/service.dart';
 import 'package:tahlil_front/classes/time.dart';
+import 'package:tahlil_front/enums/weekday.dart';
 import 'package:tahlil_front/extensions/string_ext.dart';
+import 'package:tahlil_front/services/appointment.dart';
 
 class Appointment {
   final int id;
@@ -45,9 +50,13 @@ class Appointment {
 
 class DoctorAppointment extends Appointment {
   final Doctor doctor;
-  final String notes;
+  final List<String> _services;
 
-  DoctorAppointment({
+  Future<List<Service>> get services =>
+      Future.wait(_services.map(AppointmentService.instance.getService));
+
+  DoctorAppointment(
+    this._services, {
     required super.id,
     required super.time,
     required super.rating,
@@ -61,7 +70,6 @@ class DoctorAppointment extends Appointment {
     super.patientPhoneNumber,
     super.patientBirthdate,
     super.patientPfp,
-    required this.notes,
     required String doctorSsid,
     required String doctorFirstName,
     required String doctorLastName,
@@ -94,6 +102,7 @@ class DoctorAppointment extends Appointment {
 
   DoctorAppointment.fromJson(dynamic json)
       : this(
+          (jsonDecode(json['services']) as List).cast<String>(),
           id: json['id'],
           patientSsid: json['patient'],
           patientFirstName: json['patient_first_name'],
@@ -105,7 +114,6 @@ class DoctorAppointment extends Appointment {
           patientPhoneNumber: json['patient_phone_number'],
           patientBirthdate: json['patient_birth_date'],
           patientPfp: json['patient_pfp'],
-          notes: json['notes'] ?? '-',
           doctorProvince: json['doctor_province'],
           doctorSsid: json['doctor'],
           doctorFirstName: json['doctor_first_name'],
@@ -120,6 +128,21 @@ class DoctorAppointment extends Appointment {
           doctorPfp: json['doctor_pfp'],
           time: Time.fromJson(json),
           rating: (json['rating'] as String?)?.toDouble(),
+        );
+
+  DoctorAppointment.justId({required int id})
+      : this(
+          [],
+          id: id,
+          patientFirstName: '',
+          patientLastName: '',
+          patientSsid: '',
+          doctorFirstName: '',
+          doctorLastName: '',
+          doctorSsid: '',
+          doctorMedicalId: '',
+          rating: null,
+          time: Time(dateTime: DateTime.now(), weekday: Weekday.tuesday),
         );
 
   @override

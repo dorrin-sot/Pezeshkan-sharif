@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tahlil_front/classes/service.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/pages/appointment.dart';
 import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
 import 'package:tahlil_front/pages/create_appointment.dart';
-import 'package:tahlil_front/pages/dashboard.dart';
 import 'package:tahlil_front/pages/explore.dart';
 import 'package:tahlil_front/pages/not_found.dart';
 import 'package:tahlil_front/pages/profile.dart';
+import 'package:tahlil_front/pages/services.dart';
 import 'package:tahlil_front/pages/verification.dart';
 import 'package:tahlil_front/services/auth.dart';
 import 'package:tahlil_front/services/profile.dart';
@@ -258,6 +259,24 @@ class TahlilApp extends StatelessWidget {
           //     child: DashboardPage(),
           //   ),
           // ),
+          GoRoute(
+            path: '/services/:appointment',
+            redirect: (context, state) async {
+              if ((await needsAuthRedirect(context, state)) != state.fullPath) {
+                return '/auth';
+              }
+              if (!((await _profileService.profile)?.isDoctor ?? false) ||
+                  state.pathParameters['appointment'] == null) {
+                return '/not-found';
+              }
+              return null;
+            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: ServicesPage(
+                int.parse(state.pathParameters['appointment']!),
+              ),
+            ),
+          ),
           GoRoute(
             path: '/not-found',
             pageBuilder: (context, state) => const NoTransitionPage(

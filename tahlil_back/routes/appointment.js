@@ -355,7 +355,7 @@ function appointment_requests(app, db, jsonParser) {
                         .catch(console.log)
                 }
 
-                res.status(200).send('Notes updated successfully!')
+                res.status(200).send('Services updated successfully!')
             }
         }
     });

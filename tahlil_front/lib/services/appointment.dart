@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:tahlil_front/classes/appointment.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
+import 'package:tahlil_front/classes/service.dart';
 import 'package:tahlil_front/services/network.dart';
 import 'package:tahlil_front/utils/multipart_file_bytes.dart';
 import 'package:tahlil_front/utils/pair.dart';
@@ -18,6 +19,8 @@ class AppointmentService {
   }
 
   final NetworkService _networkService = NetworkService.instance;
+
+  List<Service>? servicesCached;
 
   Future<List<Doctor>> allDoctors({String? search}) async {
     final response = await _networkService
@@ -125,12 +128,29 @@ class AppointmentService {
     return response.isOk;
   }
 
-  Future<Pair<bool, String>> updateNotes(
-      Appointment appointment, String notes) async {
+  Future<Pair<bool, String>> updateServices(
+    int appointment,
+    List<String> services,
+  ) async {
     final response = await _networkService.put(
-      '/appointment/${appointment.id}',
-      {'notes': notes},
+      '/appointment/$appointment',
+      {'services': services},
     );
     return Pair(response.isOk, response.bodyString!);
+  }
+
+  Future<List<Service>> getServices() async {
+    if (servicesCached == null) {
+      final response = await _networkService.get('/services');
+      servicesCached = (jsonDecode(response.bodyString!) as List)
+          .map(Service.fromJson)
+          .toList();
+    }
+    return servicesCached!;
+  }
+
+  Future<Service> getService(String code) async {
+    final response = await _networkService.get('/service/$code');
+    return Service.fromJson(jsonDecode(response.bodyString!));
   }
 }
