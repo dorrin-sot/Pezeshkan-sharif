@@ -22,9 +22,6 @@ jobs:
           channel: stable
       - name: Install Dependencies
         run: flutter pub get
-      - name: Install Liara
-        run: |
-          npm i -g @liara/cli@4
       - name: Check Flutter Version
         run: flutter --version
       - name: Build
@@ -36,4 +33,3 @@ jobs:
           git --work-tree build/web add --all
           git commit -m "Automatic deployment by github-actions"
           git push origin HEAD:gh-pages --force
-          git checkout gh-pages
