@@ -263,10 +263,14 @@ function appointment_requests(app, db, jsonParser) {
      *             type: object
      *             properties:
      *               rating: number
-     *               notes: string
+     *               services:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *                   format: binary
      *             example:
      *               rating: 3.5
-     *               notes: Patient is very good
+     *               services: ['D1120', 'D2620']
      *     responses:
      *       200:
      *         description: Rating updated successfully
@@ -291,7 +295,7 @@ function appointment_requests(app, db, jsonParser) {
             res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
         } else {
             const {id: appointment_id} = req.params;
-            const {rating, notes} = req.body;
+            const {rating, services} = req.body;
             let {rows: appointment, rowCount} = await db.query({
                 text: '(select id from public."appointment_doctor" where id=$1 and (patient=$2 or doctor=$2))' +
                     'union' +
@@ -309,10 +313,22 @@ function appointment_requests(app, db, jsonParser) {
                     .catch(console.log)
                 res.status(200).send('Rating updated successfully!')
             }
-            if (notes) {
+            if (services) {
                 if (user_type !== 'doctor') return res.status(400).send('Non-Doctor users cannot add notes!')
-                await db.query({text: `update public."appointment_doctor" set notes=$1 where id=$2`, values: [notes, parseInt(appointment_id)]})
-                    .catch(console.log)
+
+                await db.query({text: `delete from public."appointment_doctor_services" where appointment=$1`, values: [parseInt(appointment_id)]})
+                    .catch(console.log);
+
+                for (const code of services) {
+                    const {rowCount} = await db.query({text: 'select * from public."service" where code=$1', values: [code]})
+                        .catch(console.log)
+
+                    if (rowCount === 0) return res.status(404).send(`Service "${code}" not found!`)
+
+                    await db.query({text: `insert into public."appointment_doctor_services" (appointment, service) values ($1, $2)`, values: [parseInt(appointment_id), code]})
+                        .catch(console.log)
+                }
+
                 res.status(200).send('Notes updated successfully!')
             }
         }
