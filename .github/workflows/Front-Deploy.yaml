@@ -32,4 +32,5 @@ jobs:
           git config user.email github-actions@github.com
           git --work-tree build/web add --all
           git commit -m "Automatic deployment by github-actions"
-          git push origin HEAD:gh-pages --force
+          git push origin HEAD:gh-pages 
+#--force
