@@ -37,7 +37,3 @@ jobs:
           git commit -m "Automatic deployment by github-actions"
           git push origin HEAD:gh-pages --force
           git checkout gh-pages
-      - name: Deploy
-        env:
-          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
-        run: liara deploy --api-token="$LIARA_TOKEN" --app="pezeshkan-sharif-front" --port=3000 --platform=static --detach
