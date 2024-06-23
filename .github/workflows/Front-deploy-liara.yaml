@@ -21,3 +21,4 @@ jobs:
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
         run: liara deploy --api-token="$LIARA_TOKEN" --app="pezeshkan-sharif-front" --port=3000 --platform=static --detach
+
