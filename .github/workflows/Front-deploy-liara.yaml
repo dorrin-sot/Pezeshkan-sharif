@@ -1,4 +1,4 @@
-name: Front-end Deploy
+name: Front-end Deploy (Liara)
 
 on:
   push:
@@ -14,6 +14,9 @@ jobs:
         working-directory: .
 
     steps:
+      - name: Install Liara
+        run: |
+          npm i -g @liara/cli@4
       - name: Deploy
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
