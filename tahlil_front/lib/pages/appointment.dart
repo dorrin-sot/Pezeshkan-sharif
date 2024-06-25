@@ -40,6 +40,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
   final _appointmentService = AppointmentService.instance;
   final _profileService = ProfileService.instance;
 
+  final height = 850.0;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Appointment?>(
@@ -71,6 +73,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                   horizontal: 30,
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (profile.isPatient)
                       if (appointment is DoctorAppointment)
@@ -124,112 +127,119 @@ class _AppointmentPageState extends State<AppointmentPage> {
     final bodyLarge = theme.bodyLarge?.copyWith(fontWeight: FontWeight.w900);
 
     return SplitWidget(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (user is! ImagingCenter)
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 50,
-                right: 50,
-                top: 50,
-                bottom: 30,
-              ),
-              child: ProfilePictureWidget(user!),
-            ),
-          Text(
-            (user!.isImagingCenter
-                    ? (user as ImagingCenter).name
-                    : user.fullName)
-                .capitalize!,
-            textAlign: TextAlign.center,
-            style: titleLarge,
-          ),
-          ...[
-            Pair(const Icon(Icons.person), user.userType),
-            if (user is Doctor)
-              Pair(const Icon(Icons.medical_information), user.medicalId)
-            else if (user is Patient)
-              Pair(const Icon(Icons.calendar_month), user.birthDate ?? '-'),
-            Pair(const Icon(Icons.phone), user.phoneNumber ?? '-'),
-            Pair(const Icon(Icons.email), user.emailAddress ?? '-'),
-            if (user is Doctor)
-              Pair(
-                const FaIcon(FontAwesomeIcons.userDoctor),
-                user.specialty ?? '-',
-              ),
-            Pair(
-                const Icon(Icons.pin_drop),
-                // ignore: prefer_interpolation_to_compose_strings
-                (user.province + ', ' + user.city + ', ' + user.street) ?? '-'),
-          ].map((p) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 5),
-                    child: p.first,
+      child: SingleChildScrollView(
+        child: SizedBox(
+          height: height,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (user is! ImagingCenter)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 50,
+                    right: 50,
+                    top: 50,
+                    bottom: 30,
                   ),
-                  Text('${p.second}', style: bodyLarge)
-                ],
+                  child: ProfilePictureWidget(user!),
+                ),
+              Text(
+                (user!.isImagingCenter
+                        ? (user as ImagingCenter).name
+                        : user.fullName)
+                    .capitalize!,
+                textAlign: TextAlign.center,
+                style: titleLarge,
               ),
-            );
-          }),
-          if (profile.isPatient)
-            Center(
-              child: RatingBar.builder(
-                wrapAlignment: WrapAlignment.center,
-                initialRating: appointment.rating ?? 0,
-                allowHalfRating: true,
-                itemCount: 5,
-                glowRadius: 1,
-                itemBuilder: (context, index) {
-                  return Icon(
-                      [
-                        Icons.sentiment_very_dissatisfied,
-                        Icons.sentiment_dissatisfied,
-                        Icons.sentiment_neutral,
-                        Icons.sentiment_satisfied,
-                        Icons.sentiment_very_satisfied
-                      ][index],
-                      color: [
-                        Colors.red,
-                        Colors.redAccent,
-                        Colors.amber,
-                        Colors.lightGreen,
-                        Colors.green
-                      ][index]);
-                },
-                onRatingUpdate: (rating) async {
-                  if (await _appointmentService.rate(appointment, rating)) {
-                    setState(() {});
-                  }
-                },
-              ),
-            )
-          else if (patient && profile.isDoctor) ...[
-            Expanded(
-              child: FutureBuilder<List<Service>>(
-                future: (appointment as DoctorAppointment).services,
-                builder: (context, snapshot) {
-                  return Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: SingleChildScrollView(
-                      child: ServicesWidget(snapshot.data ?? []),
-                    ),
-                  );
-                },
-              ),
-            ),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.medication),
-              label: const Text('Edit Services'),
-              onPressed: () => RouterService.go('/services/${appointment.id}'),
-            ),
-          ] else
-            Expanded(child: Container()),
-        ],
+              ...[
+                Pair(const Icon(Icons.person), user.userType),
+                if (user is Doctor)
+                  Pair(const Icon(Icons.medical_information), user.medicalId)
+                else if (user is Patient)
+                  Pair(const Icon(Icons.calendar_month), user.birthDate ?? '-'),
+                Pair(const Icon(Icons.phone), user.phoneNumber ?? '-'),
+                Pair(const Icon(Icons.email), user.emailAddress ?? '-'),
+                if (user is Doctor)
+                  Pair(
+                    const FaIcon(FontAwesomeIcons.userDoctor),
+                    user.specialty ?? '-',
+                  ),
+                Pair(
+                    const Icon(Icons.pin_drop),
+                    // ignore: prefer_interpolation_to_compose_strings
+                    (user.province + ', ' + user.city + ', ' + user.street) ??
+                        '-'),
+              ].map((p) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: p.first,
+                      ),
+                      Text('${p.second}', style: bodyLarge)
+                    ],
+                  ),
+                );
+              }),
+              if (profile.isPatient)
+                Center(
+                  child: RatingBar.builder(
+                    wrapAlignment: WrapAlignment.center,
+                    initialRating: appointment.rating ?? 0,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    glowRadius: 1,
+                    itemBuilder: (context, index) {
+                      return Icon(
+                          [
+                            Icons.sentiment_very_dissatisfied,
+                            Icons.sentiment_dissatisfied,
+                            Icons.sentiment_neutral,
+                            Icons.sentiment_satisfied,
+                            Icons.sentiment_very_satisfied
+                          ][index],
+                          color: [
+                            Colors.red,
+                            Colors.redAccent,
+                            Colors.amber,
+                            Colors.lightGreen,
+                            Colors.green
+                          ][index]);
+                    },
+                    onRatingUpdate: (rating) async {
+                      if (await _appointmentService.rate(appointment, rating)) {
+                        setState(() {});
+                      }
+                    },
+                  ),
+                )
+              else if (patient && profile.isDoctor) ...[
+                Expanded(
+                  child: FutureBuilder<List<Service>>(
+                    future: (appointment as DoctorAppointment).services,
+                    builder: (context, snapshot) {
+                      return Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: SingleChildScrollView(
+                          child: ServicesWidget(snapshot.data ?? []),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.medication),
+                  label: const Text('Edit Services'),
+                  onPressed: () =>
+                      RouterService.go('/services/${appointment.id}'),
+                ),
+              ] else
+                Expanded(child: Container()),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -246,29 +256,33 @@ class _AppointmentPageState extends State<AppointmentPage> {
     final bodyLarge = theme.bodyLarge?.copyWith(fontWeight: FontWeight.w900);
     return SplitWidget(
       flex: 4,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('${appointment.time}'.capitalize!, style: titleLarge),
-          const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 20),
-            child: Divider(),
-          ),
-          if (patient) ...[
-            if (profile.isDoctor)
-              Expanded(child: PatientHistoryWidget(appointment))
-            else ...[
-              Expanded(child: CurrentAppointmentImages(appointment)),
-              TextButton.icon(
-                icon: const Icon(Icons.upload),
-                label: const Text('Upload Images'),
-                onPressed: () => _uploadImages(appointment),
-              )
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('${appointment.time}'.capitalize!, style: titleLarge),
+            const Padding(
+              padding: EdgeInsets.only(top: 10, bottom: 20),
+              child: Divider(),
+            ),
+            if (patient) ...[
+              if (profile.isDoctor)
+                PatientHistoryWidget(appointment)
+              else ...[
+                CurrentAppointmentImages(appointment),
+                SizedBox(height: 50),
+                TextButton.icon(
+                  icon: const Icon(Icons.upload),
+                  label: const Text('Upload Images'),
+                  onPressed: () => _uploadImages(appointment),
+                )
+              ],
+            ] else ...[
+              // todo show doctor or imaging center statistics
             ],
-          ] else ...[
-            // todo show doctor or imaging center statistics
           ],
-        ],
+        ),
       ),
     );
   }
@@ -515,8 +529,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
     return RichText(
       text: TextSpan(children: [
         TextSpan(
-            text: 'Services (Total cost: ${services.totalCost}):\n',
-            style: notesStyleBoldest),
+          text: 'Services (Total cost: ${services.totalCost}): \n',
+          style: notesStyleBoldest,
+        ),
+        if (services.isEmpty) TextSpan(text: '  -\n', style: notesStyleBolder),
         ...services
             .map(
               (s) => [
