@@ -75,118 +75,120 @@ class _ProfilePageState extends State<ProfilePage> {
         }
 
         return Center(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: const [
-                BoxShadow(color: Colors.black45, blurRadius: 2),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 20, bottom: 20, left: 40, right: 20),
-                  child: isEditMode
-                      ? SizedBox(
-                          width: 400,
-                          child: ProfileEditBody(
-                            profile,
-                            firstNameController: firstNameController,
-                            lastNameController: lastNameController,
-                            phoneNumberController: phoneNumberController,
-                            emailAddressController: emailAddressController,
-                            provinceController: provinceController,
-                            cityController: cityController,
-                            streetController: streetController,
-                            specialtyController: specialtyController,
-                            birthdateController: birthdateController,
+          child: SingleChildScrollView(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black45, blurRadius: 2),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 20, bottom: 20, left: 40, right: 20),
+                    child: isEditMode
+                        ? SizedBox(
+                            width: 400,
+                            child: ProfileEditBody(
+                              profile,
+                              firstNameController: firstNameController,
+                              lastNameController: lastNameController,
+                              phoneNumberController: phoneNumberController,
+                              emailAddressController: emailAddressController,
+                              provinceController: provinceController,
+                              cityController: cityController,
+                              streetController: streetController,
+                              specialtyController: specialtyController,
+                              birthdateController: birthdateController,
+                            ),
+                          )
+                        : FittedBox(
+                            fit: BoxFit.fill,
+                            child: ProfileViewBody(profile),
                           ),
-                        )
-                      : FittedBox(
-                          fit: BoxFit.fill,
-                          child: ProfileViewBody(profile),
-                        ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 20, bottom: 20, right: 40, left: 20),
-                  child: SizedBox(
-                    width: 250,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: isEditMode
-                          ? [
-                              if (profile.userType != UserType.imaging_center)
-                                _ProfilePictureWidget(profile),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: FilledButton.icon(
-                                  icon: const Icon(Icons.check),
-                                  label: const Text('Save Changes'),
-                                  onPressed: _editProfile,
-                                  // onPressed: _editProfile,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 20, bottom: 20, right: 40, left: 20),
+                    child: SizedBox(
+                      width: 250,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: isEditMode
+                            ? [
+                                if (profile.userType != UserType.imaging_center)
+                                  _ProfilePictureWidget(profile),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  child: FilledButton.icon(
+                                    icon: const Icon(Icons.check),
+                                    label: const Text('Save Changes'),
+                                    onPressed: _editProfile,
+                                    // onPressed: _editProfile,
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: OutlinedButton.icon(
-                                  icon: const Icon(Icons.cancel),
-                                  label: const Text('Discard Changes'),
-                                  onPressed: () =>
-                                      setState(() => isEditMode = false),
-                                ),
-                              ),
-                            ]
-                          : [
-                              if (profile.userType != UserType.imaging_center)
-                                _ProfilePictureWidget(profile),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: FilledButton.icon(
-                                  icon: const Icon(Icons.edit),
-                                  label: const Text('Edit Profile'),
-                                  onPressed: () =>
-                                      setState(() => isEditMode = true),
-                                ),
-                              ),
-                              if (profile is Doctor || profile is ImagingCenter)
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 5),
                                   child: OutlinedButton.icon(
-                                    icon: const Icon(Icons.work),
-                                    label: const Text('Manage Work Hours'),
-                                    onPressed: () => showDialog(
-                                      context: context,
-                                      builder: (_) => WorkHoursDialog(profile),
-                                    ).then((_) => setState(() {})),
+                                    icon: const Icon(Icons.cancel),
+                                    label: const Text('Discard Changes'),
+                                    onPressed: () =>
+                                        setState(() => isEditMode = false),
                                   ),
                                 ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: TextButton.icon(
-                                  icon: const FaIcon(
-                                      FontAwesomeIcons.rightFromBracket),
-                                  label: const Text('Logout'),
-                                  onPressed: _logout,
+                              ]
+                            : [
+                                if (profile.userType != UserType.imaging_center)
+                                  _ProfilePictureWidget(profile),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  child: FilledButton.icon(
+                                    icon: const Icon(Icons.edit),
+                                    label: const Text('Edit Profile'),
+                                    onPressed: () =>
+                                        setState(() => isEditMode = true),
+                                  ),
                                 ),
-                              ),
-                            ],
+                                if (profile is Doctor || profile is ImagingCenter)
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 5),
+                                    child: OutlinedButton.icon(
+                                      icon: const Icon(Icons.work),
+                                      label: const Text('Manage Work Hours'),
+                                      onPressed: () => showDialog(
+                                        context: context,
+                                        builder: (_) => WorkHoursDialog(profile),
+                                      ).then((_) => setState(() {})),
+                                    ),
+                                  ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  child: TextButton.icon(
+                                    icon: const FaIcon(
+                                        FontAwesomeIcons.rightFromBracket),
+                                    label: const Text('Logout'),
+                                    onPressed: _logout,
+                                  ),
+                                ),
+                              ],
+                      ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         );
