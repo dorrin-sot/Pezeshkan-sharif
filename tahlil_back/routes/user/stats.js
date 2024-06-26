@@ -96,14 +96,50 @@ async function get_statistics(db, ssid, user_type) {
 
         await db.query({
             text: `select extract(month from date_time) as month,` +
+                `extract(month from date_time) as month,` +
+                `count(*)` +
+                `from public."${user_type}_appointment_v1"` +
+                `where ${id}=$1 and extract(year from date_time)=extract(year from now()) ` +
+                `group by month`,
+            values: [ssid]
+        })
+            .then(({rows}) => statistics['grouped_appointments_this_year_by_month'] = rows)
+            .catch(console.log);
+
+        await db.query({
+            text: `select extract(month from date_time) as month,` +
+                `extract(week from date_time) as week,` +
+                `count(*)` +
+                `from public."${user_type}_appointment_v1"` +
+                `where ${id}=$1 and extract(month from date_time)=extract(month from now()) ` +
+                `group by week`,
+            values: [ssid]
+        })
+            .then(({rows}) => statistics['grouped_appointments_this_month_by_week'] = rows)
+            .catch(console.log);
+
+        await db.query({
+            text: `select extract(month from date_time) as month,` +
+                `extract(isodow from date_time) as weekday,` +
+                `count(*)` +
+                `from public."${user_type}_appointment_v1"` +
+                `where ${id}=$1 and extract(week from date_time)=extract(week from now()) ` +
+                `group by weekday`,
+            values: [ssid]
+        })
+            .then(({rows}) => statistics['grouped_appointments_this_week_by_day'] = rows)
+            .catch(console.log);
+
+        await db.query({
+            text: `select extract(month from date_time) as month,` +
                 `extract(year from date_time) as year,` +
                 `count(*)` +
                 `from public."${user_type}_appointment_v1"` +
                 `where ${id}=$1 ` +
-                `group by month, year`,
+                `group by year`,
             values: [ssid]
         })
-            .then(({rows}) => statistics['grouped_appointments_by_month'] = rows)
+            .then(({rows}) => statistics['grouped_appointments_by_year'] = rows)
             .catch(console.log);
     }
 
