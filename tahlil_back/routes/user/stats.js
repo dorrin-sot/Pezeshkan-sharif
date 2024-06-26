@@ -95,6 +95,17 @@ async function get_statistics(db, ssid, user_type) {
             .catch(console.log);
 
         await db.query({
+            text: `select extract(day from date_time) as day,` +
+                `count(*)` +
+                `from public."${user_type}_appointment_v1"` +
+                `where ${id}=$1 and extract(month from date_time)=extract(month from now()) ` +
+                `group by day`,
+            values: [ssid]
+        })
+            .then(({rows}) => statistics['grouped_appointments_this_month'] = rows)
+            .catch(console.log);
+
+        await db.query({
             text: `select extract(month from date_time) as month,` +
                 `count(*)` +
                 `from public."${user_type}_appointment_v1"` +
@@ -102,29 +113,7 @@ async function get_statistics(db, ssid, user_type) {
                 `group by month`,
             values: [ssid]
         })
-            .then(({rows}) => statistics['grouped_appointments_this_year_by_month'] = rows)
-            .catch(console.log);
-
-        await db.query({
-            text: `select extract(week from date_time) as week,` +
-                `count(*)` +
-                `from public."${user_type}_appointment_v1"` +
-                `where ${id}=$1 and extract(month from date_time)=extract(month from now()) ` +
-                `group by week`,
-            values: [ssid]
-        })
-            .then(({rows}) => statistics['grouped_appointments_this_month_by_week'] = rows)
-            .catch(console.log);
-
-        await db.query({
-            text: `select extract(isodow from date_time) as weekday,` +
-                `count(*)` +
-                `from public."${user_type}_appointment_v1"` +
-                `where ${id}=$1 and extract(week from date_time)=extract(week from now()) ` +
-                `group by weekday`,
-            values: [ssid]
-        })
-            .then(({rows}) => statistics['grouped_appointments_this_week_by_day'] = rows)
+            .then(({rows}) => statistics['grouped_appointments_this_year'] = rows)
             .catch(console.log);
 
         await db.query({
