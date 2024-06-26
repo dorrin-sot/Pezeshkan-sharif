@@ -96,7 +96,6 @@ async function get_statistics(db, ssid, user_type) {
 
         await db.query({
             text: `select extract(month from date_time) as month,` +
-                `extract(month from date_time) as month,` +
                 `count(*)` +
                 `from public."${user_type}_appointment_v1"` +
                 `where ${id}=$1 and extract(year from date_time)=extract(year from now()) ` +
@@ -107,8 +106,7 @@ async function get_statistics(db, ssid, user_type) {
             .catch(console.log);
 
         await db.query({
-            text: `select extract(month from date_time) as month,` +
-                `extract(week from date_time) as week,` +
+            text: `select extract(week from date_time) as week,` +
                 `count(*)` +
                 `from public."${user_type}_appointment_v1"` +
                 `where ${id}=$1 and extract(month from date_time)=extract(month from now()) ` +
@@ -119,8 +117,7 @@ async function get_statistics(db, ssid, user_type) {
             .catch(console.log);
 
         await db.query({
-            text: `select extract(month from date_time) as month,` +
-                `extract(isodow from date_time) as weekday,` +
+            text: `select extract(isodow from date_time) as weekday,` +
                 `count(*)` +
                 `from public."${user_type}_appointment_v1"` +
                 `where ${id}=$1 and extract(week from date_time)=extract(week from now()) ` +
@@ -131,8 +128,7 @@ async function get_statistics(db, ssid, user_type) {
             .catch(console.log);
 
         await db.query({
-            text: `select extract(month from date_time) as month,` +
-                `extract(year from date_time) as year,` +
+            text: `select extract(year from date_time) as year,` +
                 `count(*)` +
                 `from public."${user_type}_appointment_v1"` +
                 `where ${id}=$1 ` +
