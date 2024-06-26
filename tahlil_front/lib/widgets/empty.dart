@@ -11,7 +11,7 @@ class EmptyWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset('assets/empty.png', width: 600),
+        Image.asset('assets/empty.png', width: 500),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

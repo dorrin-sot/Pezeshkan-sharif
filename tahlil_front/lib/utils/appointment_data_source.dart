@@ -44,5 +44,5 @@ class AppointmentDataSource extends CalendarDataSource<ap.Appointment> {
 
   @override
   Color getColor(int index) =>
-      showAppointmentInfo ? colors[index] : Colors.black12;
+      showAppointmentInfo ? colors[index % colors.length] : Colors.black12;
 }

@@ -11,7 +11,7 @@ class ErrorWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset('assets/error.png', width: 600),
+        Image.asset('assets/error.png', width: 500),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
