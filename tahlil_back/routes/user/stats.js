@@ -130,9 +130,9 @@ async function get_statistics(db, ssid, user_type) {
 
     if (user_type === 'doctor') {
         await db.query({
-            text: `select patient, extract(year from age(patient_birth_date)) as age, count(distinct patient) from public."doctor_appointment_v1"` +
+            text: `select extract(year from age(patient_birth_date)) as age, count(distinct patient) from public."doctor_appointment_v1"` +
                 `where doctor=$1 and patient_birth_date is not null ` +
-                `group by age, patient`,
+                `group by age`,
             values: [ssid]
         })
             .then(({rows}) => statistics['grouped_patients_by_age'] = rows)
