@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tahlil_front/classes/service.dart';
 import 'package:tahlil_front/enums/toast_type.dart';
 import 'package:tahlil_front/enums/user_type.dart';
 import 'package:tahlil_front/pages/appointment.dart';
@@ -70,15 +69,7 @@ class TahlilApp extends StatelessWidget {
                     ),
                     const SizedBox(width: 25),
                     if (snapshot.data != null) ...[
-                      if (snapshot.data != UserType.referrer)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: TextButton(
-                            onPressed: () => RouterService.go('/appointments'),
-                            child: const Text('Appointments'),
-                          ),
-                        ),
-                      if (snapshot.data == UserType.patient)
+                      if (snapshot.data == UserType.patient) ...[
                         Padding(
                           padding: const EdgeInsets.only(left: 10),
                           child: TextButton(
@@ -86,13 +77,36 @@ class TahlilApp extends StatelessWidget {
                             child: const Text('Explore Doctors'),
                           ),
                         ),
-                      if (snapshot.data == UserType.patient)
                         Padding(
                           padding: const EdgeInsets.only(left: 10),
                           child: TextButton(
                             onPressed: () =>
                                 RouterService.go('/imaging-centers'),
                             child: const Text('Explore Imaging Centers'),
+                          ),
+                        )
+                      ] else
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: TextButton(
+                            onPressed: () => RouterService.go('/dashboard'),
+                            child: const Text('Dashboard'),
+                          ),
+                        ),
+                      if (snapshot.data == UserType.referrer)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: TextButton(
+                            onPressed: () => RouterService.go('/verification'),
+                            child: const Text('Verification'),
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: TextButton(
+                            onPressed: () => RouterService.go('/appointments'),
+                            child: const Text('Appointments'),
                           ),
                         ),
                     ]
