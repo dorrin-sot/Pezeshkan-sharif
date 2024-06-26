@@ -11,6 +11,7 @@ import 'package:tahlil_front/pages/appointment.dart';
 import 'package:tahlil_front/pages/appointments.dart';
 import 'package:tahlil_front/pages/auth.dart';
 import 'package:tahlil_front/pages/create_appointment.dart';
+import 'package:tahlil_front/pages/dashboard.dart';
 import 'package:tahlil_front/pages/explore.dart';
 import 'package:tahlil_front/pages/not_found.dart';
 import 'package:tahlil_front/pages/profile.dart';
@@ -252,13 +253,13 @@ class TahlilApp extends StatelessWidget {
               );
             },
           ),
-          // GoRoute(
-          //   path: '/dashboard',
-          //   redirect: needsAuthRedirect,
-          //   pageBuilder: (context, state) => const NoTransitionPage(
-          //     child: DashboardPage(),
-          //   ),
-          // ),
+          GoRoute(
+            path: '/dashboard',
+            redirect: needsAuthRedirect,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: DashboardPage(),
+            ),
+          ),
           GoRoute(
             path: '/services/:appointment',
             redirect: (context, state) async {
