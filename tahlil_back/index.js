@@ -17,6 +17,7 @@ const imaging_center_requests = require("./routes/imaging-center");
 const doctor_requests = require("./routes/doctor");
 const patient_requests = require("./routes/user/patient");
 const stats_requests = require("./routes/user/stats");
+const scheduleMail = require("./utils/mail");
 
 
 const db_client = new Client({
@@ -55,6 +56,8 @@ appointment_requests(app, db_client, jsonParser);
 imaging_center_requests(app, db_client, jsonParser);
 doctor_requests(app, db_client, jsonParser);
 patient_requests(app, db_client, jsonParser);
+
+scheduleMail('1234567894', 32, db_client)
 
 app.use('/files', express.static('files'));
 

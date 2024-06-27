@@ -3,6 +3,7 @@
 const {validateJwtToken} = require('../utils/jwt');
 const {auth_midware} = require("./middlewares/auth");
 const {opg_images_storage, delete_file} = require("../utils/files");
+const scheduleMail = require("../utils/mail");
 
 function appointment_requests(app, db, jsonParser) {
     /**
@@ -248,6 +249,7 @@ function appointment_requests(app, db, jsonParser) {
                     text: `insert into public."appointment_doctor" (patient, doctor, time) values ($1, $2, $3)`,
                     values: [ssid, doctor, time_id]
                 })
+                    .then(({rows}) => scheduleMail(ssid, rows[0]['id'], db))
                     .then((_) => res.status(201).send('Appointment created successfully!'))
                     .catch((e) => {
                         if (e.constraint === 'appointment_doctor_unique_key')
