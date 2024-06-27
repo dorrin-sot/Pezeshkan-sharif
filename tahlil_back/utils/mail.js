@@ -32,6 +32,7 @@ async function scheduleMail(patient_ssid, appointment_id, db) {
         `You can view your appointment <a href="${link}">here</a><br/><br/>` +
         `Best Regards,<br/>` +
         `The Pezeshkan-sharif team</p>`;
+    const send_time = new Date(date_time.getTime() - 24 * 60 * 60 * 1000);
 
     const transport = nodemailer.createTransport({
         service: 'gmail',
@@ -45,7 +46,7 @@ async function scheduleMail(patient_ssid, appointment_id, db) {
         to: patient['email_address'],
         subject: `Appointment Reminder with ${appointment_with} at ${time_str}`,
         html: html,
-        date: new Date(date_time.getTime() - 24 * 60 * 60 * 1000),
+        date: (send_time.getTime() - new Date() <= 0) ? new Date() : date_time,
     }
     await transport.sendMail(mail_options);
 }
