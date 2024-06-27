@@ -72,6 +72,9 @@ class AuthService {
           (userType == UserType.doctor && medicalId.isEmpty)) {
         return Pair(false, 'All fields are required!');
       }
+      if (ssid?.allMatches('^[0-9]{10}\$').isEmpty ?? false) {
+        return Pair(false, 'SSID must be a string of 10 digits!');
+      }
     }
     if (password.length < 8) {
       return Pair(false, 'Password must be at least 8 characters!');
