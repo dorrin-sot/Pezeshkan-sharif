@@ -31,7 +31,6 @@ function imaging_center_requests(app, db, jsonParser) {
      *         description: Referrer not found
      */
     app.post('/imaging-center', jsonParser, async function (req, res) {
-        console.log('kcmdslmc')
         const {name, password, repeat_password, referrer} = req.body;
         const {rows: referrers} = await db.query('select ssid from public."referrer"');
         const {rowCount} = await db.query(`select * from public."imaging_center" where name='${name}'`);

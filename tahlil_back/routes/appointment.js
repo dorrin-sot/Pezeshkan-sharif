@@ -249,7 +249,10 @@ function appointment_requests(app, db, jsonParser) {
                     text: `insert into public."appointment_doctor" (patient, doctor, time) values ($1, $2, $3)`,
                     values: [ssid, doctor, time_id]
                 })
-                    .then(({rows}) => scheduleMail(ssid, rows[0]['id'], db))
+                    .then(async (_) => {
+                        const {rows} = await db.query({text: 'select * from public."appointment_doctor" where doctor=$1 and time=$2', values: [doctor, time_id]})
+                        return scheduleMail(ssid, rows[0]['id'], db);
+                    })
                     .then((_) => res.status(201).send('Appointment created successfully!'))
                     .catch((e) => {
                         if (e.constraint === 'appointment_doctor_unique_key')
@@ -261,6 +264,10 @@ function appointment_requests(app, db, jsonParser) {
                     text: `insert into public."appointment_imaging_center" (patient, imaging_center, time) values ($1, $2, $3)`,
                     values: [ssid, imaging_center, time_id]
                 })
+                    .then(async (_) => {
+                        const {rows} = await db.query({text: 'select * from public."appointment_imaging_center" where imaging_center=$1 and time=$2', values: [imaging_center, time_id]})
+                        return scheduleMail(ssid, rows[0]['id'], db);
+                    })
                     .then((_) => res.status(201).send('Appointment created successfully!'))
                     .catch((e) => {
                         if (e.constraint === 'appointment_imaging_center_unique_key')
