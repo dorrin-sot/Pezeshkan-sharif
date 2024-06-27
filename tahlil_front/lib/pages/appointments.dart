@@ -26,7 +26,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return error.ErrorWidget(
-              msg: 'Encountered an error loading appointment images.',
+              msg: 'your appointments.',
               refresh: () => setState(() {}),
             );
           }

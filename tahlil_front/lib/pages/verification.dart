@@ -98,7 +98,7 @@ class _VerificationPageState extends State<VerificationPage> {
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return error.ErrorWidget(
-                  msg: 'Encountered an error loading appointment images.',
+                  msg: 'list of verifiable users.',
                   refresh: () => setState(() {}),
                 );
               }

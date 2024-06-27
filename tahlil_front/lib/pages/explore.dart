@@ -45,9 +45,10 @@ class _ExplorePageState extends State<ExplorePage> {
               : _appointmentService.allImagingCenters(
                   search: _searchController.text.nullIfEmpty),
           builder: (context, snapshot) {
+            final userSearch = widget.doctors ? "Doctor" : "Imaging Center";
             if (snapshot.hasError) {
               return error.ErrorWidget(
-                msg: 'Encountered an error loading appointment images.',
+                msg: '${userSearch}s.',
                 refresh: () => setState(() {}),
               );
             }
@@ -58,8 +59,7 @@ class _ExplorePageState extends State<ExplorePage> {
             }
             if (snapshot.data!.isEmpty) {
               return empty.EmptyWidget(
-                msg:
-                    'No ${widget.doctors ? "Doctor" : "Imaging Center"}s found.',
+                msg: 'No ${userSearch}s found.',
                 refresh: () => setState(() {}),
               );
             }

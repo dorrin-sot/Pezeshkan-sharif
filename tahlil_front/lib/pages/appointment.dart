@@ -49,7 +49,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return error.ErrorWidget(
-            msg: 'Encountered an error loading appointment information.',
+            msg: 'appointment information.',
             refresh: () => setState(() {}),
           );
         }
@@ -346,7 +346,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return error.ErrorWidget(
-                msg: 'Encountered an error loading appointment images.',
+                msg: 'appointment images.',
                 refresh: () => setState(() {}),
               );
             }
@@ -392,7 +392,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return error.ErrorWidget(
-            msg: 'Encountered an error loading appointment images.',
+            msg: 'patient history.',
             refresh: () => setState(() {}),
           );
         }

@@ -35,7 +35,7 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return error.ErrorWidget(
-            msg: 'Encountered an error loading appointment information.',
+            msg: 'dashboard.',
             refresh: () => setState(() {}),
           );
         }

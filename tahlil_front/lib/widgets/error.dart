@@ -17,7 +17,7 @@ class ErrorWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              msg,
+              'Encountered an error loading $msg',
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge
