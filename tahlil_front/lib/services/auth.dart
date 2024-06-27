@@ -72,7 +72,7 @@ class AuthService {
           (userType == UserType.doctor && medicalId.isEmpty)) {
         return Pair(false, 'All fields are required!');
       }
-      if (ssid?.allMatches('^[0-9]{10}\$').isEmpty ?? false) {
+      if (!RegExp('^[0-9]{10}\$').hasMatch(ssid!)) {
         return Pair(false, 'SSID must be a string of 10 digits!');
       }
     }
