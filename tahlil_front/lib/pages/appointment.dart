@@ -40,7 +40,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   final _appointmentService = AppointmentService.instance;
   final _profileService = ProfileService.instance;
 
-  final height = 850.0;
+  final height = 750.0;
 
   @override
   Widget build(BuildContext context) {
