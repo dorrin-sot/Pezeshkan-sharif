@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:tahlil_front/classes/doctor.dart';
 import 'package:tahlil_front/classes/imaging_center.dart';
 import 'package:tahlil_front/classes/patient.dart';
@@ -50,6 +51,20 @@ class ProfileService {
   }
 
   Future<Pair<bool, String>> editProfile(Map<String, String?> map) async {
+    if (map['birth_date'] != null) {
+      final birthDate = DateFormat('yyyy-MM-dd').tryParse(map['birth_date']!);
+
+      if (birthDate == null) {
+        return Pair(
+          false,
+          'Birth date should have "yyyy-MM-dd" format. (e.g. 2005-10-15)',
+        );
+      }
+      final age = DateTime.now().difference(birthDate).inDays ~/ 365;
+      if (age < 0) return Pair(false, 'Invalid Birth date!');
+      if (age > 18) return Pair(false, 'You must be less than 18y/o.');
+    }
+
     final response = await _networkService.put('/profile', map);
     if (response.statusCode == 200) {
       final body = jsonDecode(response.bodyString!);

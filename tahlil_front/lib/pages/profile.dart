@@ -160,7 +160,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         setState(() => isEditMode = true),
                                   ),
                                 ),
-                                if (profile is Doctor || profile is ImagingCenter)
+                                if (profile is Doctor ||
+                                    profile is ImagingCenter)
                                   Padding(
                                     padding:
                                         const EdgeInsets.symmetric(vertical: 5),
@@ -169,7 +170,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                       label: const Text('Manage Work Hours'),
                                       onPressed: () => showDialog(
                                         context: context,
-                                        builder: (_) => WorkHoursDialog(profile),
+                                        builder: (_) =>
+                                            WorkHoursDialog(profile),
                                       ).then((_) => setState(() {})),
                                     ),
                                   ),
