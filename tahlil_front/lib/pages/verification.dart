@@ -116,7 +116,7 @@ class _VerificationPageState extends State<VerificationPage> {
 
               if (users.isEmpty) {
                 return empty.EmptyWidget(
-                  msg: 'This Patient doesn\'t have any images.',
+                  msg: 'No Users found.',
                   refresh: () => setState(() {}),
                 );
               }

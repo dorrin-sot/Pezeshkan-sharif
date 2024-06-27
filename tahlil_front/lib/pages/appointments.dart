@@ -37,7 +37,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
           }
           if (snapshot.data!.isEmpty) {
             return empty.EmptyWidget(
-              msg: 'This Patient doesn\'t have any images.',
+              msg: 'You don\'t have any appointment.',
               refresh: () => setState(() {}),
             );
           }

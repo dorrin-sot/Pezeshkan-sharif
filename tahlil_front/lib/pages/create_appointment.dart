@@ -93,13 +93,19 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                               children: <Triple<String, Widget?, dynamic>>[
                                 if (user is Doctor) ...[
                                   Triple('', null, user.fullName),
-                                  Triple('Medical ID: ', const Icon(Icons.numbers),
+                                  Triple(
+                                      'Medical ID: ',
+                                      const Icon(Icons.numbers),
                                       user.medicalId),
                                 ] else if (user is ImagingCenter)
                                   Triple('', null, user.name),
-                                Triple('Phone number: ', const Icon(Icons.phone),
+                                Triple(
+                                    'Phone number: ',
+                                    const Icon(Icons.phone),
                                     user.phoneNumber ?? '-'),
-                                Triple('Email Address: ', const Icon(Icons.email),
+                                Triple(
+                                    'Email Address: ',
+                                    const Icon(Icons.email),
                                     user.emailAddress ?? '-'),
                                 if (user is Doctor)
                                   Triple(
@@ -120,34 +126,41 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                                   'Working Hours: ',
                                   const Icon(Icons.work),
                                   (user is Doctor
-                                          ? user.workTimes
-                                          : (user as ImagingCenter).workTimes)
-                                      .map((wt) => '$wt')
-                                      .join(', ')
-                                      .capitalize,
+                                              ? user.workTimes
+                                              : (user as ImagingCenter)
+                                                  .workTimes)
+                                          .map((wt) => '$wt')
+                                          .join(', ')
+                                          .capitalize
+                                          ?.nullIfEmpty ??
+                                      '-',
                                 ),
                               ].map((tup) {
                                 final label = tup.first;
                                 final icon = tup.second;
                                 final value = tup.third;
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
                                   child: Row(
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(right: 5),
+                                        padding:
+                                            const EdgeInsets.only(right: 5),
                                         child: icon ?? Container(),
                                       ),
                                       RichText(
                                         text: TextSpan(children: [
                                           TextSpan(
                                               text: label,
-                                              style: theme.textTheme.bodyMedium),
+                                              style:
+                                                  theme.textTheme.bodyMedium),
                                           TextSpan(
                                             text: '$value',
                                             style: theme.textTheme.bodyLarge
                                                 ?.copyWith(
-                                                    fontWeight: FontWeight.w900),
+                                                    fontWeight:
+                                                        FontWeight.w900),
                                           ),
                                         ]),
                                       ),
@@ -181,14 +194,15 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                             ? Future.wait([
                                 _doctorService.getWorkTimes(doctor),
                                 _doctorService.filledTimesSinceToday(doctor),
-                              ]).then((list) => Pair(
-                                list[0] as List<WorkTime>, list[1] as List<Time>))
+                              ]).then((list) => Pair(list[0] as List<WorkTime>,
+                                list[1] as List<Time>))
                             : Future.wait([
-                                _imagingCenterService.getWorkTimes(imagingCenter!),
+                                _imagingCenterService
+                                    .getWorkTimes(imagingCenter!),
                                 _imagingCenterService
                                     .filledTimesSinceToday(imagingCenter),
-                              ]).then((list) => Pair(
-                                list[0] as List<WorkTime>, list[1] as List<Time>)),
+                              ]).then((list) => Pair(list[0] as List<WorkTime>,
+                                list[1] as List<Time>)),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return error.ErrorWidget(
@@ -226,7 +240,9 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
 
                           if (workTimes.isEmpty) {
                             return empty.EmptyWidget(
-                              msg: 'This Patient doesn\'t have any images.',
+                              msg:
+                                  'This ${doctor != null ? "Doctor" : "Imaging Center"} '
+                                  'doesn\'t have any work hours.',
                               refresh: () => setState(() {}),
                             );
                           }
@@ -241,7 +257,8 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                             allowViewNavigation: true,
                             showDatePickerButton: true,
                             minDate: DateTime.now(),
-                            maxDate: DateTime.now().add(const Duration(days: 100)),
+                            maxDate:
+                                DateTime.now().add(const Duration(days: 100)),
                             dataSource: AppointmentDataSource(dataSource),
                             onTap: (details) {
                               final date = details.date!;
@@ -252,7 +269,8 @@ class _CreateAppointmentPageState extends State<CreateAppointmentPage> {
                               if (workTimes.any((wt) =>
                                       wt.startHour <= date.hour &&
                                       date.hour < wt.endHour &&
-                                      '${wt.weekday}' == week[date.weekday - 1]) &&
+                                      '${wt.weekday}' ==
+                                          week[date.weekday - 1]) &&
                                   !unavailableTimes
                                       .any((t) => t.dateTime == date)) {
                                 selectedDateTime = details.date;

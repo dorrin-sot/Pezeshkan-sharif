@@ -26,44 +26,45 @@ class _ExplorePageState extends State<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List>(
-      future: widget.doctors
-          ? _appointmentService.allDoctors(
-              search: _searchController.text.nullIfEmpty)
-          : _appointmentService.allImagingCenters(
-              search: _searchController.text.nullIfEmpty),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return error.ErrorWidget(
-            msg: 'Encountered an error loading appointment images.',
-            refresh: () => setState(() {}),
-          );
-        }
-        if (!snapshot.hasData) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (snapshot.data!.isEmpty) {
-          return empty.EmptyWidget(
-            msg: 'This Patient doesn\'t have any images.',
-            refresh: () => setState(() {}),
-          );
-        }
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 100, right: 100, bottom: 25),
+          child: CustomTextField(
+            controller: _searchController,
+            icon: const Icon(Icons.search),
+            hint: 'Search for '
+                '${widget.doctors ? 'Doctors' : 'Imaging Centers'}...',
+            onChanged: (_) => setState(() {}),
+          ),
+        ),
+        FutureBuilder<List>(
+          future: widget.doctors
+              ? _appointmentService.allDoctors(
+                  search: _searchController.text.nullIfEmpty)
+              : _appointmentService.allImagingCenters(
+                  search: _searchController.text.nullIfEmpty),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return error.ErrorWidget(
+                msg: 'Encountered an error loading appointment images.',
+                refresh: () => setState(() {}),
+              );
+            }
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.data!.isEmpty) {
+              return empty.EmptyWidget(
+                msg:
+                    'No ${widget.doctors ? "Doctor" : "Imaging Center"}s found.',
+                refresh: () => setState(() {}),
+              );
+            }
 
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 100, right: 100, bottom: 25),
-              child: CustomTextField(
-                controller: _searchController,
-                icon: const Icon(Icons.search),
-                hint: 'Search for '
-                    '${widget.doctors ? 'Doctors' : 'Imaging Centers'}...',
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-            Expanded(
+            return Expanded(
               child: GridView.builder(
                 itemCount: snapshot.data!.length,
                 padding:
@@ -205,10 +206,10 @@ class _ExplorePageState extends State<ExplorePage> {
                   );
                 },
               ),
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ],
     );
   }
 }

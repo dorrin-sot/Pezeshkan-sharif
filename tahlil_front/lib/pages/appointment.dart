@@ -407,7 +407,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
         if (appointments.isEmpty) {
           return empty.EmptyWidget(
-            msg: 'This Patient doesn\'t have any images.',
+            msg: 'This Patient doesn\'t have any history.',
             refresh: () => setState(() {}),
           );
         }
