@@ -76,6 +76,9 @@ function auth_requests(app, db, jsonParser) {
                 values.push(true);
             }
 
+            console.log(user_type)
+            console.log(keys)
+            console.log(values)
             await db.query({
                 text: `insert into public.${user_type} ` +
                     `(${keys.join(', ')}) ` +

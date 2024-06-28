@@ -110,6 +110,34 @@ function imaging_center_requests(app, db, jsonParser) {
 
     /**
      * @swagger
+     * /imaging-center/{id}/filled-times:
+     *   get:
+     *     summary: Get Imaging Center Filled Times
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: string
+     *         required: true
+     *         description: The ID of the Imaging Center
+     *     responses:
+     *       200:
+     *         description: Imaging Center Filled Times returned successfully.
+     *       404:
+     *         description: Imaging Center not found.
+     */
+    app.get('/imaging-center/:id/filled-times', async function (req, res) {
+        const {id} = req.params;
+        const {rowCount} = await db.query({text: 'select * from public."imaging_center" where id=$1', values: [id]})
+            .catch(console.log);
+        if (rowCount === 0) return res.status(404).send('Imaging Center not found!')
+        const {rows} = await db.query({text: 'select date_time, weekday from public."imaging_center_appointment_v1" where imaging_center=$1', values: [id]})
+            .catch(console.log);
+        res.status(200).json(rows);
+    });
+
+    /**
+     * @swagger
      * /imaging-center/work-hours:
      *   put:
      *     summary: Edit Work Hours
