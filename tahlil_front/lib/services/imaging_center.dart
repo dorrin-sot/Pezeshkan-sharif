@@ -34,7 +34,15 @@ class ImagingCenterService {
     return [];
   }
 
-  Future<List<Time>> filledTimesSinceToday(String id) {
-    return Future.value([]); // todo
+  Future<List<Time>> filledTimesSinceToday(String id) async {
+    final response =
+        await _networkService.get('/imaging-center/$id/filled-times');
+    if (response.isOk) {
+      return (jsonDecode(response.bodyString!) as List)
+          .map(Time.fromJson)
+          .where((t) => t.dateTime.isAfter(DateTime.now()))
+          .toList();
+    }
+    return [];
   }
 }
