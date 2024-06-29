@@ -28,48 +28,6 @@ function stats_requests(app, db, jsonParser) {
             res.status(200).json(await get_statistics(db, ssid, user_type))
         }
     });
-
-    /**
-     * @swagger
-     * /stats/{user_type}/{ssid}:
-     *   get:
-     *     summary: Get User Stats
-     *     parameters:
-     *       - in: path
-     *         name: ssid
-     *         schema:
-     *           type: string
-     *         required: true
-     *         description: The SSID of the user whose stats are to be retrieved
-     *       - in: path
-     *         name: user_type
-     *         schema:
-     *           type: string
-     *         required: true
-     *         description: The User Type of the user whose stats are to be retrieved
-     *     responses:
-     *       200:
-     *         description: Returns user statistics as a json.
-     *       401:
-     *         description: Unauthorized access. Try logging in or refreshing token.
-     *
-     */
-    app.get('/stats/:user_type/:ssid', async function (req, res) {
-        let {token} = req.cookies;
-
-        const {rows} = await db.query(`select * from public."login_token" where token='${token}' order by created_at desc limit 1`);
-        if (rows.length === 0) return res.status(401).send('Invalid Token!')
-        let {created_at} = rows[0]
-
-        if (!validateJwtToken(token)) {
-            res.status(401).send('Invalid Token!')
-        } else if ((new Date()).getTime() - created_at.getTime() >= process.env.cookie_max_age) {
-            res.status(401).send('Old Token! Send a GET /auth/refresh request and try again.')
-        } else {
-            const {user_type, ssid} = req.params;
-            res.status(200).json(await get_statistics(db, ssid, user_type))
-        }
-    });
 }
 
 async function get_statistics(db, ssid, user_type) {

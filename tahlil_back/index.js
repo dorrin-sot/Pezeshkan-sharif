@@ -15,7 +15,6 @@ const verify_requests = require("./routes/user/verify");
 const appointment_requests = require("./routes/appointment");
 const imaging_center_requests = require("./routes/imaging-center");
 const doctor_requests = require("./routes/doctor");
-const patient_requests = require("./routes/user/patient");
 const stats_requests = require("./routes/user/stats");
 
 
@@ -49,12 +48,11 @@ if (process.env['NODE_ENV'] === 'production') {
 healthcheck_request(app)
 auth_requests(app, db_client, jsonParser);
 user_requests(app, db_client, jsonParser);
-stats_requests(app, db_client, jsonParser);
 verify_requests(app, db_client, jsonParser);
-appointment_requests(app, db_client, jsonParser);
 imaging_center_requests(app, db_client, jsonParser);
 doctor_requests(app, db_client, jsonParser);
-patient_requests(app, db_client, jsonParser);
+appointment_requests(app, db_client, jsonParser);
+stats_requests(app, db_client, jsonParser);
 
 app.use('/files', express.static('files'));
 
