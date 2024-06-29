@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:tahlil_front/classes/appointment.dart';
 import 'package:tahlil_front/classes/service.dart';
@@ -104,7 +103,8 @@ class _ServicesPageState extends State<ServicesPage> {
                       ),
                       GridColumn(
                         columnName: 'professional_component',
-                        label: const Center(child: Text('Professional Component')),
+                        label:
+                            const Center(child: Text('Professional Component')),
                         width: _widths['professional_component'] ?? double.nan,
                       ),
                       GridColumn(
@@ -117,8 +117,8 @@ class _ServicesPageState extends State<ServicesPage> {
                         label: const Center(
                           child: Text('Material and Consumable Component'),
                         ),
-                        width:
-                            _widths['material_consumable_component'] ?? double.nan,
+                        width: _widths['material_consumable_component'] ??
+                            double.nan,
                       ),
                       GridColumn(
                         columnName: 'details',

@@ -4,9 +4,9 @@ import 'package:tahlil_front/classes/user.dart';
 
 class ProfilePictureWidget extends StatelessWidget {
   final User user;
-  void Function()? editPFP;
+  final void Function()? editPFP;
 
-  ProfilePictureWidget(this.user, {super.key, this.editPFP});
+  const ProfilePictureWidget(this.user, {super.key, this.editPFP});
 
   @override
   Widget build(BuildContext context) {

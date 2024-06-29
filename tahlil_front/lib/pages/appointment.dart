@@ -253,7 +253,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
   }) {
     final theme = Theme.of(context).textTheme;
     final titleLarge = theme.titleLarge?.copyWith(fontWeight: FontWeight.w900);
-    final bodyLarge = theme.bodyLarge?.copyWith(fontWeight: FontWeight.w900);
     return SplitWidget(
       flex: 4,
       child: SingleChildScrollView(

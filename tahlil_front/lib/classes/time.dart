@@ -1,5 +1,4 @@
 import 'package:intl/intl.dart';
-import 'package:shamsi_date/shamsi_date.dart';
 import 'package:tahlil_front/enums/weekday.dart';
 
 class Time {
@@ -28,7 +27,7 @@ class Time {
         );
 
   bool get isInPast =>
-      !DateTime.now().isBefore(Jalali(year, month, day, hour).toDateTime());
+      !DateTime.now().isBefore(DateTime(year, month, day, hour));
 
   @override
   String toString() => '$weekday $year-$month-$day @$hour:00';

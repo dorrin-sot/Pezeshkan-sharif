@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class EmptyWidget extends StatelessWidget {
-  void Function() refresh;
-  String msg;
+  final void Function() refresh;
+  final String msg;
 
-  EmptyWidget({super.key, required this.msg, required this.refresh});
+  const EmptyWidget({super.key, required this.msg, required this.refresh});
 
   @override
   Widget build(BuildContext context) {
